@@ -160,6 +160,10 @@ Versions are tracked as revisions in the registry — **do not add a version to 
 - Default branch → minor bump
 - Branch named `breaking/*` or `major/*` → major bump
 
+### Removing a skill
+
+Delete `skills/<skill-id>/SKILL.md` (or rename its directory) and, on merge, the action removes the skill from the registry (its revisions first, then the skill) and deletes `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/`. A rename removes the old id and registers the new one. On pull requests and in dry-run it only logs what it would delete. Deletions are detected from the git diff, so the checkout needs `fetch-depth: 2`. Agents and MCP servers are not deleted. Skills removed in earlier runs that were missed are not cleaned up automatically.
+
 ---
 
 ## Defining an MCP server

@@ -59262,10 +59262,50 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
 }, "loadTool");
 
 // agent-registry/src/index.js
-var import_fast_glob3 = __toESM(require_out4(), 1);
-var import_node_path8 = __toESM(require("node:path"), 1);
-var import_node_fs9 = require("node:fs");
 var import_node_child_process2 = require("node:child_process");
+var import_node_fs9 = require("node:fs");
+var import_node_path8 = __toESM(require("node:path"), 1);
+var import_fast_glob3 = __toESM(require_out4(), 1);
+
+// cloud-run/src/project-info.js
+var projectInfo = /* @__PURE__ */ __name((projectId) => {
+  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
+  return {
+    project: parsed[0],
+    env: parsed[1],
+    suffix: parsed[2]
+  };
+}, "projectInfo");
+var project_info_default = projectInfo;
+
+// setup-gcloud/src/exec-gcloud.js
+var import_node_os = __toESM(require("node:os"), 1);
+var findExecutable = /* @__PURE__ */ __name((executable) => {
+  if (executable === "gcloud" || !executable) {
+    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
+  }
+  return executable;
+}, "findExecutable");
+var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
+  const command = findExecutable(executable);
+  const gcloudEnv = process.env;
+  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
+  const result = await getExecOutput(command, args, {
+    silent,
+    ignoreReturnCode: true,
+    env: gcloudEnv
+  });
+  if (result.exitCode !== 0) {
+    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
+    if (result.stderr) {
+      message = `${message}
+
+${result.stderr}`;
+    }
+    throw new Error(message);
+  }
+  return result.stdout.trim();
+}, "execGcloud");
 
 // setup-gcloud/src/auth-stack.js
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -59332,35 +59372,6 @@ function createJobScopedCredential(credentialData, { encoding = "base64", suffix
   return credentialFilePath;
 }
 __name(createJobScopedCredential, "createJobScopedCredential");
-
-// setup-gcloud/src/exec-gcloud.js
-var import_node_os = __toESM(require("node:os"), 1);
-var findExecutable = /* @__PURE__ */ __name((executable) => {
-  if (executable === "gcloud" || !executable) {
-    return import_node_os.default.platform() === "win32" ? "gcloud.cmd" : "gcloud";
-  }
-  return executable;
-}, "findExecutable");
-var execGcloud = /* @__PURE__ */ __name(async (args, executable = "gcloud", silent = false) => {
-  const command = findExecutable(executable);
-  const gcloudEnv = process.env;
-  delete gcloudEnv.CLOUDSDK_AUTH_ACCESS_TOKEN;
-  const result = await getExecOutput(command, args, {
-    silent,
-    ignoreReturnCode: true,
-    env: gcloudEnv
-  });
-  if (result.exitCode !== 0) {
-    let message = `The process '${command}' failed with exit code ${result.exitCode}`;
-    if (result.stderr) {
-      message = `${message}
-
-${result.stderr}`;
-    }
-    throw new Error(message);
-  }
-  return result.stdout.trim();
-}, "execGcloud");
 
 // setup-gcloud/src/auth-wid-federation.js
 async function refreshIdToken({
@@ -62157,8 +62168,8 @@ var DefaultGlobber = class _DefaultGlobber {
         patterns = patterns.replace(/\r\n/g, "\n");
         patterns = patterns.replace(/\r/g, "\n");
       }
-      const lines = patterns.split("\n").map((x3) => x3.trim());
-      for (const line of lines) {
+      const lines2 = patterns.split("\n").map((x3) => x3.trim());
+      for (const line of lines2) {
         if (!line || line.startsWith("#")) {
           continue;
         } else {
@@ -67995,11 +68006,11 @@ function validateTagName(tagname) {
 }
 __name(validateTagName, "validateTagName");
 function getLineNumberForPosition(xmlData, index) {
-  const lines = xmlData.substring(0, index).split(/\r?\n/);
+  const lines2 = xmlData.substring(0, index).split(/\r?\n/);
   return {
-    line: lines.length,
+    line: lines2.length,
     // column number is last line's length + 1, because column numbering starts at 1:
-    col: lines[lines.length - 1].length + 1
+    col: lines2[lines2.length - 1].length + 1
   };
 }
 __name(getLineNumberForPosition, "getLineNumberForPosition");
@@ -96108,26 +96119,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
-var import_runtime342 = __toESM(require_commonjs(), 1);
 var import_runtime343 = __toESM(require_commonjs(), 1);
 var import_runtime344 = __toESM(require_commonjs(), 1);
 var import_runtime345 = __toESM(require_commonjs(), 1);
 var import_runtime346 = __toESM(require_commonjs(), 1);
+var import_runtime347 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var import_runtime336 = __toESM(require_commonjs(), 1);
 var import_runtime337 = __toESM(require_commonjs(), 1);
 var import_runtime338 = __toESM(require_commonjs(), 1);
 var import_runtime339 = __toESM(require_commonjs(), 1);
 var import_runtime340 = __toESM(require_commonjs(), 1);
+var import_runtime341 = __toESM(require_commonjs(), 1);
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime330 = __toESM(require_commonjs(), 1);
 var import_runtime331 = __toESM(require_commonjs(), 1);
 var import_runtime332 = __toESM(require_commonjs(), 1);
 var import_runtime333 = __toESM(require_commonjs(), 1);
 var import_runtime334 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime334.MessageType {
+var import_runtime335 = __toESM(require_commonjs(), 1);
+var CacheScope$Type = class extends import_runtime335.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -96151,9 +96162,9 @@ var CacheScope$Type = class extends import_runtime334.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime333.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime334.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime332.reflectionMergePartial)(this, message, value);
+      (0, import_runtime333.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96175,7 +96186,7 @@ var CacheScope$Type = class extends import_runtime334.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime331.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime332.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96183,19 +96194,19 @@ var CacheScope$Type = class extends import_runtime334.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime330.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime331.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime330.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime331.WireType.Varint).int64(message.permission);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime331.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime332.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime340.MessageType {
+var CacheMetadata$Type = class extends import_runtime341.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -96213,9 +96224,9 @@ var CacheMetadata$Type = class extends import_runtime340.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime339.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime340.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime338.reflectionMergePartial)(this, message, value);
+      (0, import_runtime339.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96237,7 +96248,7 @@ var CacheMetadata$Type = class extends import_runtime340.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime337.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime338.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96245,20 +96256,20 @@ var CacheMetadata$Type = class extends import_runtime340.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime336.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime337.WireType.Varint).int64(message.repositoryId);
     for (let i2 = 0; i2 < message.scope.length; i2++)
-      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime336.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i2], writer.tag(2, import_runtime337.WireType.LengthDelimited).fork(),
       options).join();
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime337.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime338.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime346.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -96283,9 +96294,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime346.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96311,7 +96322,7 @@ var CreateCacheEntryRequest$Type = class extends import_runtime346.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96319,20 +96330,20 @@ var CreateCacheEntryRequest$Type = class extends import_runtime346.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime342.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime343.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime342.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime343.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime342.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime343.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime346.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -96363,9 +96374,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime346.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96391,7 +96402,7 @@ var CreateCacheEntryResponse$Type = class extends import_runtime346.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96399,19 +96410,19 @@ var CreateCacheEntryResponse$Type = class extends import_runtime346.MessageType 
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime342.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime343.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime342.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime343.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime342.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime343.WireType.LengthDelimited).string(message.message);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime346.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -96443,9 +96454,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime346.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96475,7 +96486,7 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime346.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96483,22 +96494,22 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime346.Messa
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime342.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime343.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime342.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime343.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime342.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime343.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime342.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime343.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime346.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -96529,9 +96540,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime346.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96557,7 +96568,7 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime346.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96565,19 +96576,19 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime346.Mess
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime342.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime343.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime342.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime343.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime342.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime343.WireType.LengthDelimited).string(message.message);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime346.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -96610,9 +96621,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime346.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96642,7 +96653,7 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime346.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96650,22 +96661,22 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime346.Messa
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime342.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime343.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime342.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime343.WireType.LengthDelimited).string(message.key);
     for (let i2 = 0; i2 < message.restoreKeys.length; i2++)
-      writer.tag(3, import_runtime342.WireType.LengthDelimited).string(message.restoreKeys[i2]);
+      writer.tag(3, import_runtime343.WireType.LengthDelimited).string(message.restoreKeys[i2]);
     if (message.version !== "")
-      writer.tag(4, import_runtime342.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime343.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime346.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime347.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -96696,9 +96707,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime346.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime345.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime346.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime344.reflectionMergePartial)(this, message, value);
+      (0, import_runtime345.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96724,7 +96735,7 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime346.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime343.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime344.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96732,14 +96743,14 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime346.Mess
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime342.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime343.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime342.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime343.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime342.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime343.WireType.LengthDelimited).string(message.matchedKey);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime343.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime344.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
@@ -97873,24 +97884,138 @@ var setupGcloud = /* @__PURE__ */ __name(async (serviceAccountKey, version3 = "l
 }, "setupGcloud");
 var setup_gcloud_default = setupGcloud;
 
-// agent-registry/src/upload-gcs.js
-var GCS_BUCKET = "extenda-agent-artifacts";
-var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
-  const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
-  await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
-  return dest;
-}, "upload");
-
-// cloud-run/src/project-info.js
-var projectInfo = /* @__PURE__ */ __name((projectId) => {
-  const parsed = projectId.split(/^(.+)-(prod|staging)(-.*)?$/).filter(Boolean);
-  return {
-    project: parsed[0],
-    env: parsed[1],
-    suffix: parsed[2]
-  };
-}, "projectInfo");
-var project_info_default = projectInfo;
+// agent-registry/src/delete-skills.js
+var PROJECT = "extenda";
+var LOCATION = "eu";
+var GCS = "gs://extenda-agent-artifacts";
+var NOT_FOUND = /NOT_FOUND|matched no objects/;
+var isNotFound = /* @__PURE__ */ __name((e) => NOT_FOUND.test(e.message ?? ""), "isNotFound");
+var ignoreNotFound = /* @__PURE__ */ __name(async (args, description) => {
+  try {
+    await execGcloud(args, "gcloud", true);
+    info(`Deleted ${description}`);
+  } catch (e) {
+    if (!isNotFound(e)) throw e;
+    info(`Already gone: ${description}`);
+  }
+}, "ignoreNotFound");
+var lines = /* @__PURE__ */ __name((out) => (out || "").split("\n").map((l3) => l3.trim()).filter(Boolean), "lines");
+var registryFlags = [`--location=${LOCATION}`, `--project=${PROJECT}`];
+var getRevisionsToDelete = /* @__PURE__ */ __name(async (registryId) => {
+  let defaultRevision;
+  try {
+    defaultRevision = await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "describe",
+        registryId,
+        ...registryFlags,
+        "--format=value(defaultRevision.basename())",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
+  } catch (e) {
+    if (!isNotFound(e)) throw e;
+    return null;
+  }
+  let revisions;
+  try {
+    revisions = lines(
+      await execGcloud(
+        [
+          "alpha",
+          "agent-registry",
+          "skills",
+          "revisions",
+          "list",
+          `--skill=${registryId}`,
+          ...registryFlags,
+          "--format=value(name.basename())",
+          "--quiet"
+        ],
+        "gcloud",
+        true
+      )
+    );
+  } catch (e) {
+    if (!isNotFound(e)) throw e;
+    return null;
+  }
+  const def = (defaultRevision || "").trim();
+  return [
+    ...revisions.filter((r2) => r2 !== def),
+    ...revisions.filter((r2) => r2 === def)
+  ];
+}, "getRevisionsToDelete");
+var deleteSkills = /* @__PURE__ */ __name(async (skillIds, dryRun, clan) => {
+  if (!skillIds.length) {
+    info("No deleted skills to remove");
+    return [];
+  }
+  if (!clan) {
+    warning("Skipping skill deletion: clan namespace is empty");
+    return [];
+  }
+  for (const skillId of skillIds) {
+    const namespacedId = `${clan}-${skillId}`;
+    const registryId = `private-${namespacedId}`;
+    const gcsPrefix = `${GCS}/skills/${namespacedId}/`;
+    if (dryRun) {
+      let revisions2 = [];
+      try {
+        revisions2 = await getRevisionsToDelete(registryId) ?? [];
+      } catch (e) {
+        warning(
+          `[dry-run] Could not list revisions for ${registryId}: ${e.message?.split("\n")[0]}`
+        );
+      }
+      for (const revision of revisions2) {
+        info(`[dry-run] Would delete revision ${registryId}@${revision}`);
+      }
+      info(`[dry-run] Would delete skill ${registryId} and ${gcsPrefix}`);
+      continue;
+    }
+    const revisions = await getRevisionsToDelete(registryId);
+    if (revisions) {
+      for (const revision of revisions) {
+        await ignoreNotFound(
+          [
+            "alpha",
+            "agent-registry",
+            "skills",
+            "revisions",
+            "delete",
+            revision,
+            `--skill=${registryId}`,
+            ...registryFlags,
+            "--quiet"
+          ],
+          `revision ${registryId}@${revision}`
+        );
+      }
+      await ignoreNotFound(
+        [
+          "alpha",
+          "agent-registry",
+          "skills",
+          "delete",
+          registryId,
+          ...registryFlags,
+          "--quiet"
+        ],
+        `registry skill ${registryId}`
+      );
+    } else {
+      info(`Already gone: registry skill ${registryId}`);
+    }
+    await ignoreNotFound(["storage", "rm", "-r", gcsPrefix], gcsPrefix);
+  }
+  return skillIds;
+}, "deleteSkills");
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 var NOT_RESOLVED = /* @__PURE__ */ Symbol("NOT_RESOLVED");
@@ -99108,12 +99233,12 @@ __name(getDoubleQuotedValue, "getDoubleQuotedValue");
 function getBlockValue(input, start, end, indent, chomping, folded) {
   const textIndent = indent < 0 ? 0 : indent;
   const region = input.slice(start, end).replace(/\r\n?/g, "\n");
-  const lines = region === "" ? [] : (region.endsWith("\n") ? region.slice(0, -1) : region).split("\n");
+  const lines2 = region === "" ? [] : (region.endsWith("\n") ? region.slice(0, -1) : region).split("\n");
   let result = "";
   let didReadContent = false;
   let emptyLines = 0;
   let atMoreIndented = false;
-  for (const line of lines) {
+  for (const line of lines2) {
     let column = 0;
     while (column < textIndent && line.charCodeAt(column) === 32) column++;
     if (indent < 0 || column >= line.length) {
@@ -100549,8 +100674,8 @@ var CHOMPING_STRIP = CHOMPING_MODE.STRIP;
 var CHOMPING_KEEP = CHOMPING_MODE.KEEP;
 
 // agent-registry/src/register-agent.js
-var PROJECT = "extenda";
-var LOCATION = "europe-west1";
+var PROJECT2 = "extenda";
+var LOCATION2 = "europe-west1";
 var isMajorBranch = /* @__PURE__ */ __name(() => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "";
   return /^(breaking|major)(\/|$)/i.test(branch);
@@ -100562,7 +100687,7 @@ var bumpVersion = /* @__PURE__ */ __name((version3) => {
 var serviceExists = /* @__PURE__ */ __name(async (serviceId) => {
   try {
     await execGcloud(
-      ["agent-registry", "services", "describe", serviceId, `--location=${LOCATION}`, `--project=${PROJECT}`],
+      ["agent-registry", "services", "describe", serviceId, `--location=${LOCATION2}`, `--project=${PROJECT2}`],
       "gcloud",
       true
     );
@@ -100579,8 +100704,8 @@ var getAgentVersion = /* @__PURE__ */ __name(async (agentId) => {
         "services",
         "describe",
         agentId,
-        `--location=${LOCATION}`,
-        `--project=${PROJECT}`,
+        `--location=${LOCATION2}`,
+        `--project=${PROJECT2}`,
         "--format=value(agentSpec.content.version)"
       ],
       "gcloud",
@@ -100626,8 +100751,8 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
     defaultOutputModes: card.defaultOutputModes ?? ["text/plain"]
   });
   const flags = [
-    `--location=${LOCATION}`,
-    `--project=${PROJECT}`,
+    `--location=${LOCATION2}`,
+    `--project=${PROJECT2}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
     `--agent-spec-content=${specContent}`
@@ -100650,12 +100775,12 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
 }, "registerAgent");
 
 // agent-registry/src/register-mcp.js
-var PROJECT2 = "extenda";
-var LOCATION2 = "europe-west1";
+var PROJECT3 = "extenda";
+var LOCATION3 = "europe-west1";
 var serviceExists2 = /* @__PURE__ */ __name(async (serviceId) => {
   try {
     await execGcloud(
-      ["agent-registry", "services", "describe", serviceId, `--location=${LOCATION2}`, `--project=${PROJECT2}`],
+      ["agent-registry", "services", "describe", serviceId, `--location=${LOCATION3}`, `--project=${PROJECT3}`],
       "gcloud",
       true
     );
@@ -100676,8 +100801,8 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
     return [`--interfaces=protocolBinding=${iface.protocolBinding ?? "JSONRPC"},url=${iface.url}`];
   });
   const flags = [
-    `--location=${LOCATION2}`,
-    `--project=${PROJECT2}`,
+    `--location=${LOCATION3}`,
+    `--project=${PROJECT3}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
     `--mcp-server-spec-type=${specType}`,
@@ -101426,9 +101551,17 @@ function zipSync(data, opts) {
 }
 __name(zipSync, "zipSync");
 
+// agent-registry/src/upload-gcs.js
+var GCS_BUCKET = "extenda-agent-artifacts";
+var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
+  await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
+  return dest;
+}, "upload");
+
 // agent-registry/src/register-skill.js
-var PROJECT3 = "extenda";
-var LOCATION3 = "eu";
+var PROJECT4 = "extenda";
+var LOCATION4 = "eu";
 var MAX_DESCRIPTION_LENGTH = 1024;
 var asTrimmedString = /* @__PURE__ */ __name((value) => value == null ? "" : String(value).trim(), "asTrimmedString");
 var parseSkillMeta = /* @__PURE__ */ __name((content) => {
@@ -101446,7 +101579,7 @@ var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
 }, "makeZipFile");
 var skillExists = /* @__PURE__ */ __name(async (skillId) => {
   try {
-    info(`[skill] checking exists: ${skillId} @ ${LOCATION3}`);
+    info(`[skill] checking exists: ${skillId} @ ${LOCATION4}`);
     await execGcloud(
       [
         "alpha",
@@ -101454,8 +101587,8 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
         "skills",
         "describe",
         skillId,
-        `--location=${LOCATION3}`,
-        `--project=${PROJECT3}`,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
         "--quiet"
       ],
       "gcloud",
@@ -101478,8 +101611,8 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
       "revisions",
       "list",
       `--skill=${registryId}`,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
+      `--location=${LOCATION4}`,
+      `--project=${PROJECT4}`,
       "--format=value(name.basename())",
       "--quiet"
     ], "gcloud", true);
@@ -101503,15 +101636,15 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
   return isMajorBranch2() ? `v${major + 1}-00` : `v${major}-${String(minor + 1).padStart(2, "0")}`;
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
-  const revisionName = `projects/${PROJECT3}/locations/${LOCATION3}/skills/${registryId}/revisions/${revisionId}`;
+  const revisionName = `projects/${PROJECT4}/locations/${LOCATION4}/skills/${registryId}/revisions/${revisionId}`;
   await execGcloud([
     "alpha",
     "agent-registry",
     "skills",
     "update",
     registryId,
-    `--location=${LOCATION3}`,
-    `--project=${PROJECT3}`,
+    `--location=${LOCATION4}`,
+    `--project=${PROJECT4}`,
     `--default-revision=${revisionName}`,
     "--target-state=active",
     "--quiet"
@@ -101552,8 +101685,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       "skills",
       "create",
       namespacedId,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
+      `--location=${LOCATION4}`,
+      `--project=${PROJECT4}`,
       `--display-name=${displayName}`,
       `--description=${description}`,
       "--type=simple",
@@ -101571,8 +101704,8 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       "create",
       revisionId,
       `--skill=${registryId}`,
-      `--location=${LOCATION3}`,
-      `--project=${PROJECT3}`,
+      `--location=${LOCATION4}`,
+      `--project=${PROJECT4}`,
       `--payload=${zipPath}`,
       "--quiet"
     ], "gcloud", true);
@@ -101818,13 +101951,13 @@ ${result.toString()}`);
   }
 }, "validateSettings");
 var GCS_BUCKET2 = "extenda-agent-artifacts";
-var GCS = `gs://${GCS_BUCKET2}`;
+var GCS2 = `gs://${GCS_BUCKET2}`;
 var CD = "${CLAUDE_PROJECT_DIR}";
 var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
   const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `global-settings-${process.pid}.yaml`);
   try {
     await execGcloud(
-      ["storage", "cp", `${GCS}/config/settings.yaml`, tmpPath],
+      ["storage", "cp", `${GCS2}/config/settings.yaml`, tmpPath],
       "gcloud",
       true
     );
@@ -101872,13 +102005,13 @@ var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanN
   cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
   if (clanName) {
     cmds.push(hookCmd(
-      `gcloud storage cp ${GCS}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
+      `gcloud storage cp ${GCS2}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
     ));
   } else {
     cmds.push(hookCmd(
       `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null); [ -n "$\
-CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud stora\
-ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
+CLAN" ] && gcloud storage cp ${GCS2}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud stor\
+age cp ${GCS2}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
     ));
   }
   const downloadedGlobal = /* @__PURE__ */ new Set();
@@ -101886,7 +102019,7 @@ ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || t
     const s = filename(entry.script);
     if (downloadedGlobal.has(s)) continue;
     downloadedGlobal.add(s);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
+    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
   }
   if (clanName) {
     const globalHookNames = new Set(allHookEntries(baseline).map((e) => filename(e.script)));
@@ -101895,31 +102028,31 @@ ge cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || t
       const s = filename(entry.script);
       if (globalHookNames.has(s) || downloadedClan.has(s)) continue;
       downloadedClan.add(s);
-      cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
+      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
     }
   }
   cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
   cmds.push(hookCmd(
-    `tmp=$(mktemp); gcloud storage cat ${GCS}/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==2\
-){p=1;next}}p' > "$tmp"; if [ -s "$tmp" ]; then mv "$tmp" "${CD}/CLAUDE.md"; cp "${CD}/CLAUDE.md" "${CD}/AGENTS.md"; els\
-e rm -f "$tmp"; fi`
+    `tmp=$(mktemp); gcloud storage cat ${GCS2}/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==\
+2){p=1;next}}p' > "$tmp"; if [ -s "$tmp" ]; then mv "$tmp" "${CD}/CLAUDE.md"; cp "${CD}/CLAUDE.md" "${CD}/AGENTS.md"; el\
+se rm -f "$tmp"; fi`
   ));
   for (const c3 of baseline?.commands ?? []) {
     const f3 = filename(c3);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null || true`));
+    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/commands/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null || true`));
   }
   if (clanName) {
     const globalCommandNames = new Set((baseline?.commands ?? []).map((c3) => filename(c3)));
     for (const c3 of clanConfig?.commands ?? []) {
       const f3 = filename(c3);
       if (globalCommandNames.has(f3)) continue;
-      cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null \
-|| true`));
+      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/commands/${clanName}/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null\
+ || true`));
     }
   }
   if (clanName) {
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/n\
-ull || true`));
+    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/\
+null || true`));
   }
   for (const entry of baseline?.hooks?.SessionStart ?? []) {
     const s = filename(entry.script);
@@ -101979,7 +102112,7 @@ var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
   }
   let gcsFiles;
   try {
-    const lsOut = await execGcloud(["storage", "ls", `${GCS}/${gcsPrefix}/`], "gcloud", true);
+    const lsOut = await execGcloud(["storage", "ls", `${GCS2}/${gcsPrefix}/`], "gcloud", true);
     gcsFiles = (lsOut || "").split("\n").map((l3) => l3.trim()).filter((l3) => l3.startsWith("gs://") && !l3.endsWith("/")).
     map((l3) => l3.replace(`gs://${GCS_BUCKET2}/${gcsPrefix}/`, "")).filter(Boolean);
   } catch {
@@ -101992,7 +102125,7 @@ var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
       if (dryRun) {
         info(`[dry-run] Would delete gs://${GCS_BUCKET2}/${gcsPath}`);
       } else {
-        await execGcloud(["storage", "rm", `${GCS}/${gcsPath}`], "gcloud", true);
+        await execGcloud(["storage", "rm", `${GCS2}/${gcsPath}`], "gcloud", true);
         info(`Deleted: gs://${GCS_BUCKET2}/${gcsPath}`);
       }
     }
@@ -102038,7 +102171,7 @@ agent-registry/${prefix2}`)), "affected");
     }
     try {
       const lsOutput = await execGcloud(
-        ["storage", "ls", `${GCS}/config/`],
+        ["storage", "ls", `${GCS2}/config/`],
         "gcloud",
         true
       );
@@ -102049,7 +102182,7 @@ agent-registry/${prefix2}`)), "affected");
         pid}`);
         try {
           await execGcloud(
-            ["storage", "cp", `${GCS}/config/${clanName2}/settings.yaml`, tmpYamlPath],
+            ["storage", "cp", `${GCS2}/config/${clanName2}/settings.yaml`, tmpYamlPath],
             "gcloud",
             true
           );
@@ -102154,21 +102287,52 @@ var getChangedPaths = /* @__PURE__ */ __name(() => {
     return [];
   }
 }, "getChangedPaths");
+var getDeletedPaths = /* @__PURE__ */ __name(() => {
+  try {
+    const base = process.env.GITHUB_BASE_SHA || "HEAD~1";
+    return (0, import_node_child_process2.execSync)(
+      `git diff --name-only --no-renames --diff-filter=D ${base}...HEAD`
+    ).toString().trim().split("\n").filter(Boolean);
+  } catch (e) {
+    warning(
+      `Could not compute deleted files (${e.message?.split("\n")[0]}); skill deletions were not checked. Ensure the chec\
+kout uses fetch-depth: 2.`
+    );
+    return [];
+  }
+}, "getDeletedPaths");
+var getDeletedSkillIds = /* @__PURE__ */ __name((registryRoot, deletedPaths) => {
+  const pattern = new RegExp(
+    `^${AGENT_REGISTRY_PATH}/skills/([^/]+)/SKILL\\.md$`
+  );
+  const ids = deletedPaths.map((p2) => p2.match(pattern)?.[1]).filter((id) => id && !id.startsWith("example-")).filter(
+    (id) => !(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, "skills", id, "SKILL.md"))
+  );
+  return [...new Set(ids)];
+}, "getDeletedSkillIds");
 var isAffected = /* @__PURE__ */ __name((registryRelativePath, changedPaths) => !changedPaths.length || changedPaths.some(
-(p2) => p2.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`)), "isAffected");
+  (p2) => p2.startsWith(`${AGENT_REGISTRY_PATH}/${registryRelativePath}`)
+), "isAffected");
 var uploadInstructions = /* @__PURE__ */ __name(async (instructionsPath, agentId, gitSha, dryRun) => {
   const versionedPath = `agents/${agentId}/${gitSha}/instructions.md`;
   const latestPath = `agents/${agentId}/instructions.md`;
   if (dryRun) {
-    info(`[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${latestPath}`);
+    info(
+      `[dry-run] Would upload instructions to gs://extenda-agent-artifacts/${latestPath}`
+    );
   } else {
     await upload(instructionsPath, versionedPath);
     await upload(instructionsPath, latestPath);
-    info(`Instructions uploaded: gs://extenda-agent-artifacts/${latestPath}`);
+    info(
+      `Instructions uploaded: gs://extenda-agent-artifacts/${latestPath}`
+    );
   }
 }, "uploadInstructions");
 var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
-  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", { cwd: registryRoot, onlyFiles: true });
+  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", {
+    cwd: registryRoot,
+    onlyFiles: true
+  });
   for (const agentFile of agentFiles) {
     const agentId = import_node_path8.default.basename(import_node_path8.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
@@ -102176,7 +102340,12 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     const agentYaml = (0, import_node_fs9.readFileSync)(import_node_path8.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
-    const instructionsPath = import_node_path8.default.join(registryRoot, "agents", agentId, "instructions.md");
+    const instructionsPath = import_node_path8.default.join(
+      registryRoot,
+      "agents",
+      agentId,
+      "instructions.md"
+    );
     if ((0, import_node_fs9.existsSync)(instructionsPath)) {
       await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);
     }
@@ -102184,7 +102353,10 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
   }
 }, "processAgents");
 var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
-  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", { cwd: registryRoot, onlyFiles: true });
+  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", {
+    cwd: registryRoot,
+    onlyFiles: true
+  });
   for (const mcpFile of mcpFiles) {
     const mcpId = import_node_path8.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
@@ -102196,26 +102368,44 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
   }
 }, "processMcps");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = import_fast_glob3.default.sync("skills/*/SKILL.md", { cwd: registryRoot, onlyFiles: true });
+  const skillFiles = import_fast_glob3.default.sync("skills/*/SKILL.md", {
+    cwd: registryRoot,
+    onlyFiles: true
+  });
   for (const skillFile of skillFiles) {
     const skillId = import_node_path8.default.basename(import_node_path8.default.dirname(skillFile));
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(skillId, import_node_path8.default.join(registryRoot, skillFile), dryRun, clan);
+    await registerSkill(
+      skillId,
+      import_node_path8.default.join(registryRoot, skillFile),
+      dryRun,
+      clan
+    );
     endGroup();
   }
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
-  const serviceAccountKey = getInput("service-account-key", { required: true });
+  const serviceAccountKey = getInput("service-account-key", {
+    required: true
+  });
   const dryRun = getInput("dry-run") === "true";
   const projectId = await setup_gcloud_default(serviceAccountKey);
   const { project: clan } = project_info_default(projectId);
   info(`Clan namespace: ${clan}`);
-  await execGcloud(["components", "install", "alpha", "--quiet", "--no-user-output-enabled"]);
+  await execGcloud([
+    "components",
+    "install",
+    "alpha",
+    "--quiet",
+    "--no-user-output-enabled"
+  ]);
   const gitSha = getGitSha();
   const changedPaths = getChangedPaths();
-  const registryPaths = changedPaths.filter((p2) => p2.startsWith(AGENT_REGISTRY_PATH));
+  const registryPaths = changedPaths.filter(
+    (p2) => p2.startsWith(AGENT_REGISTRY_PATH)
+  );
   if (changedPaths.length && !registryPaths.length) {
     info("No agent-registry changes detected \u2014 skipping");
   } else if (!changedPaths.length) {
@@ -102225,6 +102415,12 @@ var action5 = /* @__PURE__ */ __name(async () => {
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   await processSkills(registryRoot, changedPaths, dryRun, clan);
+  const deletedSkillIds = getDeletedSkillIds(registryRoot, getDeletedPaths());
+  if (deletedSkillIds.length) {
+    startGroup("Delete removed skills");
+    await deleteSkills(deletedSkillIds, dryRun, clan);
+    endGroup();
+  }
   await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
 }, "action");
 var src_default = action5;
