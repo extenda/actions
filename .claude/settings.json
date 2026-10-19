@@ -1,0 +1,95 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(.agent/*)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(gh search *)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr create *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git stash*)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(jq *)",
+      "Bash(base64 *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(gcloud alpha agent-registry *)",
+      "Bash(gcloud storage cat *)",
+      "Bash(gcp-infra *)",
+      "Bash(npm test*)",
+      "Bash(npm run test*)",
+      "Bash(npm run lint*)",
+      "Bash(mvn test*)",
+      "Bash(./gradlew test*)",
+      "Bash(node *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/.claude/hooks\" \"${CLAUDE_PROJECT_DIR}/.claude/commands\"\ngcloud storage cp gs://extenda-agent-artifacts/config/platform/settings.json \"${CLAUDE_PROJECT_DIR}/.claude/settings.json\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/hooks/ensure-pre-commit.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/ensure-pre-commit.sh\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/hooks/verify-on-stop.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/hooks/tool-guardian.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/hooks/secret-scanner.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/hooks/test-guard.sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/test-guard.sh\" 2>/dev/null || true\nchmod +x \"${CLAUDE_PROJECT_DIR}/.claude/hooks/\"*.sh 2>/dev/null || true\ntmp=$(mktemp); gcloud storage cat gs://extenda-agent-artifacts/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==2){p=1;next}}p' > \"$tmp\"; if [ -s \"$tmp\" ]; then mv \"$tmp\" \"${CLAUDE_PROJECT_DIR}/CLAUDE.md\"; cp \"${CLAUDE_PROJECT_DIR}/CLAUDE.md\" \"${CLAUDE_PROJECT_DIR}/AGENTS.md\"; else rm -f \"$tmp\"; fi\ngcloud storage cp gs://extenda-agent-artifacts/commands/init.md \"${CLAUDE_PROJECT_DIR}/.claude/commands/init.md\" 2>/dev/null || true\ngcloud storage cp gs://extenda-agent-artifacts/config/platform/conventions.md \"${CLAUDE_PROJECT_DIR}/.agent/conventions.md\" 2>/dev/null || true\n[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/ensure-pre-commit.sh\" ] && bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/ensure-pre-commit.sh\" || true\n[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh\" ] && bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh\" --baseline || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\" ] || exit 0; bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\" ] || exit 0; bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/test-guard.sh\" ] || exit 0; bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/test-guard.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh\" ] || exit 0; bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh\"",
+            "timeout": 900
+          }
+        ]
+      }
+    ]
+  }
+}
