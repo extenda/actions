@@ -112142,9 +112142,10 @@ disabled.",
               properties: {
                 "ephemeral-storage": {
                   description: "Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) app\
-lies. Max 8Gi to leave room for sidecars within the 10Gi pod limit.",
+lies. Max 7Gi to leave room for up to 3 sidecars (security, collector, evaluation) at about 1Gi each within the 10Gi pod\
+ limit.",
                   type: "string",
-                  pattern: "^([1-8])Gi$"
+                  pattern: "^[1-7]Gi$"
                 }
               }
             }

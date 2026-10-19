@@ -364,7 +364,7 @@ metadata:
     test('should set ephemeral-storage when opted in', async () => {
       await buildManifest(
         'example-image:latest',
-        buildService({ cpu: 1, memory: '512Mi', 'ephemeral-storage': '8Gi' }),
+        buildService({ cpu: 1, memory: '512Mi', 'ephemeral-storage': '7Gi' }),
         'example-project',
         'example-clan',
         'production',
@@ -375,7 +375,7 @@ metadata:
         '',
       );
       const manifest = readFileSync('k8s(deploy)-manifest.yaml');
-      expect(manifest.match(/ephemeral-storage: 8Gi/g)).toHaveLength(2);
+      expect(manifest.match(/ephemeral-storage: 7Gi/g)).toHaveLength(2);
     });
   });
 

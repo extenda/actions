@@ -941,9 +941,12 @@ environments:
 
 #### Kubernetes Deployment with increased ephemeral storage
 
-By default pods get the GKE default of 1Gi ephemeral storage. A service that needs more scratch space can opt in
-with `resources.ephemeral-storage` (applies to the user container only). Allowed values are `1Gi` to `8Gi`, which
-leaves room for the sidecars within the 10Gi per-pod limit.
+By default pods get the GKE default of 1Gi ephemeral storage.
+A service that needs more scratch space can opt in with `resources.ephemeral-storage`.
+It applies to the user container only.
+Allowed values are `1Gi` to `7Gi`.
+The maximum leaves room for up to 3 sidecars (security, collector and evaluation) at about 1Gi each,
+which keeps the pod within the 10Gi per-pod limit.
 
 ```yaml
 kubernetes:
@@ -952,7 +955,7 @@ kubernetes:
   resources:
     cpu: 1
     memory: 512Mi
-    ephemeral-storage: 8Gi
+    ephemeral-storage: 7Gi
   protocol: http
   scaling:
     cpu: 50

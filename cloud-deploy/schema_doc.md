@@ -904,9 +904,9 @@ Must be one of:
 | **Required**              | No               |
 | **Additional properties** | Any type allowed |
 
-| Property                                                                          | Pattern | Type   | Deprecated | Definition | Title/Description                                                                                                                                           |
-| --------------------------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| - [ephemeral-storage](#oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage ) | No      | string | No         | -          | Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 8Gi to leave room for sidecars within the 10Gi pod limit. |
+| Property                                                                          | Pattern | Type   | Deprecated | Definition | Title/Description                                                                                                                                                                                                       |
+| --------------------------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| - [ephemeral-storage](#oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage ) | No      | string | No         | -          | Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 7Gi to leave room for up to 3 sidecars (security, collector, evaluation) at about 1Gi each within the 10Gi pod limit. |
 
 ###### <a name="oneOf_i1_kubernetes_resources_allOf_i1_ephemeral-storage"></a>2.1.3.2.1. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > resources > allOf > item 1 > ephemeral-storage`
 
@@ -915,11 +915,11 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-**Description:** Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 8Gi to leave room for sidecars within the 10Gi pod limit.
+**Description:** Opt-in ephemeral storage for the user container. When omitted, the GKE default (1Gi) applies. Max 7Gi to leave room for up to 3 sidecars (security, collector, evaluation) at about 1Gi each within the 10Gi pod limit.
 
-| Restrictions                      |                                                                               |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| **Must match regular expression** | ```^([1-8])Gi$``` [Test](https://regex101.com/?regex=%5E%28%5B1-8%5D%29Gi%24) |
+| Restrictions                      |                                                                       |
+| --------------------------------- | --------------------------------------------------------------------- |
+| **Must match regular expression** | ```^[1-7]Gi$``` [Test](https://regex101.com/?regex=%5E%5B1-7%5DGi%24) |
 
 #### <a name="oneOf_i1_kubernetes_protocol"></a>2.1.4. Property `CloudDeploy > oneOf > Kubernetes > kubernetes > protocol`
 
@@ -2161,4 +2161,4 @@ must respect the following conditions
 **Description:** A deploy environment
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-10-14 at 12:22:28 +0200
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2026-10-19 at 08:47:12 +0200
