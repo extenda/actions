@@ -110064,8 +110064,31 @@ var SECRETS_PROJECT_NUMBER = "377710398576";
 var DEFAULT_ENV = {
   OCMS_CLIENT_ID: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-id`,
   OCMS_CLIENT_SECRET: `sm://${SECRETS_PROJECT}/ecs-api-ocms-client-secret`,
-  REQUEST_ALL_BUNDLE: "false"
+  REQUEST_ALL_BUNDLE: "false",
+  RULES_CHANNEL: "stable"
 };
+var bundlesHealthProbe = /* @__PURE__ */ __name((timings) => ({
+  httpGet: {
+    path: "/health?bundles=true",
+    port: 8282
+  },
+  ...timings
+}), "bundlesHealthProbe");
+var probeFor = /* @__PURE__ */ __name((platformGKE) => platformGKE ? {
+  readinessProbe: bundlesHealthProbe({
+    initialDelaySeconds: 5,
+    periodSeconds: 5,
+    timeoutSeconds: 5,
+    failureThreshold: 60
+  })
+} : {
+  startupProbe: bundlesHealthProbe({
+    initialDelaySeconds: 0,
+    periodSeconds: 2,
+    timeoutSeconds: 2,
+    failureThreshold: 150
+  })
+}, "probeFor");
 var imageTag2 = /* @__PURE__ */ __name((version3 = null) => process.env.EVALUATION_IMAGE_TAG || version3 || STABLE_TAG2,
 "imageTag");
 var resolveImage = /* @__PURE__ */ __name(async (version3 = null) => image_sha256_default(`${IMAGE_NAME}:${imageTag2(version3)}`),
@@ -110112,7 +110135,8 @@ var evaluationSpec = /* @__PURE__ */ __name(async (projectId, platformGKE, confi
     container: {
       name: "evaluation",
       image,
-      env: resolved.map(({ env: envVar }) => envVar)
+      env: resolved.map(({ env: envVar }) => envVar),
+      ...probeFor(platformGKE)
     },
     // Cross-project secret aliases to merge into the `run.googleapis.com/secrets`
     // annotation. Always empty on GKE.
@@ -110577,6 +110601,18 @@ var configureNetworking = /* @__PURE__ */ __name(async (annotations, enableDirec
     }
   }
 }, "configureNetworking");
+var USER_CONTAINER_DEPENDENCIES = ["collector", "evaluation"];
+var setContainerDependencies = /* @__PURE__ */ __name((annotations, containers) => {
+  const names = containers.map(({ name }) => name);
+  const dependencies = USER_CONTAINER_DEPENDENCIES.filter(
+    (name) => names.includes(name)
+  );
+  if (dependencies.length > 0) {
+    annotations["run.googleapis.com/container-dependencies"] = JSON.stringify({
+      "user-container": dependencies
+    });
+  }
+}, "setContainerDependencies");
 var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, labels, protocol, environment, minInstances, maxInstances, scaling, cpu, memory, opaCpu, opaMemory, timeoutSeconds, serviceAccountName, SQLInstance, cpuThrottling, cpuBoost, sessionAffinity, activeRevisionName, audiences, monitoring, deployEnv, baseAnnotations, enableCloudNAT, enableDirectVPC, cors, securityPreviewTag, evaluationSidecar, projectId) => {
   labels.push({ "cloud.googleapis.com/location": "europe-west1" });
   const ports = opa ? void 0 : [
@@ -110674,9 +110710,6 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
   }
   if (collectorContainer) {
     containers.push(collectorContainer);
-    annotations["run.googleapis.com/container-dependencies"] = JSON.stringify({
-      "user-container": ["collector"]
-    });
   }
   if (evaluationSidecar) {
     const { container: evaluationContainer, secretAliases } = await evaluationSpec(projectId, false, evaluationSidecar);
@@ -110694,6 +110727,7 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
       ].filter(Boolean).join(",");
     }
   }
+  setContainerDependencies(annotations, containers);
   return {
     apiVersion: "serving.knative.dev/v1",
     kind: "Service",
@@ -112598,9 +112632,10 @@ the generally available `stable` tag is used.",
         },
         env: {
           title: "EvaluationSidecarEnvVars",
-          description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OC\
-MS_CLIENT_SECRET default to the extenda Secret Manager project's ecs-api secrets, but can be overridden here with an sm:\
-// reference, e.g. to the deploying project's own OCMS client (sm://*/<name>).",
+          description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE or RULES_CHANNEL (stab\
+le, pre-release or v<N>; defaults to stable). OCMS_CLIENT_ID and OCMS_CLIENT_SECRET default to the extenda Secret Manage\
+r project's ecs-api secrets, but can be overridden here with an sm:// reference, e.g. to the deploying project's own OCM\
+S client (sm://*/<name>).",
           type: "object",
           patternProperties: {
             "^[A-Z0-9_]+$": {

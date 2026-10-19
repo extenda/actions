@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+import * as yaml from 'js-yaml';
 import mockFs from 'mock-fs';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -22,6 +23,16 @@ vi.mock('../../src/utils/cluster-connection.js');
 vi.mock('../../src/manifests/image-sha256.js');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
+
+const findContainer = (podSpec, name) =>
+  podSpec.containers.find((container) => container.name === name);
+
+const cloudRunContainerDependencies = (manifest) =>
+  JSON.parse(
+    yaml.load(manifest).spec.template.metadata.annotations[
+      'run.googleapis.com/container-dependencies'
+    ],
+  );
 const originalEnv = process.env;
 
 vi.setConfig({ testTimeout: 30000 });
@@ -1853,6 +1864,21 @@ metadata:
     mockFs.restore();
     expect(manifest).toContain('name: evaluation');
     expect(manifest).toContain('sm://extenda/ecs-api-ocms-client-id');
+    const deployment = yaml
+      .loadAll(manifest)
+      .find(({ kind }) => kind === 'Deployment');
+    const evaluation = findContainer(
+      deployment.spec.template.spec,
+      'evaluation',
+    );
+    expect(evaluation.startupProbe).toBeUndefined();
+    expect(evaluation.readinessProbe).toEqual({
+      httpGet: { path: '/health?bundles=true', port: 8282 },
+      initialDelaySeconds: 5,
+      periodSeconds: 5,
+      timeoutSeconds: 5,
+      failureThreshold: 60,
+    });
     expect(manifest).toMatchSnapshot();
   });
 
@@ -1918,6 +1944,83 @@ metadata:
     expect(manifest).toContain('name: evaluation');
     expect(manifest).toContain('secretKeyRef');
     expect(manifest).toContain('REQUEST_ALL_BUNDLE');
+    expect(cloudRunContainerDependencies(manifest)).toEqual({
+      'user-container': ['evaluation'],
+    });
+    const evaluation = findContainer(
+      yaml.load(manifest).spec.template.spec,
+      'evaluation',
+    );
+    const { startupProbe } = evaluation;
+    expect(evaluation.readinessProbe).toBeUndefined();
+    expect(startupProbe).toEqual({
+      httpGet: { path: '/health?bundles=true', port: 8282 },
+      initialDelaySeconds: 0,
+      periodSeconds: 2,
+      timeoutSeconds: 2,
+      failureThreshold: 150,
+    });
+    expect(
+      startupProbe.periodSeconds * startupProbe.failureThreshold,
+    ).toBeLessThanOrEqual(600);
     expect(manifest).toMatchSnapshot();
+  });
+
+  test('It starts the collector and evaluation sidecars before the Cloud Run user-container', async () => {
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 40,
+        },
+        monitoring: {
+          prometheus: {
+            interval: 15,
+          },
+        },
+      },
+      security: 'none',
+      sidecars: {
+        evaluation: {
+          enabled: true,
+        },
+      },
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          'max-instances': 10,
+          env: {},
+        },
+        staging: 'none',
+      },
+    };
+
+    await buildManifest(
+      'example-image:latest',
+      service,
+      'example-project',
+      'example-clan',
+      'production',
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    const manifest = readFileSync('cloudrun-service.yaml');
+    mockFs.restore();
+    expect(cloudRunContainerDependencies(manifest)).toEqual({
+      'user-container': ['collector', 'evaluation'],
+    });
   });
 });

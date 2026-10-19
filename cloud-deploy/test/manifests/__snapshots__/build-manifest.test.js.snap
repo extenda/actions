@@ -715,6 +715,7 @@ spec:
         run.googleapis.com/network-interfaces: '[{"network":"clan-network","subnetwork":"cloudrun-subnet"}]'
         run.googleapis.com/vpc-access-egress: private-ranges-only
         run.googleapis.com/secrets: ecs-api-ocms-client-id:projects/377710398576/secrets/ecs-api-ocms-client-id,ecs-api-ocms-client-secret:projects/377710398576/secrets/ecs-api-ocms-client-secret
+        run.googleapis.com/container-dependencies: '{"user-container":["evaluation"]}'
       labels:
         app: example-service
         product: actions
@@ -768,6 +769,16 @@ spec:
                   name: ecs-api-ocms-client-secret
             - name: REQUEST_ALL_BUNDLE
               value: 'true'
+            - name: RULES_CHANNEL
+              value: stable
+          startupProbe:
+            httpGet:
+              path: /health?bundles=true
+              port: 8282
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 150
           resources:
             limits:
               cpu: '0.1'
@@ -882,6 +893,16 @@ spec:
               value: sm://extenda/ecs-api-ocms-client-secret
             - name: REQUEST_ALL_BUNDLE
               value: 'false'
+            - name: RULES_CHANNEL
+              value: stable
+          readinessProbe:
+            httpGet:
+              path: /health?bundles=true
+              port: 8282
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 60
           imagePullPolicy: IfNotPresent
           resources:
             requests:

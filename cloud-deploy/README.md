@@ -1184,8 +1184,10 @@ environments:
   at container startup. Either way, the deploying service's runtime service account needs
   `roles/secretmanager.secretAccessor` on both secrets in the `extenda` project
 - `REQUEST_ALL_BUNDLE` defaults to `false`
+- `RULES_CHANNEL` selects the rules release the sidecar loads: `stable` (default), `pre-release` to
+  preview the next rules, or `v<N>` (e.g. `v3`) to pin a release
 
-Use `env` to override the defaults, for example to request the full bundle:
+Use `env` to override the defaults, for example to request the full bundle and pin a rules release:
 
 ```yaml
 sidecars:
@@ -1194,7 +1196,13 @@ sidecars:
     version: <tag>
     env:
       REQUEST_ALL_BUNDLE: 'true'
+      RULES_CHANNEL: v3
 ```
+
+**Bundle readiness:** the evaluation container gets an HTTP probe on `/health?bundles=true` (port
+`8282`): a readiness probe on GKE and a startup probe on Cloud Run, where the user-container also
+depends on the `evaluation` container. A pod or instance receives traffic only once both the rules and
+the conditions bundles are active, so an unknown `RULES_CHANNEL` fails the deploy.
 
 If the sidecar needs to call into Customer Registry with the tenant's own identity rather than the
 shared `ecs-api` one, override `OCMS_CLIENT_ID`/`OCMS_CLIENT_SECRET` with an `sm://` reference, same

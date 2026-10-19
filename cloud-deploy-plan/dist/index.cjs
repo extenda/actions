@@ -107115,9 +107115,10 @@ the generally available `stable` tag is used.",
         },
         env: {
           title: "EvaluationSidecarEnvVars",
-          description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE. OCMS_CLIENT_ID and OC\
-MS_CLIENT_SECRET default to the extenda Secret Manager project's ecs-api secrets, but can be overridden here with an sm:\
-// reference, e.g. to the deploying project's own OCMS client (sm://*/<name>).",
+          description: "Environment variables for the evaluation sidecar, e.g. REQUEST_ALL_BUNDLE or RULES_CHANNEL (stab\
+le, pre-release or v<N>; defaults to stable). OCMS_CLIENT_ID and OCMS_CLIENT_SECRET default to the extenda Secret Manage\
+r project's ecs-api secrets, but can be overridden here with an sm:// reference, e.g. to the deploying project's own OCM\
+S client (sm://*/<name>).",
           type: "object",
           patternProperties: {
             "^[A-Z0-9_]+$": {
