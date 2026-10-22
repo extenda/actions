@@ -1,6 +1,6 @@
 # agent-registry
 
-Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
+Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://docs.cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
 
 ## Workflow setup
 
