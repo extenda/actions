@@ -2,7 +2,8 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
-import generateOutputs from './generate-outputs.js';
+import DestroyedResources from './destroyed-resources.js';
+import generateOutputs, { terraformShowJson } from './generate-outputs.js';
 
 const moduleEmoji = (summary) => {
   if (!summary.includes(', 0 to destroy')) {
@@ -35,8 +36,30 @@ const outputToMarkdown = ({ module, output }) => {
   ].join('\n');
 };
 
-const createComment = (changes, workingDirectory, footer) => {
+const createComment = (
+  changes,
+  workingDirectory,
+  footer,
+  destroyedReport,
+  behindReport,
+) => {
   const comment = [];
+  const addDestroyedReport = () => {
+    if (behindReport) {
+      comment.push('---', behindReport, '');
+    }
+    comment.push(
+      '---',
+      '### :warning: You are about to destroy some resources',
+      '',
+      ...destroyedReport,
+      'Also check the following <ins>before</ins> applying:',
+      '* Make sure that no customers are using your resource.',
+      '* Other destroyed resources are not checked automatically.',
+      '  * Search on https://github.com/extenda for your resource in all repositories.',
+      '---',
+    );
+  };
   if (changes.length === 0) {
     comment.push(
       '### :white_check_mark: Terraform plan with no changes',
@@ -59,6 +82,9 @@ const createComment = (changes, workingDirectory, footer) => {
         'If the plan looks alright it can be applied according to below',
         '',
       );
+      if (changesString.includes('destroyed') && destroyedReport) {
+        addDestroyedReport();
+      }
     } else {
       comment.push(
         '### :mag: Terraform plan changes',
@@ -67,7 +93,9 @@ const createComment = (changes, workingDirectory, footer) => {
         '',
         ...changes,
       );
-      if (changesString.includes('destroyed')) {
+      if (changesString.includes('destroyed') && destroyedReport) {
+        addDestroyedReport();
+      } else if (changesString.includes('destroyed')) {
         comment.push(
           '---',
           '### :warning: You are about to destroy some resources',
@@ -94,6 +122,37 @@ const createComment = (changes, workingDirectory, footer) => {
   return comment.join('\n');
 };
 
+/**
+ * Check if destroyed resources are still in use. Only reads and warns: on any
+ * error the comment falls back to the static checklist.
+ */
+const checkDestroyedResources = async (
+  outputs,
+  token,
+  repository,
+  pullRequestNumber,
+  fallbackToken,
+) => {
+  if (!outputs.some(({ output }) => / [1-9]\d* to destroy/.test(output))) {
+    return null;
+  }
+  try {
+    const checker = new DestroyedResources(github.getOctokit(token), {
+      org: repository.split('/')[0],
+      repository,
+      pullRequestNumber,
+      fallbackToken,
+    });
+    await checker.collect(outputs, terraformShowJson);
+    await checker.check();
+    const report = checker.render();
+    return report && { report, behind: checker.behind };
+  } catch (err) {
+    core.warning(`Could not check destroyed resources: ${err.message}`);
+    return null;
+  }
+};
+
 const action = async () => {
   const planFile = core.getInput('plan-file') || 'plan.out';
   const workingDirectory = core.getInput('working-directory') || process.cwd();
@@ -104,6 +163,9 @@ const action = async () => {
   const footer = core.getInput('footer');
   const maxThreads = core.getInput('max-terraform-processes');
   const ignoredResourcesRegexp = core.getInput('ignored-resources-regexp');
+  const checkDestroyed = core.getInput('check-destroyed-resources') !== 'false';
+  const destroyedToken = core.getInput('check-destroyed-resources-token');
+  const checkToken = destroyedToken || githubToken;
 
   if (repository !== process.env.GITHUB_REPOSITORY && !pullRequestNumber) {
     throw new Error(
@@ -124,14 +186,28 @@ const action = async () => {
     }
   }
 
-  const comment = await generateOutputs(
+  const outputs = await generateOutputs(
     workingDirectory,
     planFile,
     maxThreads,
     ignoredResourcesRegexp,
-  )
-    .then((outputs) => outputs.map(outputToMarkdown))
-    .then((outputs) => createComment(outputs, workingDirectory, footer));
+  );
+  const destroyed = checkDestroyed
+    ? await checkDestroyedResources(
+        outputs,
+        checkToken,
+        repository,
+        pullRequest.number,
+        !destroyedToken,
+      )
+    : null;
+  const comment = createComment(
+    outputs.map(outputToMarkdown),
+    workingDirectory,
+    footer,
+    destroyed?.report,
+    destroyed?.behind,
+  );
 
   const octokit = github.getOctokit(githubToken);
   const [owner, repo] = repository.split('/');
