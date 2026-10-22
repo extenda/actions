@@ -41640,7 +41640,13 @@ var DestroyedResources = class {
         continue;
       }
       hasPlannedDestroy = true;
-      const environment = module2.replace(/^organization\//, "");
+      const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+      const planPath = import_node_path2.default.relative(workspace, import_node_path2.default.resolve(plan));
+      const planSegments = planPath.split(import_node_path2.default.sep);
+      const cacheIndex = planSegments.indexOf(".terragrunt-cache");
+      const modulePath2 = cacheIndex > 0 ? planSegments.slice(0, cacheIndex).join(import_node_path2.default.sep) : import_node_path2.default.
+      dirname(planPath);
+      const environment = modulePath2.replace(/^organization\//, "");
       if (this.repository === "extenda/tf-infra-gcp" && /^[^/]+\/departments\/.+\/[^/]+$/.test(environment)) {
         this.environments.add(environment);
       }
@@ -41804,10 +41810,14 @@ ked.`
     const [owner, repoName] = repo.split("/");
     let files;
     try {
+      const { data: repository } = await this.octokit.rest.repos.get({
+        owner,
+        repo: repoName
+      });
       const { data } = await this.octokit.rest.git.getTree({
         owner,
         repo: repoName,
-        tree_sha: "HEAD",
+        tree_sha: repository.default_branch,
         recursive: "true"
       });
       if (data.truncated) {
@@ -41820,12 +41830,21 @@ ked.`
       return { deploys: [], error: err.status || err.message };
     }
     const deploys = [];
+    const unreadable = [];
     for (const file of files) {
       const deploy = await this.readDeployFile(repo, file);
+      if (!deploy) {
+        unreadable.push(file);
+      }
       const service = deployService(deploy);
       deploys.push({ file, deploy, service });
     }
-    return { deploys };
+    return {
+      deploys,
+      ...unreadable.length > 0 && {
+        error: `could not read or parse ${DEPLOY_FILE}: ${unreadable.join(", ")}`
+      }
+    };
   }
   /**
    * Check if the pull request removes lines naming a service without adding

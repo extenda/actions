@@ -107,6 +107,9 @@ const mockOctokit = () => {
         }),
       },
       repos: {
+        get: vi.fn().mockResolvedValue({
+          data: { default_branch: 'main' },
+        }),
         compareCommitsWithBasehead: vi.fn().mockResolvedValue({
           data: {
             ahead_by: 0,
@@ -177,7 +180,7 @@ const runWithEnvironments = async (octokit, environments, ...changes) => {
   await checker.collect(
     environments.map((environment) => ({
       module: `extendaretail-com/departments/product-development/experience/clans/eva/${environment}`,
-      plan: `${environment}/plan.out`,
+      plan: `organization/extendaretail-com/departments/product-development/experience/clans/eva/${environment}/plan.out`,
       output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
     })),
     vi.fn().mockResolvedValue(destroyPlan(...changes)),
@@ -235,15 +238,13 @@ describe('Destroyed resources', () => {
       await checker.collect(
         [
           {
-            module:
-              'extendaretail-com/departments/product-development/experience/clans/eva/staging',
-            plan: 'staging/plan.out',
+            module: 'staging',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/staging/plan.out',
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           },
           {
-            module:
-              'extendaretail-com/departments/product-development/experience/clans/eva/prod',
-            plan: 'prod/plan.out',
+            module: 'prod',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/prod/plan.out',
             output: 'Plan: 0 to add, 0 to change, 0 to destroy.',
           },
         ],
@@ -476,6 +477,56 @@ environments:
         'Some repository checks are incomplete; verify manually before applying.',
       );
     });
+
+    test('It resolves repository trees from the remote default branch', async () => {
+      await run(octokit, [
+        'github_actions_secret',
+        { repository: 'my-service' },
+      ]);
+
+      expect(octokit.rest.repos.get).toHaveBeenCalledWith({
+        owner: 'extenda',
+        repo: 'my-service',
+      });
+      expect(octokit.rest.git.getTree).toHaveBeenCalledWith({
+        owner: 'extenda',
+        repo: 'my-service',
+        tree_sha: 'main',
+        recursive: 'true',
+      });
+    });
+
+    test.each([
+      ['unreadable', null],
+      ['malformed', 'cloud-run:\n  service: ['],
+    ])(
+      'It marks repository checks incomplete when cloud-deploy.yaml is %s',
+      async (_condition, contents) => {
+        octokit.rest.pulls.listFiles.mockResolvedValue({
+          data: [{ patch: '-  my-service = {}' }],
+        });
+        if (contents === null) {
+          octokit.rest.repos.getContent.mockRejectedValue(notFound());
+        } else {
+          mockFiles(octokit, {
+            'extenda/my-service:cloud-deploy.yaml': contents,
+          });
+        }
+
+        const checker = await run(octokit, [
+          'github_actions_secret',
+          { repository: 'my-service' },
+        ]);
+
+        expect(checker.incompleteRepositoryChecks).toBe(true);
+        expect(checker.render().join('\n')).toContain(
+          'Some repository checks are incomplete; verify manually before applying.',
+        );
+        expect(checker.notes.join('\n')).toContain(
+          'could not be fully checked',
+        );
+      },
+    );
   });
 
   describe('Check', () => {
@@ -744,7 +795,7 @@ environments:
         await checker.collect(
           ['prod', 'staging'].map((environment) => ({
             module: modules(environment),
-            plan: `${environment}/plan.out`,
+            plan: `organization/${modules(environment)}/plan.out`,
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           })),
           vi.fn().mockResolvedValue(plan),
@@ -882,13 +933,13 @@ environments:
           {
             module:
               'extendaretail-com/departments/product-development/experience/clans/eva/staging',
-            plan: 'staging/plan.out',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/staging/plan.out',
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           },
           {
             module:
               'extendaretail-com/departments/product-development/experience/clans/eva/prod',
-            plan: 'prod/plan.out',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/prod/plan.out',
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           },
         ],
@@ -1323,13 +1374,13 @@ environments:
           {
             module:
               'extendaretail-com/departments/product-development/experience/clans/eva/prod',
-            plan: 'prod/plan.out',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/prod/plan.out',
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           },
           {
             module:
               'extendaretail-com/departments/product-development/experience/clans/eva/staging',
-            plan: 'staging/plan.out',
+            plan: 'organization/extendaretail-com/departments/product-development/experience/clans/eva/staging/plan.out',
             output: 'Plan: 0 to add, 0 to change, 1 to destroy.',
           },
         ],
