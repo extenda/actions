@@ -4,7 +4,7 @@ import * as exec from '@actions/exec';
 import mockFs from 'mock-fs';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import generateOutputs from '../src/generate-outputs.js';
+import generateOutputs, { terraformShowJson } from '../src/generate-outputs.js';
 
 const terragruntFs = {
   'base/work': {
@@ -202,5 +202,25 @@ describe('Generate Terraform plan output', () => {
       },
     ]);
     expect(exec.exec).toHaveBeenCalledTimes(1);
+  });
+
+  test('It shows a plan as JSON', async () => {
+    mockFs(terragruntFs);
+    exec.exec.mockImplementationOnce(async (bin, args, opts) => {
+      opts.listeners.stdout(Buffer.from('{"resource_changes":', 'utf8'));
+      opts.listeners.stdout(Buffer.from('[]}', 'utf8'));
+      return 0;
+    });
+
+    const json = await terraformShowJson('base/work/moduleA/plan.out');
+    expect(json).toEqual({ resource_changes: [] });
+    expect(exec.exec).toHaveBeenCalledWith(
+      'terraform',
+      ['show', '-json', '../../../plan.out'],
+      expect.objectContaining({
+        cwd: 'base/work/moduleA/.terragrunt-cache/UUID1/UUID2',
+        silent: true,
+      }),
+    );
   });
 });
