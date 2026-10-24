@@ -34946,6 +34946,17 @@ var require_utils2 = __commonJS({
     var setMaxIndex = /* @__PURE__ */ __name(function setMaxIndex2(obj, maxIndex) {
       overflowChannel.set(obj, maxIndex);
     }, "setMaxIndex");
+    var conflictChannel = getSideChannel();
+    var markConflict = /* @__PURE__ */ __name(function markConflict2(obj, maxIndex) {
+      conflictChannel.set(obj, maxIndex);
+      return obj;
+    }, "markConflict");
+    var isConflict = /* @__PURE__ */ __name(function isConflict2(obj) {
+      return conflictChannel.has(obj);
+    }, "isConflict");
+    var getConflictIndex = /* @__PURE__ */ __name(function getConflictIndex2(obj) {
+      return conflictChannel.get(obj);
+    }, "getConflictIndex");
     var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
@@ -34989,6 +35000,28 @@ var require_utils2 = __commonJS({
         obj[key] = value;
       }
     }, "setProperty");
+    var maxNumericIndex = /* @__PURE__ */ __name(function maxNumericIndex2(obj, min) {
+      var max = min;
+      var keys = Object.keys(obj);
+      for (var i = 0; i < keys.length; ++i) {
+        var num = parseInt(keys[i], 10);
+        if (String(num) === keys[i] && num > max) {
+          max = num;
+        }
+      }
+      return max;
+    }, "maxNumericIndex");
+    var limitedPair = /* @__PURE__ */ __name(function limitedPair2(first, second, options) {
+      var pair = [first, second];
+      if (options && typeof options.arrayLimit === "number" && pair.length > options.arrayLimit) {
+        if (options.throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+          1 ? "" : "s") + " allowed in an array.");
+        }
+        return markOverflow(arrayToObject(pair, options), 1);
+      }
+      return pair;
+    }, "limitedPair");
     var merge = /* @__PURE__ */ __name(function merge2(target, source, options) {
       if (!source) {
         return target;
@@ -35009,13 +35042,22 @@ var require_utils2 = __commonJS({
             var newIndex = getMaxIndex(target) + 1;
             target[newIndex] = source;
             setMaxIndex(target, newIndex);
+          } else if (options && options.strictMerge && isConflict(target)) {
+            var nextConflict = getConflictIndex(target) + 1;
+            if (options.throwOnLimitExceeded && typeof options.arrayLimit === "number" && nextConflict >= options.arrayLimit) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit ===
+              1 ? "" : "s") + " allowed in an array.");
+            }
+            target[nextConflict] = source;
+            markConflict(target, nextConflict);
           } else if (options && options.strictMerge) {
-            return [target, source];
+            var conflict = limitedPair(target, source, options);
+            return isArray(conflict) ? markConflict(conflict, 1) : conflict;
           } else if (options && (options.plainObjects || options.allowPrototypes) || !has.call(Object.prototype, source)) {
             target[source] = true;
           }
         } else {
-          return [target, source];
+          return limitedPair(target, source, options);
         }
         return target;
       }
@@ -35042,6 +35084,9 @@ var require_utils2 = __commonJS({
       var mergeTarget = target;
       if (isArray(target) && !isArray(source)) {
         mergeTarget = arrayToObject(target, options);
+        if (isConflict(target)) {
+          markConflict(mergeTarget, target.length - 1);
+        }
       }
       if (isArray(target) && isArray(source)) {
         source.forEach(function(item, i) {
@@ -35073,12 +35118,18 @@ var require_utils2 = __commonJS({
           setProperty(acc, key, value);
         }
         if (isOverflow(source) && !isOverflow(acc)) {
-          markOverflow(acc, getMaxIndex(source));
+          markOverflow(acc, maxNumericIndex(acc, getMaxIndex(source)));
         }
         if (isOverflow(acc)) {
           var keyNum = parseInt(key, 10);
           if (String(keyNum) === key && keyNum >= 0 && keyNum > getMaxIndex(acc)) {
             setMaxIndex(acc, keyNum);
+          }
+        }
+        if (isConflict(acc)) {
+          var conflictKey = parseInt(key, 10);
+          if (String(conflictKey) === key && conflictKey > getConflictIndex(acc)) {
+            markConflict(acc, conflictKey);
           }
         }
         return acc;
@@ -35091,6 +35142,9 @@ var require_utils2 = __commonJS({
       }, target);
     }, "assignSingleSource");
     var decode = /* @__PURE__ */ __name(function(str, defaultDecoder, charset) {
+      if (typeof str === "string" && str.indexOf("%") === -1) {
+        return str.indexOf("+") === -1 ? str : str.replace(/\+/g, " ");
+      }
       var strWithoutPlus = str.replace(/\+/g, " ");
       if (charset === "iso-8859-1") {
         return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
@@ -35101,6 +35155,52 @@ var require_utils2 = __commonJS({
         return strWithoutPlus;
       }
     }, "decode");
+    var hasToPrimitive = typeof Symbol === "function" && typeof Symbol.toPrimitive === "symbol";
+    var arrayJoin = Array.prototype.join;
+    var arrayToString = Array.prototype.toString;
+    var objectToString = Object.prototype.toString;
+    var toCoercible = /* @__PURE__ */ __name(function toCoercible2(value, joining) {
+      if (!value || typeof value !== "object" && typeof value !== "function") {
+        return value;
+      }
+      if (hasToPrimitive && value[Symbol.toPrimitive] != null) {
+        return value;
+      }
+      if (isArray(value) && value.toString === arrayToString && value.join === arrayJoin) {
+        var ancestors = joining || getSideChannel();
+        if (ancestors.has(value)) {
+          return "";
+        }
+        ancestors.set(value, true);
+        var copy;
+        for (var i = 0; i < value.length; i += 1) {
+          var item = value[i];
+          var coerced = toCoercible2(item, ancestors);
+          if (!copy && coerced !== item) {
+            copy = [];
+            for (var j2 = 0; j2 < i; j2 += 1) {
+              copy[j2] = value[j2];
+            }
+          }
+          if (copy) {
+            copy[i] = coerced;
+          }
+        }
+        ancestors["delete"](value);
+        return copy || value;
+      }
+      if (typeof value.toString === "function") {
+        return value;
+      }
+      var valueOf = value.valueOf;
+      if (typeof valueOf === "function") {
+        var primitive = valueOf.call(value);
+        if (!primitive || typeof primitive !== "object" && typeof primitive !== "function") {
+          return String(primitive);
+        }
+      }
+      return objectToString.call(value);
+    }, "toCoercible");
     var limit = 1024;
     var encode = /* @__PURE__ */ __name(function encode2(str, defaultEncoder, charset, kind, format) {
       if (str.length === 0) {
@@ -35110,12 +35210,12 @@ var require_utils2 = __commonJS({
       if (typeof str === "symbol") {
         string = Symbol.prototype.toString.call(str);
       } else if (typeof str !== "string") {
-        string = String(str);
+        string = String(toCoercible(str));
       }
       if (charset === "iso-8859-1") {
         return escape(string).replace(/%u[0-9a-f]{4}/gi, function($0) {
           return "%26%23" + parseInt($0.slice(2), 16) + "%3B";
-        });
+        }).replace(/\+/g, "%2B");
       }
       var out = "";
       for (var j2 = 0; j2 < string.length; j2 += limit) {
@@ -35231,7 +35331,8 @@ var require_utils2 = __commonJS({
       isRegExp,
       markOverflow,
       maybeMap,
-      merge
+      merge,
+      toCoercible
     };
   }
 });
@@ -35347,17 +35448,17 @@ var require_stringify = __commonJS({
       if (generateArrayPrefix === "comma" && isArray(obj)) {
         if (encodeValuesOnly && encoder) {
           obj = utils.maybeMap(obj, function(v2) {
-            return v2 == null ? v2 : encoder(v2);
+            return v2 == null ? v2 : encoder(v2, defaults.encoder, charset, "value", format);
           });
         }
-        objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
+        objKeys = [{ value: obj.length > 0 ? utils.toCoercible(obj).join(",") || null : void 0 }];
       } else if (isArray(filter)) {
         objKeys = filter;
       } else {
         var keys = Object.keys(obj);
         objKeys = sort ? keys.sort(sort) : keys;
       }
-      var encodedPrefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
+      var encodedPrefix = String(prefix);
       var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
       if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
@@ -35429,7 +35530,7 @@ var require_stringify = __commonJS({
         filter = opts.filter;
       }
       var arrayFormat;
-      if (opts.arrayFormat in arrayPrefixGenerators) {
+      if (has.call(arrayPrefixGenerators, opts.arrayFormat)) {
         arrayFormat = opts.arrayFormat;
       } else if ("indices" in opts) {
         arrayFormat = opts.indices ? "indices" : "repeat";
@@ -35540,9 +35641,53 @@ var require_stringify = __commonJS({
 var require_parse3 = __commonJS({
   "node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
+    var getSideChannel = require_side_channel();
     var utils = require_utils2();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
+    var getPrototypeOf = Object.getPrototypeOf;
+    var isPlainContainer = /* @__PURE__ */ __name(function isPlainContainer2(value) {
+      if (!value || typeof value !== "object") {
+        return false;
+      }
+      if (isArray(value)) {
+        return true;
+      }
+      var proto = getPrototypeOf(value);
+      return proto === Object.prototype || proto === null;
+    }, "isPlainContainer");
+    var emptyCopyOf = /* @__PURE__ */ __name(function emptyCopyOf2(value) {
+      if (isArray(value)) {
+        var arr = [];
+        arr.length = value.length;
+        return arr;
+      }
+      return getPrototypeOf(value) === null ? { __proto__: null } : {};
+    }, "emptyCopyOf");
+    var copyInput = /* @__PURE__ */ __name(function copyInput2(input) {
+      var copies = getSideChannel();
+      var result = {};
+      var queue = [{ source: input, target: result }];
+      for (var i = 0; i < queue.length; ++i) {
+        var source = queue[i].source;
+        var target = queue[i].target;
+        var keys = Object.keys(source);
+        for (var j2 = 0; j2 < keys.length; ++j2) {
+          var value = source[keys[j2]];
+          if (isPlainContainer(value)) {
+            if (!copies.has(value)) {
+              var copy = emptyCopyOf(value);
+              copies.set(value, copy);
+              queue[queue.length] = { source: value, target: copy };
+            }
+            target[keys[j2]] = copies.get(value);
+          } else {
+            target[keys[j2]] = value;
+          }
+        }
+      }
+      return result;
+    }, "copyInput");
     var defaults = {
       allowDots: false,
       allowEmptyArrays: false,
@@ -35632,6 +35777,7 @@ owed.");
         var part = parts[i];
         var bracketEqualsPos = part.indexOf("]=");
         var pos = bracketEqualsPos === -1 ? part.indexOf("=") : bracketEqualsPos + 1;
+        var isEmptyBracketKey = pos > 1 && part.slice(pos - 2, pos) === "[]";
         var key;
         var val;
         if (pos === -1) {
@@ -35655,7 +35801,7 @@ owed.");
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(String(val));
         }
-        if (part.indexOf("[]=") > -1) {
+        if (isEmptyBracketKey) {
           val = isArray(val) ? [val] : val;
         }
         if (options.comma && isArray(val) && val.length > options.arrayLimit) {
@@ -35663,7 +35809,7 @@ owed.");
         }
         if (key !== null) {
           var existing = has.call(obj, key);
-          if (existing && (options.duplicates === "combine" || part.indexOf("[]=") > -1)) {
+          if (existing && (options.duplicates === "combine" || isEmptyBracketKey)) {
             obj[key] = utils.combine(
               obj[key],
               val,
@@ -35727,8 +35873,36 @@ owed.");
       }
       return leaf;
     }, "parseObject");
+    var topLevelDotsToBrackets = /* @__PURE__ */ __name(function topLevelDotsToBrackets2(key) {
+      var result = "";
+      var depth = 0;
+      for (var i = 0; i < key.length; i += 1) {
+        var cu = key.charCodeAt(i);
+        if (cu === 91) {
+          depth += 1;
+          result += "[";
+        } else if (cu === 93) {
+          if (depth > 0) {
+            depth -= 1;
+          }
+          result += "]";
+        } else if (cu === 46 && depth === 0 && i + 1 < key.length && key.charCodeAt(i + 1) !== 46 && key.charCodeAt(i + 1) !==
+        91) {
+          var start = i + 1;
+          var j2 = start;
+          while (j2 < key.length && key.charCodeAt(j2) !== 46 && key.charCodeAt(j2) !== 91) {
+            j2 += 1;
+          }
+          result += "[" + key.slice(start, j2) + "]";
+          i = j2 - 1;
+        } else {
+          result += key.charAt(i);
+        }
+      }
+      return result;
+    }, "topLevelDotsToBrackets");
     var splitKeyIntoSegments = /* @__PURE__ */ __name(function splitKeyIntoSegments2(originalKey, options) {
-      var key = options.allowDots ? originalKey.replace(/\.([^.[]+)/g, "[$1]") : originalKey;
+      var key = options.allowDots ? topLevelDotsToBrackets(originalKey) : originalKey;
       if (options.depth <= 0) {
         if (!options.plainObjects && has.call(Object.prototype, key)) {
           if (!options.allowPrototypes) {
@@ -35856,7 +36030,7 @@ owed.");
       if (str === "" || str === null || typeof str === "undefined") {
         return options.plainObjects ? { __proto__: null } : {};
       }
-      var tempObj = typeof str === "string" ? parseValues(str, options) : str;
+      var tempObj = typeof str === "string" ? parseValues(str, options) : copyInput(str);
       var obj = options.plainObjects ? { __proto__: null } : {};
       var keys = Object.keys(tempObj);
       for (var i = 0; i < keys.length; ++i) {
@@ -40932,13 +41106,30 @@ var require_test = __commonJS({
             }, "onError");
             app.once("listening", onListening);
             app.once("error", onError);
-            app.listen(0);
+            app.listen(0, "127.0.0.1");
           }
           addr = app.address();
         }
         if (state) {
           this._server = app;
         }
+        if (!addr) {
+          this._serverPath = path;
+          const protocol = app instanceof Server ? "https" : "http";
+          return protocol + "://127.0.0.1" + path;
+        }
+        return this.formatServerUrl(app, addr, path);
+      }
+      /**
+       * Builds a request URL from a listening server address.
+       *
+       * @param {Server} app
+       * @param {Object} addr
+       * @param {String} path
+       * @returns {String} URL address
+       * @api private
+       */
+      formatServerUrl(app, addr, path) {
         let host = addr.address;
         if (host === "::") host = "127.0.0.1";
         else if (host === "0.0.0.0") host = "127.0.0.1";
@@ -41031,6 +41222,10 @@ var require_test = __commonJS({
         dispatch = /* @__PURE__ */ __name(() => {
           removeStartListeners();
           try {
+            if (this._serverPath !== void 0) {
+              this.url = this.formatServerUrl(server, server.address(), this._serverPath);
+              this._serverPath = void 0;
+            }
             super.end(finish);
           } catch (err) {
             finish(err);
@@ -45806,7 +46001,6 @@ var Schema = class Schema2 {
         case "mapping":
           if (tag.matchByTagPrefix) prefix.mapping.push(tag);
           else exact.mapping[tag.tagName] = tag;
-          break;
       }
     }
     const implicitScalarAnyFirstChar = implicitScalarTags.filter((tag) => tag.implicitFirstChars === null);
@@ -46338,16 +46532,17 @@ function getBlockValue(input, start, end, indent, chomping, folded) {
     }
     const content = line.slice(textIndent);
     const first = content.charCodeAt(0);
-    if (folded) if (first === 32 || first === 9) {
-      atMoreIndented = true;
-      result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
-    } else if (atMoreIndented) {
-      atMoreIndented = false;
-      result += "\n".repeat(emptyLines + 1);
-    } else if (emptyLines === 0) {
-      if (didReadContent) result += " ";
-    } else result += "\n".repeat(emptyLines);
-    else result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+    if (folded) {
+      if (first === 32 || first === 9) {
+        atMoreIndented = true;
+        result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+      } else if (atMoreIndented) {
+        atMoreIndented = false;
+        result += "\n".repeat(emptyLines + 1);
+      } else if (emptyLines === 0) {
+        if (didReadContent) result += " ";
+      } else result += "\n".repeat(emptyLines);
+    } else result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
     result += content;
     didReadContent = true;
     emptyLines = 0;
@@ -46381,12 +46576,41 @@ var DEFAULT_TAG_HANDLERS = Object.assign(/* @__PURE__ */ Object.create(null), {
   "!": "!",
   "!!": "tag:yaml.org,2002:"
 });
+var TAG_SUFFIX_CHARS = "-#;/?:@&=+$_.~*'()";
+var TAG_URI_CHARS = TAG_SUFFIX_CHARS + "!,[]";
+function tagPercentDecode(source) {
+  let result = "";
+  let index = 0;
+  while (index < source.length) {
+    if (source.charCodeAt(index) !== 37) {
+      result += source[index++];
+      continue;
+    }
+    let ch = parseInt(source.slice(index + 1, index + 3), 16);
+    index += 3;
+    if (ch >= 192) {
+      let remaining = ch < 224 ? 1 : ch < 240 ? 2 : 3;
+      ch &= (1 << 6 - remaining) - 1;
+      while (remaining-- > 0) {
+        ch = ch << 6 | parseInt(source.slice(index + 1, index + 3), 16) & 63;
+        index += 3;
+      }
+    }
+    if (ch < 65536) result += String.fromCharCode(ch);
+    else {
+      ch -= 65536;
+      result += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+    }
+  }
+  return result;
+}
+__name(tagPercentDecode, "tagPercentDecode");
 function tagNameFull(rawTag, tagHandlers) {
-  if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return decodeURIComponent(rawTag.slice(2, -1));
+  if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return tagPercentDecode(rawTag.slice(2, -1));
   const handleEnd = rawTag.indexOf("!", 1);
   const handle = handleEnd === -1 ? "!" : rawTag.slice(0, handleEnd + 1);
-  const prefix = tagHandlers?.[handle] ?? DEFAULT_TAG_HANDLERS[handle] ?? handle;
-  return decodeURIComponent(prefix) + decodeURIComponent(rawTag.slice(handle.length));
+  return tagPercentDecode(tagHandlers?.[handle] ?? DEFAULT_TAG_HANDLERS[handle] ?? handle) + tagPercentDecode(rawTag.slice(
+  handle.length));
 }
 __name(tagNameFull, "tagNameFull");
 var NO_RANGE$2 = -1;
@@ -46900,8 +47124,11 @@ function skipUntilLineEnd(state) {
 }
 __name(skipUntilLineEnd, "skipUntilLineEnd");
 function checkPrintable(state, start, end) {
-  if (PATTERN_NON_PRINTABLE.test(state.input.slice(start, end))) throwError(state, "the stream contains non-printable ch\
-aracters");
+  const match = PATTERN_NON_PRINTABLE.exec(state.input.slice(start, end));
+  if (match !== null) {
+    state.position = start + match.index + match[0].length - 1;
+    throwError(state, "the stream contains non-printable characters");
+  }
 }
 __name(checkPrintable, "checkPrintable");
 function readTagProperty(state, props, inFlow) {
@@ -46929,12 +47156,14 @@ function readTagProperty(state, props, inFlow) {
     state.position++;
   } else {
     while (ch !== 0 && !isWsOrEol(ch) && !(inFlow && isFlowIndicator(ch))) {
-      if (ch === 33) if (!isNamed) {
-        tagHandle = state.input.slice(suffixStart - 1, state.position + 1);
-        if (!PATTERN_TAG_HANDLE.test(tagHandle)) throwError(state, "named tag handle cannot contain such characters");
-        isNamed = true;
-        suffixStart = state.position + 1;
-      } else throwError(state, "tag suffix cannot contain exclamation marks");
+      if (ch === 33) {
+        if (!isNamed) {
+          tagHandle = state.input.slice(suffixStart - 1, state.position + 1);
+          if (!PATTERN_TAG_HANDLE.test(tagHandle)) throwError(state, "named tag handle cannot contain such characters");
+          isNamed = true;
+          suffixStart = state.position + 1;
+        } else throwError(state, "tag suffix cannot contain exclamation marks");
+      }
       ch = state.input.charCodeAt(++state.position);
     }
     tagName = state.input.slice(suffixStart, state.position);
@@ -47102,7 +47331,7 @@ function readBlockScalar(state, parentIndent, props) {
         state.position = linePosition + column;
         throwError(state, "tab characters must not be used in indentation");
       }
-      if (column < maxLeadingIndent) {
+      if (column >= parentIndent && column < maxLeadingIndent) {
         state.position = linePosition + column;
         throwError(state, "bad indentation of a mapping entry");
       }
@@ -47136,7 +47365,7 @@ function canStartPlainScalar(state, nodeContext) {
   const ch = state.input.charCodeAt(state.position);
   const inFlow = nodeContext === CONTEXT_FLOW_IN;
   if (ch === 0 || isWsOrEol(ch) || ch === 35 || ch === 38 || ch === 42 || ch === 33 || ch === 124 || ch === 62 || ch ===
-  39 || ch === 34 || ch === 37 || ch === 64 || ch === 96 || inFlow && isFlowIndicator(ch)) return false;
+  39 || ch === 34 || ch === 37 || ch === 64 || ch === 96 || isFlowIndicator(ch)) return false;
   if (ch === 63 || ch === 45) {
     const following = state.input.charCodeAt(state.position + 1);
     if (isWsOrEolOrEnd(following) || inFlow && isFlowIndicator(following)) return false;
@@ -47330,14 +47559,16 @@ function readBlockMapping(state, nodeIndent, flowIndent, props) {
           if (!isWsOrEolOrEnd(ch)) throwError(state, "a whitespace character is expected after the key-value separator w\
 ithin a block mapping");
           if (!mappingOpened) {
-            restoreState(state, beforeKey);
-            addMappingEvent(state, beforeKey.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd,
-            COLLECTION_STYLE.BLOCK);
+            state.events.splice(beforeKey.eventsLength, 0, {
+              type: EVENT_ID.MAPPING,
+              start: beforeKey.position,
+              anchorStart: props.anchorStart,
+              anchorEnd: props.anchorEnd,
+              tagStart: props.tagStart,
+              tagEnd: props.tagEnd,
+              style: COLLECTION_STYLE.BLOCK
+            });
             mappingOpened = true;
-            parseNode(state, flowIndent, CONTEXT_FLOW_OUT, false, true);
-            ch = state.input.charCodeAt(state.position);
-            while (isWhiteSpace(ch)) ch = state.input.charCodeAt(++state.position);
-            state.position++;
           }
           detected = true;
           atExplicitKey = false;
@@ -47427,24 +47658,25 @@ function parseNode(state, parentIndent, nodeContext, allowToSeek, allowCompact, 
     const flowIndent = nodeContext === CONTEXT_FLOW_IN || nodeContext === CONTEXT_FLOW_OUT ? parentIndent : parentIndent +
     1;
     const blockIndent = state.position - state.lineStart;
-    if (indentStatus === 1) if (allowBlockCollections && (readBlockSequence(state, blockIndent, props) || readBlockMapping(
-    state, blockIndent, flowIndent, props)) || readFlowCollection(state, flowIndent, props)) hasContent = true;
-    else {
-      const ch = state.input.charCodeAt(state.position);
-      if (propertyStart !== null && allowPropertyMapping && allowBlockStyles && !allowBlockCollections && ch !== 124 && ch !==
-      62) {
-        const fallbackState = snapshotState(state);
-        const propertyIndent = propertyStart.position - propertyStart.lineStart;
-        restoreState(state, propertyStart);
-        if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.
-        type === EVENT_ID.MAPPING) hasContent = true;
-        else restoreState(state, fallbackState);
+    if (indentStatus === 1) {
+      if (allowBlockCollections && (readBlockSequence(state, blockIndent, props) || readBlockMapping(state, blockIndent,
+      flowIndent, props)) || readFlowCollection(state, flowIndent, props)) hasContent = true;
+      else {
+        const ch = state.input.charCodeAt(state.position);
+        if (propertyStart !== null && allowPropertyMapping && allowBlockStyles && !allowBlockCollections && ch !== 124 &&
+        ch !== 62) {
+          const fallbackState = snapshotState(state);
+          const propertyIndent = propertyStart.position - propertyStart.lineStart;
+          restoreState(state, propertyStart);
+          if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.
+          type === EVENT_ID.MAPPING) hasContent = true;
+          else restoreState(state, fallbackState);
+        }
+        if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state,
+        flowIndent, props) || readDoubleQuotedScalar(state, flowIndent, props) || readAlias(state, props) || readPlainScalar(
+        state, flowIndent, nodeContext, props))) hasContent = true;
       }
-      if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state,
-      flowIndent, props) || readDoubleQuotedScalar(state, flowIndent, props) || readAlias(state, props) || readPlainScalar(
-      state, flowIndent, nodeContext, props))) hasContent = true;
-    }
-    else if (indentStatus === 0) hasContent = allowBlockCollections && readBlockSequence(state, blockIndent, props);
+    } else if (indentStatus === 0) hasContent = allowBlockCollections && readBlockSequence(state, blockIndent, props);
   }
   allowBlockScalars = allowBlockScalars && !hasContent;
   if (!hasContent && (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1 || allowBlockScalars)) {
@@ -47852,5 +48084,5 @@ methods/index.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.4.2 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.5.0 https://github.com/nodeca/js-yaml @license MIT *)
 */
