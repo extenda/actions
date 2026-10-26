@@ -101642,9 +101642,14 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
   const [major, minor] = version3.slice(1).split("-").map(Number);
   return isMajorBranch2() ? `v${major + 1}-00` : `v${major}-${String(minor + 1).padStart(2, "0")}`;
 }, "bumpVersion");
+var SCAN_PENDING = /pending scan results/;
+var ACTIVATE_RETRY_DELAYS_MS = [5e3, 1e4, 15e3, 3e4, 6e4];
+var sleep2 = /* @__PURE__ */ __name((ms2) => new Promise((resolve3) => {
+  setTimeout(resolve3, ms2);
+}), "sleep");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT4}/locations/${LOCATION4}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
+  const args = [
     "alpha",
     "agent-registry",
     "skills",
@@ -101655,7 +101660,19 @@ var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
     `--default-revision=${revisionName}`,
     "--target-state=active",
     "--quiet"
-  ], "gcloud", true);
+  ];
+  for (const delay4 of [...ACTIVATE_RETRY_DELAYS_MS, null]) {
+    try {
+      await execGcloud(args, "gcloud", true);
+      return;
+    } catch (e) {
+      if (delay4 === null || !SCAN_PENDING.test(e.message)) throw e;
+      info(
+        `[skill] scan of ${registryId}@${revisionId} still pending, retrying activation in ${delay4 / 1e3}s`
+      );
+      await sleep2(delay4);
+    }
+  }
 }, "activate");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
