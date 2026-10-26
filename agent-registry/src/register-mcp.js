@@ -36,7 +36,6 @@ const registerMcp = async (mcpId, mcpYaml, dryRun) => {
     `--project=${PROJECT}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
-    `--mcp-server-spec-type=${specType}`,
     `--mcp-server-spec-content=${specContent}`,
   ];
 
@@ -52,7 +51,16 @@ const registerMcp = async (mcpId, mcpYaml, dryRun) => {
     await execGcloud(['agent-registry', 'services', 'update', mcpId, ...flags, ...interfaces]);
   } else {
     core.info(`Creating MCP: ${mcpId}`);
-    await execGcloud(['agent-registry', 'services', 'create', mcpId, ...flags, ...interfaces]);
+    // The spec type is fixed at creation; `services update` (gcloud 588+) rejects --mcp-server-spec-type.
+    await execGcloud([
+      'agent-registry',
+      'services',
+      'create',
+      mcpId,
+      `--mcp-server-spec-type=${specType}`,
+      ...flags,
+      ...interfaces,
+    ]);
   }
   core.info(`MCP registered: ${mcpId}`);
 };
