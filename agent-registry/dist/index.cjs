@@ -100722,8 +100722,11 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
   if (!/^https?:\/\//i.test(card.url)) throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? "";
-  for (const iface of card.interfaces ?? []) {
-    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+  if (card.interfaces?.length) {
+    throw new Error(
+      `agent.yaml for '${agentId}': remove 'interfaces' \u2014 the registry rejects interfaces on an A2A agent card. Put the \
+agent's base URL in 'url'.`
+    );
   }
   if (dryRun) {
     info(`[dry-run] Would register agent: ${agentId}`);
@@ -100757,16 +100760,13 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
     `--description=${description}`,
     `--agent-spec-content=${specContent}`
   ];
-  const interfaces = (card.interfaces ?? []).flatMap((iface) => [
-    `--interfaces=protocolBinding=${iface.protocolBinding ?? "a2a"},url=${iface.url}`
-  ]);
   if (exists2) {
     info(`Updating agent: ${agentId}@${version3}`);
-    await execGcloud(["agent-registry", "services", "update", agentId, ...flags, ...interfaces], "gcloud", true);
+    await execGcloud(["agent-registry", "services", "update", agentId, ...flags], "gcloud", true);
   } else {
     info(`Creating agent: ${agentId}@${version3}`);
     await execGcloud(
-      ["agent-registry", "services", "create", agentId, "--agent-spec-type=a2a-agent-card", ...flags, ...interfaces],
+      ["agent-registry", "services", "create", agentId, "--agent-spec-type=a2a-agent-card", ...flags],
       "gcloud",
       true
     );
@@ -100805,7 +100805,6 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
     `--project=${PROJECT3}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
-    `--mcp-server-spec-type=${specType}`,
     `--mcp-server-spec-content=${specContent}`
   ];
   if (dryRun) {
@@ -100818,7 +100817,15 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
     await execGcloud(["agent-registry", "services", "update", mcpId, ...flags, ...interfaces]);
   } else {
     info(`Creating MCP: ${mcpId}`);
-    await execGcloud(["agent-registry", "services", "create", mcpId, ...flags, ...interfaces]);
+    await execGcloud([
+      "agent-registry",
+      "services",
+      "create",
+      mcpId,
+      `--mcp-server-spec-type=${specType}`,
+      ...flags,
+      ...interfaces
+    ]);
   }
   info(`MCP registered: ${mcpId}`);
 }, "registerMcp");

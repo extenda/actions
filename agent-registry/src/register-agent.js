@@ -44,8 +44,12 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? '';
 
-  for (const iface of card.interfaces ?? []) {
-    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+  // An A2A agent card carries its own connection details; the registry rejects a Service with
+  // interfaces ("interfaces must be empty for A2A_AGENT_CARD"). Fail here so a PR's dry run catches it.
+  if (card.interfaces?.length) {
+    throw new Error(
+      `agent.yaml for '${agentId}': remove 'interfaces' — the registry rejects interfaces on an A2A agent card. Put the agent's base URL in 'url'.`,
+    );
   }
 
   if (dryRun) {
@@ -84,18 +88,14 @@ const registerAgent = async (agentId, agentYaml, dryRun) => {
     `--agent-spec-content=${specContent}`,
   ];
 
-  const interfaces = (card.interfaces ?? []).flatMap((iface) => [
-    `--interfaces=protocolBinding=${iface.protocolBinding ?? 'a2a'},url=${iface.url}`,
-  ]);
-
   if (exists) {
     core.info(`Updating agent: ${agentId}@${version}`);
-    await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags, ...interfaces], 'gcloud', true);
+    await execGcloud(['agent-registry', 'services', 'update', agentId, ...flags], 'gcloud', true);
   } else {
     core.info(`Creating agent: ${agentId}@${version}`);
     // The spec type is fixed at creation; `services update` (gcloud 588+) rejects --agent-spec-type.
     await execGcloud(
-      ['agent-registry', 'services', 'create', agentId, '--agent-spec-type=a2a-agent-card', ...flags, ...interfaces],
+      ['agent-registry', 'services', 'create', agentId, '--agent-spec-type=a2a-agent-card', ...flags],
       'gcloud',
       true,
     );
