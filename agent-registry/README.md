@@ -55,6 +55,7 @@ agent-registry/
   skills/
     <skill-id>/
       SKILL.md            # required
+      references/**       # optional; any other files, synced with the skill
   config/                 # clan-specific Claude Code settings
     settings.yaml         # clan name, additional permissions, hooks, and commands
     hooks/
@@ -151,7 +152,28 @@ You are a dependency upgrade specialist...
 | `description` | yes | Short description of what the skill does. Max 1024 characters (checked in dry-run too). Frontmatter is parsed as YAML, so quote values containing `: ` or use `>` for multi-line text. |
 | `metadata` | no | Arbitrary key/value pairs (e.g. `category`). |
 
-The skill is registered as `private-<skill-id>` in the `eu` location. The entire `SKILL.md` file is zipped and uploaded as the skill payload.
+The skill is registered as `private-<clan>-<skill-id>` (`private-<skill-id>` when no clan is resolved) in the `eu` location. `SKILL.md` and every other file in the skill directory (e.g. `references/**`, including nested folders) are zipped, preserving relative paths, and uploaded as the skill payload. The same files are copied to `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/` (`skills/<skill-id>/<revision>/` when no clan is resolved). Symbolic links inside a skill directory are ignored. Each revision gets its own prefix, so reference files removed from the skill do not appear in the new revision. A change to any file under `skills/<skill-id>/`, including references, triggers a new revision of that skill.
+
+### Skill limits
+
+Checked before anything is created or uploaded, and also in dry-run, so pull requests catch them.
+A skill that exceeds a limit fails with a message naming the file or size.
+A failing skill does not stop the others: the action continues with the remaining skills, skill deletions and clan settings, then fails the run once at the end, listing every failed skill.
+Dry-run reports failures the same way.
+
+| Limit | Value |
+|-------|-------|
+| Size of any `.md` file in the skill (`SKILL.md` and references) | 64 KB |
+| Files in the skill (`SKILL.md` plus references) | 150 |
+| Payload zip | 400 KB |
+
+### Revision pruning
+
+Before a new revision of an existing skill is created, the action prunes so that at most 19 old revisions remain and the new one makes 20 (the registry allows 100 per skill, and a skill at the cap could not otherwise get a new revision).
+Each pruned revision is deleted from the registry, then its `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/` prefix is removed; a prefix that is already gone is not an error.
+The registry's default (active) revision is never deleted.
+Pruning problems are logged as warnings and never fail the run.
+In dry-run the action only logs which revisions it would prune, and logs nothing for a skill that does not exist yet.
 
 ### Skill versioning
 
@@ -263,6 +285,7 @@ agents/
 skills/
   <skill-id>/
     <revision>/SKILL.md
+    <revision>/<reference files>   # e.g. references/usage.md
 ```
 
 Global hooks, commands, and the baseline `settings.json` are managed by the platform team and merged in automatically — clan repos do not need to define or upload them.

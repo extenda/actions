@@ -59265,7 +59265,7 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
 var import_node_child_process2 = require("node:child_process");
 var import_node_fs9 = require("node:fs");
 var import_node_path8 = __toESM(require("node:path"), 1);
-var import_fast_glob3 = __toESM(require_out4(), 1);
+var import_fast_glob4 = __toESM(require_out4(), 1);
 
 // cloud-run/src/project-info.js
 var projectInfo = /* @__PURE__ */ __name((projectId) => {
@@ -100827,6 +100827,7 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 var import_node_fs7 = require("node:fs");
 var import_node_os4 = require("node:os");
 var import_node_path6 = __toESM(require("node:path"), 1);
+var import_fast_glob2 = __toESM(require_out4(), 1);
 
 // node_modules/fflate/esm/index.mjs
 var import_module = require("module");
@@ -101563,20 +101564,76 @@ var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
 var PROJECT4 = "extenda";
 var LOCATION4 = "eu";
 var MAX_DESCRIPTION_LENGTH = 1024;
+var MAX_MARKDOWN_BYTES = 64 * 1024;
+var MAX_ZIP_BYTES = 400 * 1024;
+var MAX_FILES = 150;
+var KEEP_REVISIONS = 20;
+var NOT_FOUND2 = /NOT_FOUND|matched no objects/;
+var REVISION_PATTERN = /^v\d+-\d+$/;
 var asTrimmedString = /* @__PURE__ */ __name((value) => value == null ? "" : String(value).trim(), "asTrimmedString");
 var parseSkillMeta = /* @__PURE__ */ __name((content) => {
   const match3 = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match3) return { name: "", description: "" };
   const meta = load(match3[1]) ?? {};
-  return { name: asTrimmedString(meta.name), description: asTrimmedString(meta.description) };
+  return {
+    name: asTrimmedString(meta.name),
+    description: asTrimmedString(meta.description)
+  };
 }, "parseSkillMeta");
-var makeZipFile = /* @__PURE__ */ __name((skillFilePath) => {
+var listReferenceFiles = /* @__PURE__ */ __name((skillDir) => (import_fast_glob2.default.sync("**/*", {
+  cwd: skillDir,
+  onlyFiles: true,
+  dot: true,
+  // Never publish files outside the skill directory through symlinks.
+  followSymbolicLinks: false,
+  ignore: ["SKILL.md", "**/.DS_Store"]
+}) ?? []).sort(), "listReferenceFiles");
+var buildZip = /* @__PURE__ */ __name((skillFilePath, referenceFiles = []) => {
+  const skillDir = import_node_path6.default.dirname(skillFilePath);
   const content = (0, import_node_fs7.readFileSync)(skillFilePath);
-  const zipped = zipSync({ "SKILL.md": [strToU8(content.toString()), { level: 6 }] });
+  const entries = { "SKILL.md": [strToU8(content.toString()), { level: 6 }] };
+  for (const rel of referenceFiles) {
+    entries[rel] = [
+      new Uint8Array((0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, rel))),
+      { level: 6 }
+    ];
+  }
+  return zipSync(entries);
+}, "buildZip");
+var writeZipFile = /* @__PURE__ */ __name((zipped) => {
   const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
   (0, import_node_fs7.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
-}, "makeZipFile");
+}, "writeZipFile");
+var checkFileLimits = /* @__PURE__ */ __name((skillId, skillContent, skillDir, referenceFiles) => {
+  const total = referenceFiles.length + 1;
+  if (total > MAX_FILES) {
+    throw new Error(
+      `Skill '${skillId}' has ${total} files (SKILL.md plus references), max is ${MAX_FILES}`
+    );
+  }
+  const skillMdBytes = Buffer.byteLength(skillContent);
+  if (skillMdBytes > MAX_MARKDOWN_BYTES) {
+    throw new Error(
+      `Skill '${skillId}': SKILL.md is ${skillMdBytes} bytes, max for a Markdown file is ${MAX_MARKDOWN_BYTES}`
+    );
+  }
+  for (const rel of referenceFiles.filter((f3) => /\.md$/i.test(f3))) {
+    const bytes = Buffer.byteLength((0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, rel)));
+    if (bytes > MAX_MARKDOWN_BYTES) {
+      throw new Error(
+        `Skill '${skillId}': ${rel} is ${bytes} bytes, max for a Markdown file is ${MAX_MARKDOWN_BYTES}`
+      );
+    }
+  }
+}, "checkFileLimits");
+var checkZipLimit = /* @__PURE__ */ __name((skillId, zipped) => {
+  if (zipped.length > MAX_ZIP_BYTES) {
+    throw new Error(
+      `Skill '${skillId}': payload zip is ${zipped.length} bytes, max is ${MAX_ZIP_BYTES}`
+    );
+  }
+}, "checkZipLimit");
 var skillExists = /* @__PURE__ */ __name(async (skillId) => {
   try {
     info(`[skill] checking exists: ${skillId} @ ${LOCATION4}`);
@@ -101604,18 +101661,22 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
 var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
   try {
     info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "revisions",
-      "list",
-      `--skill=${registryId}`,
-      `--location=${LOCATION4}`,
-      `--project=${PROJECT4}`,
-      "--format=value(name.basename())",
-      "--quiet"
-    ], "gcloud", true);
+    const output = await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "revisions",
+        "list",
+        `--skill=${registryId}`,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
+        "--format=value(name.basename())",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
     const versions = output.split("\n").filter(Boolean).filter((v2) => /^v\d+-\d+$/.test(v2));
     if (!versions.length) return null;
     return versions.sort((a, b2) => {
@@ -101627,6 +101688,11 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
     return null;
   }
 }, "getLatestRevision");
+var compareVersions = /* @__PURE__ */ __name((a, b2) => {
+  const [aMaj, aMin] = a.slice(1).split("-").map(Number);
+  const [bMaj, bMin] = b2.slice(1).split("-").map(Number);
+  return aMaj - bMaj || aMin - bMin;
+}, "compareVersions");
 var isMajorBranch2 = /* @__PURE__ */ __name(() => {
   const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "";
   return /^(breaking|major)(\/|$)/i.test(branch);
@@ -101637,84 +101703,213 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
 }, "bumpVersion");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT4}/locations/${LOCATION4}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud([
-    "alpha",
-    "agent-registry",
-    "skills",
-    "update",
-    registryId,
-    `--location=${LOCATION4}`,
-    `--project=${PROJECT4}`,
-    `--default-revision=${revisionName}`,
-    "--target-state=active",
-    "--quiet"
-  ], "gcloud", true);
+  await execGcloud(
+    [
+      "alpha",
+      "agent-registry",
+      "skills",
+      "update",
+      registryId,
+      `--location=${LOCATION4}`,
+      `--project=${PROJECT4}`,
+      `--default-revision=${revisionName}`,
+      "--target-state=active",
+      "--quiet"
+    ],
+    "gcloud",
+    true
+  );
 }, "activate");
+var pruneRevisions = /* @__PURE__ */ __name(async (registryId, namespacedId, dryRun) => {
+  try {
+    const output = await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "revisions",
+        "list",
+        `--skill=${registryId}`,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
+        "--format=value(name.basename())",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
+    const defaultRevision = (await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "describe",
+        registryId,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
+        "--format=value(defaultRevision.basename())",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    ) ?? "").trim();
+    const all3 = [
+      ...new Set(
+        (output ?? "").split("\n").map((v2) => v2.trim()).filter((v2) => REVISION_PATTERN.test(v2))
+      )
+    ].sort(compareVersions);
+    const stale = all3.slice(0, Math.max(0, all3.length + 1 - KEEP_REVISIONS)).filter((r2) => r2 !== defaultRevision);
+    for (const revision of stale) {
+      const prefix2 = `gs://extenda-agent-artifacts/skills/${namespacedId}/${revision}/`;
+      if (dryRun) {
+        info(
+          `[dry-run] Would prune revision ${registryId}@${revision} and ${prefix2}`
+        );
+        continue;
+      }
+      try {
+        await execGcloud(
+          [
+            "alpha",
+            "agent-registry",
+            "skills",
+            "revisions",
+            "delete",
+            revision,
+            `--skill=${registryId}`,
+            `--location=${LOCATION4}`,
+            `--project=${PROJECT4}`,
+            "--quiet"
+          ],
+          "gcloud",
+          true
+        );
+        try {
+          await execGcloud(["storage", "rm", "-r", prefix2], "gcloud", true);
+        } catch (e) {
+          if (!NOT_FOUND2.test(e.message ?? "")) throw e;
+        }
+        info(`Pruned revision ${registryId}@${revision}`);
+      } catch (e) {
+        warning(
+          `Could not prune ${registryId}@${revision}: ${e.message?.split("\n")[0]}`
+        );
+      }
+    }
+  } catch (e) {
+    if (NOT_FOUND2.test(e.message ?? "")) return;
+    const log2 = dryRun ? info : warning;
+    log2(
+      `${dryRun ? "[dry-run] " : ""}Could not prune old revisions of ${registryId}: ${e.message?.split("\n")[0]}`
+    );
+  }
+}, "pruneRevisions");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
   const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
   let meta;
   try {
     meta = parseSkillMeta(skillContent);
   } catch (e) {
-    throw new Error(`SKILL.md for '${skillId}' has invalid YAML frontmatter: ${e.message.split("\n")[0]}`);
+    throw new Error(
+      `SKILL.md for '${skillId}' has invalid YAML frontmatter: ${e.message.split("\n")[0]}`
+    );
   }
   const { name: displayName, description } = meta;
-  if (!displayName) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: name`);
-  if (!description) throw new Error(`SKILL.md for '${skillId}' is missing required frontmatter field: description`);
+  if (!displayName)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: name`
+    );
+  if (!description)
+    throw new Error(
+      `SKILL.md for '${skillId}' is missing required frontmatter field: description`
+    );
   const descriptionLength = [...description].length;
   if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
-    throw new Error(`SKILL.md for '${skillId}': description is ${descriptionLength} chars, max is ${MAX_DESCRIPTION_LENGTH}`);
+    throw new Error(
+      `SKILL.md for '${skillId}': description is ${descriptionLength} chars, max is ${MAX_DESCRIPTION_LENGTH}`
+    );
   }
   const body2 = skillContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
-  if (!body2) throw new Error(`SKILL.md for '${skillId}' must have instructions after the frontmatter`);
+  if (!body2)
+    throw new Error(
+      `SKILL.md for '${skillId}' must have instructions after the frontmatter`
+    );
+  const skillDir = import_node_path6.default.dirname(skillFilePath);
+  const referenceFiles = listReferenceFiles(skillDir);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
+  checkFileLimits(skillId, skillContent, skillDir, referenceFiles);
+  const zipped = buildZip(skillFilePath, referenceFiles);
+  checkZipLimit(skillId, zipped);
   if (dryRun) {
     info(`[dry-run] Would register skill: ${registryId}`);
+    if (referenceFiles.length)
+      info(
+        `[dry-run] Would include ${referenceFiles.length} reference file(s): ${referenceFiles.join(", ")}`
+      );
+    await pruneRevisions(registryId, namespacedId, true);
     return;
   }
   const exists2 = await skillExists(registryId);
   const currentVersion = exists2 ? await getLatestRevision(registryId) : null;
+  if (exists2) await pruneRevisions(registryId, namespacedId, false);
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-01";
   const revisionId = version3;
   if (!exists2) {
     info(`Creating skill: ${registryId}@${version3}`);
-    await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "create",
-      namespacedId,
-      `--location=${LOCATION4}`,
-      `--project=${PROJECT4}`,
-      `--display-name=${displayName}`,
-      `--description=${description}`,
-      "--type=simple",
-      "--quiet"
-    ], "gcloud", true);
+    await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "create",
+        namespacedId,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
+        `--display-name=${displayName}`,
+        `--description=${description}`,
+        "--type=simple",
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
   }
-  const zipPath = makeZipFile(skillFilePath);
+  const zipPath = writeZipFile(zipped);
   try {
-    info(`${exists2 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`);
-    await execGcloud([
-      "alpha",
-      "agent-registry",
-      "skills",
-      "revisions",
-      "create",
-      revisionId,
-      `--skill=${registryId}`,
-      `--location=${LOCATION4}`,
-      `--project=${PROJECT4}`,
-      `--payload=${zipPath}`,
-      "--quiet"
-    ], "gcloud", true);
+    info(
+      `${exists2 ? "Adding" : "Uploading"} revision ${version3} to skill: ${registryId}`
+    );
+    await execGcloud(
+      [
+        "alpha",
+        "agent-registry",
+        "skills",
+        "revisions",
+        "create",
+        revisionId,
+        `--skill=${registryId}`,
+        `--location=${LOCATION4}`,
+        `--project=${PROJECT4}`,
+        `--payload=${zipPath}`,
+        "--quiet"
+      ],
+      "gcloud",
+      true
+    );
   } finally {
     (0, import_node_fs7.unlinkSync)(zipPath);
   }
+  const revisionPrefix = `skills/${namespacedId}/${revisionId}`;
+  const gcsPath = await upload(skillFilePath, `${revisionPrefix}/SKILL.md`);
+  for (const rel of referenceFiles) {
+    await upload(import_node_path6.default.join(skillDir, rel), `${revisionPrefix}/${rel}`);
+  }
   await activate(registryId, revisionId);
-  const gcsPath = await upload(skillFilePath, `skills/${namespacedId}/${revisionId}/SKILL.md`);
-  info(`Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}`);
+  info(
+    `Skill registered: ${registryId}@${version3} \u2192 ${gcsPath}${referenceFiles.length ? ` (+${referenceFiles.length}\
+ reference file(s))` : ""}`
+  );
 }, "registerSkill");
 
 // agent-registry/src/sync-clan-settings.js
@@ -101722,7 +101917,7 @@ var import_node_fs8 = require("node:fs");
 var import_node_os5 = require("node:os");
 var import_node_path7 = __toESM(require("node:path"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
-var import_fast_glob2 = __toESM(require_out4(), 1);
+var import_fast_glob3 = __toESM(require_out4(), 1);
 
 // agent-registry/src/global-settings.schema.json
 var global_settings_schema_default = {
@@ -102098,7 +102293,7 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
   };
 }, "buildSettingsJson");
 var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
-  const localFiles = (0, import_node_fs8.existsSync)(localDir) ? import_fast_glob2.default.sync("**/*", { cwd: localDir,
+  const localFiles = (0, import_node_fs8.existsSync)(localDir) ? import_fast_glob3.default.sync("**/*", { cwd: localDir,
   onlyFiles: true }) : [];
   for (const file of localFiles) {
     const localPath = import_node_path7.default.join(localDir, file);
@@ -102329,7 +102524,7 @@ var uploadInstructions = /* @__PURE__ */ __name(async (instructionsPath, agentId
   }
 }, "uploadInstructions");
 var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gitSha, dryRun) => {
-  const agentFiles = import_fast_glob3.default.sync("agents/*/agent.yaml", {
+  const agentFiles = import_fast_glob4.default.sync("agents/*/agent.yaml", {
     cwd: registryRoot,
     onlyFiles: true
   });
@@ -102353,7 +102548,7 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
   }
 }, "processAgents");
 var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun) => {
-  const mcpFiles = import_fast_glob3.default.sync("mcp/*/mcp.yaml", {
+  const mcpFiles = import_fast_glob4.default.sync("mcp/*/mcp.yaml", {
     cwd: registryRoot,
     onlyFiles: true
   });
@@ -102368,7 +102563,8 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
   }
 }, "processMcps");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const skillFiles = import_fast_glob3.default.sync("skills/*/SKILL.md", {
+  const failures = [];
+  const skillFiles = import_fast_glob4.default.sync("skills/*/SKILL.md", {
     cwd: registryRoot,
     onlyFiles: true
   });
@@ -102377,14 +102573,22 @@ var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dr
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
-    await registerSkill(
-      skillId,
-      import_node_path8.default.join(registryRoot, skillFile),
-      dryRun,
-      clan
-    );
-    endGroup();
+    try {
+      await registerSkill(
+        skillId,
+        import_node_path8.default.join(registryRoot, skillFile),
+        dryRun,
+        clan
+      );
+    } catch (e) {
+      const message = e.message?.split("\n")[0] ?? String(e);
+      error(`Skill '${skillId}' failed: ${message}`);
+      failures.push({ skillId, message });
+    } finally {
+      endGroup();
+    }
   }
+  return failures;
 }, "processSkills");
 var action5 = /* @__PURE__ */ __name(async () => {
   const serviceAccountKey = getInput("service-account-key", {
@@ -102414,7 +102618,12 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const registryRoot = import_node_path8.default.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
-  await processSkills(registryRoot, changedPaths, dryRun, clan);
+  const skillFailures = await processSkills(
+    registryRoot,
+    changedPaths,
+    dryRun,
+    clan
+  );
   const deletedSkillIds = getDeletedSkillIds(registryRoot, getDeletedPaths());
   if (deletedSkillIds.length) {
     startGroup("Delete removed skills");
@@ -102422,6 +102631,11 @@ var action5 = /* @__PURE__ */ __name(async () => {
     endGroup();
   }
   await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
+  if (skillFailures.length) {
+    setFailed(
+      `${skillFailures.length} skill(s) failed: ${skillFailures.map((f3) => `${f3.skillId} (${f3.message})`).join("; ")}`
+    );
+  }
 }, "action");
 var src_default = action5;
 

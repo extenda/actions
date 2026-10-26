@@ -137,7 +137,10 @@ const processMcps = async (registryRoot, changedPaths, dryRun) => {
   }
 };
 
+// A failing skill (invalid, over a limit, registry error) must not stop the other skills, deletions or clan settings.
+// Failures are collected and reported once at the end of the run.
 const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
+  const failures = [];
   const skillFiles = fg.sync('skills/*/SKILL.md', {
     cwd: registryRoot,
     onlyFiles: true,
@@ -148,14 +151,22 @@ const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
 
     core.startGroup(`Skill: ${skillId}`);
-    await registerSkill(
-      skillId,
-      path.join(registryRoot, skillFile),
-      dryRun,
-      clan,
-    );
-    core.endGroup();
+    try {
+      await registerSkill(
+        skillId,
+        path.join(registryRoot, skillFile),
+        dryRun,
+        clan,
+      );
+    } catch (e) {
+      const message = e.message?.split('\n')[0] ?? String(e);
+      core.error(`Skill '${skillId}' failed: ${message}`);
+      failures.push({ skillId, message });
+    } finally {
+      core.endGroup();
+    }
   }
+  return failures;
 };
 
 const action = async () => {
@@ -190,7 +201,12 @@ const action = async () => {
   const registryRoot = path.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
-  await processSkills(registryRoot, changedPaths, dryRun, clan);
+  const skillFailures = await processSkills(
+    registryRoot,
+    changedPaths,
+    dryRun,
+    clan,
+  );
   // Deletions are not in the registered set, so they are read from the diff separately.
   const deletedSkillIds = getDeletedSkillIds(registryRoot, getDeletedPaths());
   if (deletedSkillIds.length) {
@@ -199,6 +215,13 @@ const action = async () => {
     core.endGroup();
   }
   await syncClanSettings(registryRoot, changedPaths, dryRun, clan);
+  if (skillFailures.length) {
+    core.setFailed(
+      `${skillFailures.length} skill(s) failed: ${skillFailures
+        .map((f) => `${f.skillId} (${f.message})`)
+        .join('; ')}`,
+    );
+  }
 };
 
 export { getChangedPaths, getDeletedPaths, getDeletedSkillIds, isAffected };
