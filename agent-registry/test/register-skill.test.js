@@ -296,6 +296,63 @@ describe('registerSkill', () => {
     });
   });
 
+  describe('activation while the revision scan is pending', () => {
+    const SCAN_PENDING_ERROR = new Error(
+      "The process 'gcloud' failed with exit code 1\n\nERROR: (gcloud.alpha.agent-registry.skills.update) " +
+        'FAILED_PRECONDITION: Invalid resource state for "Skill": cannot set default revision to a revision ' +
+        'with pending scan results when scanning policy is ENABLED_BLOCKING',
+    );
+    const ACTIVATE = 3;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      execGcloud.mockRejectedValueOnce(new Error('not found')); // skillExists
+      execGcloud.mockResolvedValueOnce(''); // skills create
+      execGcloud.mockResolvedValueOnce(''); // revisions create
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    test('retries activation until the scan finishes', async () => {
+      execGcloud.mockRejectedValueOnce(SCAN_PENDING_ERROR);
+      execGcloud.mockRejectedValueOnce(SCAN_PENDING_ERROR);
+      execGcloud.mockResolvedValueOnce(''); // activate
+      execGcloud.mockResolvedValueOnce(''); // upload
+
+      const done = registerSkill('my-skill', '/SKILL.md', false);
+      await vi.advanceTimersByTimeAsync(15000);
+      await done;
+
+      expect(call(ACTIVATE + 1)).toEqual(call(ACTIVATE));
+      expect(call(ACTIVATE + 2)).toEqual(call(ACTIVATE));
+      expect(call(ACTIVATE + 3)).toContain('storage');
+    });
+
+    test('gives up once the retries run out', async () => {
+      execGcloud.mockRejectedValue(SCAN_PENDING_ERROR);
+
+      const done = expect(
+        registerSkill('my-skill', '/SKILL.md', false),
+      ).rejects.toThrow('pending scan results');
+      await vi.advanceTimersByTimeAsync(120000);
+      await done;
+
+      expect(execGcloud).toHaveBeenCalledTimes(ACTIVATE + 6);
+    });
+
+    test('does not retry any other activation error', async () => {
+      execGcloud.mockRejectedValueOnce(new Error('PERMISSION_DENIED'));
+
+      await expect(
+        registerSkill('my-skill', '/SKILL.md', false),
+      ).rejects.toThrow('PERMISSION_DENIED');
+
+      expect(execGcloud).toHaveBeenCalledTimes(ACTIVATE + 1);
+    });
+  });
+
   describe('payload flag', () => {
     test('passes a temp zip path to --payload on revisions create', async () => {
       execGcloud.mockRejectedValueOnce(new Error('not found'));
