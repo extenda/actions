@@ -20,9 +20,6 @@ skills:
     examples: ['Do something']
 capabilities:
   streaming: true
-interfaces:
-  - protocolBinding: a2a
-    url: https://agent.example.com/a2a
 `;
 
 const AGENT_YAML_MINIMAL = `
@@ -78,13 +75,13 @@ describe('register-agent', () => {
       expect(spec.skills[0]).toMatchObject({ id: 'my-skill', tags: ['tag1', 'tag2'] });
     });
 
-    test('includes interface flags', async () => {
+    test('never sends interfaces, which the registry rejects on an A2A agent card', async () => {
       mockNew();
       execGcloud.mockResolvedValueOnce('');
 
       await registerAgent('my-agent', AGENT_YAML, false);
 
-      expect(call(1)).toContain('--interfaces=protocolBinding=a2a,url=https://agent.example.com/a2a');
+      expect(call(1).some((a) => a.startsWith('--interfaces'))).toBe(false);
     });
   });
 
@@ -180,16 +177,17 @@ describe('register-agent', () => {
         .rejects.toThrow("url must be an http(s) URL");
     });
 
-    test('throws when an interface is missing url', async () => {
-      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
+    test('throws when interfaces are set', async () => {
+      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: JSONRPC\n    url: https://agent.example.com/a2a\n`;
       await expect(registerAgent('my-agent', yaml, false))
-        .rejects.toThrow("each interface must have a url");
+        .rejects.toThrow("remove 'interfaces'");
+      expect(execGcloud).not.toHaveBeenCalled();
     });
 
-    test('throws on interface missing url even in dry-run', async () => {
-      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: a2a\n`;
+    test('throws when interfaces are set even in dry-run', async () => {
+      const yaml = `url: https://agent.example.com\ninterfaces:\n  - protocolBinding: JSONRPC\n    url: https://agent.example.com/a2a\n`;
       await expect(registerAgent('my-agent', yaml, true))
-        .rejects.toThrow("each interface must have a url");
+        .rejects.toThrow("remove 'interfaces'");
     });
   });
 
@@ -242,16 +240,6 @@ describe('register-agent', () => {
       await registerAgent('my-agent', AGENT_YAML_MINIMAL, false);
 
       expect(call(1)).toContain('--display-name=my-agent');
-    });
-
-    test('defaults protocolBinding to a2a', async () => {
-      const yaml = `url: https://a.example.com\ninterfaces:\n  - url: https://a.example.com/a2a\n`;
-      mockNew();
-      execGcloud.mockResolvedValueOnce('');
-
-      await registerAgent('my-agent', yaml, false);
-
-      expect(call(1)).toContain('--interfaces=protocolBinding=a2a,url=https://a.example.com/a2a');
     });
 
     test('normalises plain-string skill to object with defaults', async () => {

@@ -1,6 +1,6 @@
 # agent-registry
 
-Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
+Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://docs.cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
 
 ## Workflow setup
 
@@ -89,10 +89,6 @@ skills:
 capabilities:
   streaming: true
 
-interfaces:
-  - protocolBinding: a2a
-    url: https://my-agent.example.com/a2a
-
 defaultInputModes: [text/plain]
 defaultOutputModes: [text/plain]
 ```
@@ -101,12 +97,17 @@ defaultOutputModes: [text/plain]
 |-------|----------|-------------|
 | `displayName` | no | Human-readable name. Defaults to the agent directory name. |
 | `description` | no | Short description of what the agent does. |
-| `url` | yes | Base URL where the agent is reachable. |
+| `url` | yes | Base URL where the agent is reachable; A2A clients fetch the agent card from `/.well-known/agent-card.json` there. The registry rejected a URL ending in an endpoint path such as `/a2a/v1` (`invalid URL ending`). |
 | `skills` | no | Skills this agent advertises. Each entry can be a plain string ID or an object with `id`, `name`, `description`, `tags`, `examples`. |
 | `capabilities` | no | A2A capabilities object (e.g. `streaming: true`). |
-| `interfaces` | no | Protocol bindings. Defaults `protocolBinding` to `a2a` if omitted. |
 | `defaultInputModes` | no | Defaults to `[text/plain]`. |
 | `defaultOutputModes` | no | Defaults to `[text/plain]`. |
+
+Agents have no `interfaces`: an `a2a-agent-card` Service must not have any
+([`services create`](https://docs.cloud.google.com/sdk/gcloud/reference/agent-registry/services/create):
+"The `interfaces` field must be empty"), and the registry rejects them with
+`interfaces must be empty for A2A_AGENT_CARD`. The action fails on an `agent.yaml` that sets
+them, in the dry run too.
 
 ### Agent versioning
 

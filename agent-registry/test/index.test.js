@@ -387,6 +387,63 @@ describe('action — change filtering', () => {
       );
     });
 
+    test('reports the cause of an exhausted activation retry, not the gcloud wrapper line', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          "The process 'gcloud' failed with exit code 1\n\nERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: cannot set default revision to a revision with pending scan results",
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(registerSkill).toHaveBeenCalledTimes(2);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'bad (ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION',
+        ),
+      );
+    });
+
+    test('prefers the ERROR: line over gcloud warnings printed before it', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          [
+            "The process 'gcloud' failed with exit code 1",
+            '',
+            '/opt/homebrew/Caskroom/gcloud-cli/570.0.0/google-cloud-sdk/lib/third_party/google/api_core/_python_version_support.py:266: FutureWarning: You are using a Python version (3.11.15) which Google will stop supporting',
+            '  warnings.warn(message, FutureWarning)',
+            'ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: pending scan results',
+          ].join('\n'),
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        '1 skill(s) failed: bad (ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: pending scan results)',
+      );
+    });
+
+    test('falls back to the first non-wrapper line when there is no ERROR: line', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          "The process 'gcloud' failed with exit code 1\n\nsomething broke",
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        '1 skill(s) failed: bad (something broke)',
+      );
+    });
+
     test('does not call setFailed when every skill succeeds', async () => {
       twoSkills();
       await action();

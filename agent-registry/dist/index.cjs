@@ -100722,8 +100722,11 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
   if (!/^https?:\/\//i.test(card.url)) throw new Error(`agent.yaml for '${agentId}': url must be an http(s) URL`);
   const displayName = card.displayName ?? agentId;
   const description = card.description ?? "";
-  for (const iface of card.interfaces ?? []) {
-    if (!iface.url) throw new Error(`agent.yaml for '${agentId}': each interface must have a url`);
+  if (card.interfaces?.length) {
+    throw new Error(
+      `agent.yaml for '${agentId}': remove 'interfaces' \u2014 the registry rejects interfaces on an A2A agent card. Put the \
+agent's base URL in 'url'.`
+    );
   }
   if (dryRun) {
     info(`[dry-run] Would register agent: ${agentId}`);
@@ -100757,16 +100760,13 @@ var registerAgent = /* @__PURE__ */ __name(async (agentId, agentYaml, dryRun) =>
     `--description=${description}`,
     `--agent-spec-content=${specContent}`
   ];
-  const interfaces = (card.interfaces ?? []).flatMap((iface) => [
-    `--interfaces=protocolBinding=${iface.protocolBinding ?? "a2a"},url=${iface.url}`
-  ]);
   if (exists2) {
     info(`Updating agent: ${agentId}@${version3}`);
-    await execGcloud(["agent-registry", "services", "update", agentId, ...flags, ...interfaces], "gcloud", true);
+    await execGcloud(["agent-registry", "services", "update", agentId, ...flags], "gcloud", true);
   } else {
     info(`Creating agent: ${agentId}@${version3}`);
     await execGcloud(
-      ["agent-registry", "services", "create", agentId, "--agent-spec-type=a2a-agent-card", ...flags, ...interfaces],
+      ["agent-registry", "services", "create", agentId, "--agent-spec-type=a2a-agent-card", ...flags],
       "gcloud",
       true
     );
@@ -100805,7 +100805,6 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
     `--project=${PROJECT3}`,
     `--display-name=${displayName}`,
     `--description=${description}`,
-    `--mcp-server-spec-type=${specType}`,
     `--mcp-server-spec-content=${specContent}`
   ];
   if (dryRun) {
@@ -100818,7 +100817,15 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
     await execGcloud(["agent-registry", "services", "update", mcpId, ...flags, ...interfaces]);
   } else {
     info(`Creating MCP: ${mcpId}`);
-    await execGcloud(["agent-registry", "services", "create", mcpId, ...flags, ...interfaces]);
+    await execGcloud([
+      "agent-registry",
+      "services",
+      "create",
+      mcpId,
+      `--mcp-server-spec-type=${specType}`,
+      ...flags,
+      ...interfaces
+    ]);
   }
   info(`MCP registered: ${mcpId}`);
 }, "registerMcp");
@@ -101701,24 +101708,37 @@ var bumpVersion2 = /* @__PURE__ */ __name((version3) => {
   const [major, minor] = version3.slice(1).split("-").map(Number);
   return isMajorBranch2() ? `v${major + 1}-00` : `v${major}-${String(minor + 1).padStart(2, "0")}`;
 }, "bumpVersion");
+var SCAN_PENDING = /pending scan results/;
+var ACTIVATE_RETRY_DELAYS_MS = [5e3, 1e4, 15e3, 3e4, 6e4];
+var sleep2 = /* @__PURE__ */ __name((ms2) => new Promise((resolve3) => {
+  setTimeout(resolve3, ms2);
+}), "sleep");
 var activate = /* @__PURE__ */ __name(async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT4}/locations/${LOCATION4}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud(
-    [
-      "alpha",
-      "agent-registry",
-      "skills",
-      "update",
-      registryId,
-      `--location=${LOCATION4}`,
-      `--project=${PROJECT4}`,
-      `--default-revision=${revisionName}`,
-      "--target-state=active",
-      "--quiet"
-    ],
-    "gcloud",
-    true
-  );
+  const args = [
+    "alpha",
+    "agent-registry",
+    "skills",
+    "update",
+    registryId,
+    `--location=${LOCATION4}`,
+    `--project=${PROJECT4}`,
+    `--default-revision=${revisionName}`,
+    "--target-state=active",
+    "--quiet"
+  ];
+  for (const delay4 of [...ACTIVATE_RETRY_DELAYS_MS, null]) {
+    try {
+      await execGcloud(args, "gcloud", true);
+      return;
+    } catch (e) {
+      if (delay4 === null || !SCAN_PENDING.test(e.message)) throw e;
+      info(
+        `[skill] scan of ${registryId}@${revisionId} still pending, retrying activation in ${delay4 / 1e3}s`
+      );
+      await sleep2(delay4);
+    }
+  }
 }, "activate");
 var pruneRevisions = /* @__PURE__ */ __name(async (registryId, namespacedId, dryRun) => {
   try {
@@ -102562,6 +102582,14 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
     endGroup();
   }
 }, "processMcps");
+var summarizeError = /* @__PURE__ */ __name((e) => {
+  const lines2 = (e.message ?? String(e)).split("\n").map((l3) => l3.trim());
+  const first = lines2.find(Boolean) ?? "unknown error";
+  const error2 = lines2.find((l3) => l3.startsWith("ERROR:"));
+  if (error2) return error2;
+  if (!/^The process .* failed with exit code/.test(first)) return first;
+  return lines2.find((l3) => l3 && l3 !== first) ?? first;
+}, "summarizeError");
 var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
   const failures = [];
   const skillFiles = import_fast_glob4.default.sync("skills/*/SKILL.md", {
@@ -102581,7 +102609,7 @@ var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dr
         clan
       );
     } catch (e) {
-      const message = e.message?.split("\n")[0] ?? String(e);
+      const message = summarizeError(e);
       error(`Skill '${skillId}' failed: ${message}`);
       failures.push({ skillId, message });
     } finally {

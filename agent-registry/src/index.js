@@ -137,6 +137,17 @@ const processMcps = async (registryRoot, changedPaths, dryRun) => {
   }
 };
 
+// execGcloud errors start with "The process 'gcloud' failed with exit code N", which says nothing about the cause.
+const summarizeError = (e) => {
+  const lines = (e.message ?? String(e)).split('\n').map((l) => l.trim());
+  const first = lines.find(Boolean) ?? 'unknown error';
+  // gcloud may print warnings (e.g. a Python FutureWarning) before the real error, so prefer an ERROR: line.
+  const error = lines.find((l) => l.startsWith('ERROR:'));
+  if (error) return error;
+  if (!/^The process .* failed with exit code/.test(first)) return first;
+  return lines.find((l) => l && l !== first) ?? first;
+};
+
 // A failing skill (invalid, over a limit, registry error) must not stop the other skills, deletions or clan settings.
 // Failures are collected and reported once at the end of the run.
 const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
@@ -159,7 +170,7 @@ const processSkills = async (registryRoot, changedPaths, dryRun, clan) => {
         clan,
       );
     } catch (e) {
-      const message = e.message?.split('\n')[0] ?? String(e);
+      const message = summarizeError(e);
       core.error(`Skill '${skillId}' failed: ${message}`);
       failures.push({ skillId, message });
     } finally {

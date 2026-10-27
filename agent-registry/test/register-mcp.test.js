@@ -95,6 +95,21 @@ describe('register-mcp', () => {
       expect(updateArgs[2]).toBe('update');
       expect(updateArgs[3]).toBe('my-mcp');
     });
+
+    test('omits spec-type on update, which gcloud rejects', async () => {
+      execGcloud.mockResolvedValueOnce(undefined); // describe → exists
+      execGcloud.mockResolvedValueOnce(undefined); // update
+
+      await registerMcp('my-mcp', MCP_YAML, false);
+
+      const updateArgs = execGcloud.mock.calls[1][0];
+      expect(
+        updateArgs.some((a) => a.startsWith('--mcp-server-spec-type')),
+      ).toBe(false);
+      expect(
+        updateArgs.some((a) => a.startsWith('--mcp-server-spec-content=')),
+      ).toBe(true);
+    });
   });
 
   describe('dry-run', () => {

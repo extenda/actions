@@ -34,6 +34,18 @@ inputs:
   ignored-resources-regexp:
     description: Pattern of resource names for ignore in pull request comment if only those resources are planned to change.
     required: false
+  check-destroyed-resources:
+    description: |
+      Check if destroyed service accounts, DNS records and the DNS names of removed repositories are still used
+      in any configuration. Usage is reported as warnings in the comment, the check never fails the action.
+      Set to false to disable the check.
+    required: false
+    default: 'true'
+  check-destroyed-resources-token:
+    description: |
+      A GitHub token with read access to all repositories in the organization, used to search for usage.
+      Defaults to the github-token.
+    required: false
 runs:
   using: node24
   main: dist/index.cjs

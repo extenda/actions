@@ -182,24 +182,42 @@ const bumpVersion = (version) => {
     : `v${major}-${String(minor + 1).padStart(2, '0')}`;
 };
 
+// A skill with scanning policy ENABLED_BLOCKING refuses a default revision until its scan is done,
+// which takes about 20–45s after the revision is created.
+const SCAN_PENDING = /pending scan results/;
+const ACTIVATE_RETRY_DELAYS_MS = [5000, 10000, 15000, 30000, 60000];
+
+const sleep = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const activate = async (registryId, revisionId) => {
   const revisionName = `projects/${PROJECT}/locations/${LOCATION}/skills/${registryId}/revisions/${revisionId}`;
-  await execGcloud(
-    [
-      'alpha',
-      'agent-registry',
-      'skills',
-      'update',
-      registryId,
-      `--location=${LOCATION}`,
-      `--project=${PROJECT}`,
-      `--default-revision=${revisionName}`,
-      '--target-state=active',
-      '--quiet',
-    ],
-    'gcloud',
-    true,
-  );
+  const args = [
+    'alpha',
+    'agent-registry',
+    'skills',
+    'update',
+    registryId,
+    `--location=${LOCATION}`,
+    `--project=${PROJECT}`,
+    `--default-revision=${revisionName}`,
+    '--target-state=active',
+    '--quiet',
+  ];
+  for (const delay of [...ACTIVATE_RETRY_DELAYS_MS, null]) {
+    try {
+      await execGcloud(args, 'gcloud', true);
+      return;
+    } catch (e) {
+      if (delay === null || !SCAN_PENDING.test(e.message)) throw e;
+      core.info(
+        `[skill] scan of ${registryId}@${revisionId} still pending, retrying activation in ${delay / 1000}s`,
+      );
+      await sleep(delay);
+    }
+  }
 };
 
 // Runs BEFORE the new revision is created, so a skill at the registry's revision cap can still get a new one:

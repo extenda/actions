@@ -3,6 +3,20 @@ vi.mock('../../utils/src/pull-request-info.js');
 vi.mock('@actions/core');
 vi.mock('../src/generate-outputs.js');
 
+const mockCollect = vi.fn();
+const mockRender = vi.fn();
+let mockBehind;
+vi.mock('../src/destroyed-resources.js', () => ({
+  default: vi.fn(function DestroyedResources() {
+    return {
+      collect: mockCollect,
+      check: vi.fn(),
+      render: mockRender,
+      behind: mockBehind,
+    };
+  }),
+}));
+
 const mockComment = vi.fn();
 const mockListComments = vi.fn(() => ({ data: [] }));
 const mockDeleteComment = vi.fn();
@@ -28,6 +42,7 @@ vi.mock('@actions/github', () => ({
 import * as core from '@actions/core';
 
 import { getPullRequestInfo } from '../../utils/src/pull-request-info.js';
+import DestroyedResources from '../src/destroyed-resources.js';
 import generateOutputs from '../src/generate-outputs.js';
 import action from '../src/index.js';
 
@@ -301,5 +316,162 @@ Next section. Preserved.
     }));
     await action();
     expect(mockDeleteComment).toHaveBeenCalledTimes(0);
+  });
+  describe('Destroyed resources check', () => {
+    const destroyOutputs = [
+      {
+        module: 'clan/prod',
+        plan: 'clan/prod/plan.out',
+        output:
+          '# google_service_account.sa will be destroyed\nPlan: 0 to add, 0 to change, 1 to destroy.',
+        status: 0,
+      },
+    ];
+
+    beforeEach(() => {
+      // Earlier tests can leave unused mocked outputs behind.
+      generateOutputs.mockReset();
+    });
+
+    const enableCheck = () =>
+      core.getInput.mockImplementation((name) =>
+        name === 'check-destroyed-resources' ? 'true' : '',
+      );
+
+    test('It replaces the checklist with the check results', async () => {
+      enableCheck();
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      mockRender.mockReturnValueOnce(['Check results', '']);
+      const comment = await action();
+      expect(DestroyedResources).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          org: 'extenda',
+          repository: 'extenda/actions',
+          pullRequestNumber: 1,
+        }),
+      );
+      expect(mockCollect).toHaveBeenCalledWith(
+        destroyOutputs,
+        expect.any(Function),
+      );
+      expect(comment)
+        .toContain(`### :warning: You are about to destroy some resources
+
+Check results
+
+Also check the following <ins>before</ins> applying:
+* Make sure that no customers are using your resource.
+* Other destroyed resources are not checked automatically.`);
+    });
+
+    test('It includes incomplete-check warnings for an oversized destroy plan', async () => {
+      enableCheck();
+      generateOutputs.mockResolvedValueOnce([
+        {
+          ...destroyOutputs[0],
+          output: `${destroyOutputs[0].output}\n${'x'.repeat(250000)}`,
+        },
+      ]);
+      mockRender.mockReturnValueOnce([
+        'Some repository checks are incomplete; verify manually before applying.',
+      ]);
+
+      const comment = await action();
+
+      expect(comment).toContain(
+        'Some repository checks are incomplete; verify manually before applying.',
+      );
+    });
+
+    test('It shows the behind message in its own section before the destroyed resources', async () => {
+      enableCheck();
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      mockRender.mockReturnValueOnce(['Check results', '']);
+      mockBehind =
+        ':warning: **This pull request is 3 commit(s) behind master. The plans could also add/destroy resources added/destroyed there since. Update the branch and plan again <ins>before</ins> applying.**';
+      try {
+        const comment = await action();
+        expect(comment).toContain(`</details>
+
+---
+${mockBehind}
+
+---
+### :warning: You are about to destroy some resources
+
+Check results
+
+Also check the following`);
+        expect(comment.match(/behind master/g)).toHaveLength(1);
+      } finally {
+        mockBehind = undefined;
+      }
+    });
+
+    test('It adds no section when not behind', async () => {
+      enableCheck();
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      mockRender.mockReturnValueOnce(['Check results', '']);
+      const comment = await action();
+      expect(comment).toContain(`</details>
+
+---
+### :warning: You are about to destroy some resources
+
+Check results
+`);
+      expect(comment.match(/^---$/gm)).toHaveLength(2);
+    });
+
+    test.each([
+      ['', true],
+      ['org-token', false],
+    ])(
+      'It searches with a fallback token when check-destroyed-resources-token is "%s": %s',
+      async (token, fallbackToken) => {
+        core.getInput.mockImplementation((name) =>
+          name === 'check-destroyed-resources-token' ? token : '',
+        );
+        generateOutputs.mockResolvedValueOnce(destroyOutputs);
+        await action();
+        expect(DestroyedResources).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ fallbackToken }),
+        );
+      },
+    );
+
+    test('It keeps the checklist if the check fails', async () => {
+      enableCheck();
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      mockCollect.mockRejectedValueOnce(new Error('Boom'));
+      const comment = await action();
+      expect(core.warning).toHaveBeenCalledWith(
+        'Could not check destroyed resources: Boom',
+      );
+      expect(comment).toContain(
+        "* Make sure your common repository doesn't contain any configuration of your resource.",
+      );
+    });
+
+    test('It checks by default', async () => {
+      core.getInput.mockReturnValue('');
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      await action();
+      expect(DestroyedResources).toHaveBeenCalled();
+    });
+
+    test('It does not check when disabled', async () => {
+      core.getInput.mockImplementation((name) =>
+        name === 'check-destroyed-resources' ? 'false' : '',
+      );
+      generateOutputs.mockResolvedValueOnce(destroyOutputs);
+      const comment = await action();
+      expect(DestroyedResources).not.toHaveBeenCalled();
+      expect(comment).toContain(
+        'Check the following <ins>before</ins> applying:',
+      );
+    });
   });
 });
