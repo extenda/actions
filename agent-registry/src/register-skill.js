@@ -151,8 +151,9 @@ const getLatestRevision = async (registryId) => {
       .filter(Boolean)
       .filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
-    return versions.reduce((newest, v) =>
-      compareVersions(v, newest) > 0 ? v : newest,
+    return versions.reduce(
+      (newest, v) => (compareVersions(v, newest) > 0 ? v : newest),
+      versions[0],
     );
   } catch {
     return null;

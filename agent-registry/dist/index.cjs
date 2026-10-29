@@ -101687,7 +101687,8 @@ var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
     const versions = output.split("\n").filter(Boolean).filter((v2) => /^v\d+-\d+$/.test(v2));
     if (!versions.length) return null;
     return versions.reduce(
-      (newest, v2) => compareVersions(v2, newest) > 0 ? v2 : newest
+      (newest, v2) => compareVersions(v2, newest) > 0 ? v2 : newest,
+      versions[0]
     );
   } catch {
     return null;
