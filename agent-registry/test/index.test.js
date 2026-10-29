@@ -34,6 +34,7 @@ import {
 import { registerAgent } from '../src/register-agent.js';
 import { registerMcp } from '../src/register-mcp.js';
 import { registerSkill } from '../src/register-skill.js';
+import { syncClanSettings } from '../src/sync-clan-settings.js';
 import { upload } from '../src/upload-gcs.js';
 
 beforeEach(() => {
@@ -142,6 +143,13 @@ describe('isAffected', () => {
   test('returns true for skill when skill file changed', () => {
     const changed = ['agent-registry/skills/fix-dependabot-pr/SKILL.md'];
     expect(isAffected('skills/fix-dependabot-pr/', changed)).toBe(true);
+  });
+
+  test('returns true for skill when only a nested reference file changed', () => {
+    const changed = [
+      'agent-registry/skills/java-api-clients/references/templates/src/A.java',
+    ];
+    expect(isAffected('skills/java-api-clients/', changed)).toBe(true);
   });
 });
 
@@ -317,6 +325,130 @@ describe('action — change filtering', () => {
       expect.any(String),
       false,
     );
+  });
+
+  describe('a failing skill', () => {
+    const twoSkills = () => {
+      setupDiffs([], []);
+      fg.sync.mockImplementation((p) =>
+        p === 'skills/*/SKILL.md'
+          ? ['skills/bad/SKILL.md', 'skills/good/SKILL.md']
+          : [],
+      );
+      existsSync.mockReturnValue(true);
+    };
+
+    test('does not stop later skills, deletions or clan settings, and fails once at the end', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error("Skill 'bad': payload zip is 999999 bytes, max is 409600"),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(registerSkill).toHaveBeenCalledTimes(2);
+      expect(syncClanSettings).toHaveBeenCalled();
+      expect(core.endGroup).toHaveBeenCalledTimes(2);
+      expect(core.setFailed).toHaveBeenCalledTimes(1);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining('1 skill(s) failed: bad (Skill'),
+      );
+    });
+
+    test('lists every failed skill in the single failure', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValue(new Error('boom'));
+
+      await action();
+
+      expect(core.setFailed).toHaveBeenCalledTimes(1);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        '2 skill(s) failed: bad (boom); good (boom)',
+      );
+    });
+
+    test('surfaces limit errors the same way in dry-run', async () => {
+      core.getInput.mockImplementation((name) =>
+        name === 'service-account-key'
+          ? 'fake-key'
+          : name === 'dry-run'
+            ? 'true'
+            : '',
+      );
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(new Error('has 151 files'));
+
+      await action();
+
+      expect(registerSkill).toHaveBeenCalledTimes(2);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining('bad (has 151 files)'),
+      );
+    });
+
+    test('reports the cause of an exhausted activation retry, not the gcloud wrapper line', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          "The process 'gcloud' failed with exit code 1\n\nERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: cannot set default revision to a revision with pending scan results",
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(registerSkill).toHaveBeenCalledTimes(2);
+      expect(core.setFailed).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'bad (ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION',
+        ),
+      );
+    });
+
+    test('prefers the ERROR: line over gcloud warnings printed before it', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          [
+            "The process 'gcloud' failed with exit code 1",
+            '',
+            '/opt/homebrew/Caskroom/gcloud-cli/570.0.0/google-cloud-sdk/lib/third_party/google/api_core/_python_version_support.py:266: FutureWarning: You are using a Python version (3.11.15) which Google will stop supporting',
+            '  warnings.warn(message, FutureWarning)',
+            'ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: pending scan results',
+          ].join('\n'),
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        '1 skill(s) failed: bad (ERROR: (gcloud.alpha.agent-registry.skills.update) FAILED_PRECONDITION: pending scan results)',
+      );
+    });
+
+    test('falls back to the first non-wrapper line when there is no ERROR: line', async () => {
+      twoSkills();
+      registerSkill.mockRejectedValueOnce(
+        new Error(
+          "The process 'gcloud' failed with exit code 1\n\nsomething broke",
+        ),
+      );
+      registerSkill.mockResolvedValueOnce();
+
+      await action();
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        '1 skill(s) failed: bad (something broke)',
+      );
+    });
+
+    test('does not call setFailed when every skill succeeds', async () => {
+      twoSkills();
+      await action();
+      expect(core.setFailed).not.toHaveBeenCalled();
+    });
   });
 
   test('passes dry-run=true to all register functions', async () => {
