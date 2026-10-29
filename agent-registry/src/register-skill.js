@@ -46,7 +46,7 @@ const listReferenceFiles = (skillDir) =>
       followSymbolicLinks: false,
       ignore: ['SKILL.md', '**/.DS_Store'],
     }) ?? []
-  ).sort();
+  ).sort((a, b) => a.localeCompare(b));
 
 // The registry requires a zip archive containing SKILL.md and any reference files at their relative paths.
 const buildZip = (skillFilePath, referenceFiles = []) => {
@@ -151,13 +151,9 @@ const getLatestRevision = async (registryId) => {
       .filter(Boolean)
       .filter((v) => /^v\d+-\d+$/.test(v));
     if (!versions.length) return null;
-    return versions
-      .sort((a, b) => {
-        const [aMaj, aMin] = a.slice(1).split('-').map(Number);
-        const [bMaj, bMin] = b.slice(1).split('-').map(Number);
-        return aMaj - bMaj || aMin - bMin;
-      })
-      .at(-1);
+    return versions.reduce((newest, v) =>
+      compareVersions(v, newest) > 0 ? v : newest,
+    );
   } catch {
     return null;
   }
@@ -224,49 +220,88 @@ const activate = async (registryId, revisionId) => {
 // afterwards at most KEEP_REVISIONS - 1 old revisions remain and the new revision makes KEEP_REVISIONS.
 // Never deletes the default (active) revision.
 // Failures only warn: a registered skill must not fail the run because old revisions could not be pruned.
-const pruneRevisions = async (registryId, namespacedId, dryRun) => {
+const REGISTRY_FLAGS = [`--location=${LOCATION}`, `--project=${PROJECT}`];
+
+const listRevisionIds = async (registryId) => {
+  const output = await execGcloud(
+    [
+      'alpha',
+      'agent-registry',
+      'skills',
+      'revisions',
+      'list',
+      `--skill=${registryId}`,
+      ...REGISTRY_FLAGS,
+      '--format=value(name.basename())',
+      '--quiet',
+    ],
+    'gcloud',
+    true,
+  );
+  return [
+    ...new Set(
+      (output ?? '')
+        .split('\n')
+        .map((v) => v.trim())
+        .filter((v) => REVISION_PATTERN.test(v)),
+    ),
+  ].sort(compareVersions);
+};
+
+const getDefaultRevision = async (registryId) => {
+  const output = await execGcloud(
+    [
+      'alpha',
+      'agent-registry',
+      'skills',
+      'describe',
+      registryId,
+      ...REGISTRY_FLAGS,
+      '--format=value(defaultRevision.basename())',
+      '--quiet',
+    ],
+    'gcloud',
+    true,
+  );
+  return (output ?? '').trim();
+};
+
+// Deletes one revision from the registry, then its GCS artifacts, as in delete-skills.js. Failures only warn.
+const pruneRevision = async (registryId, revision, prefix) => {
   try {
-    const output = await execGcloud(
+    await execGcloud(
       [
         'alpha',
         'agent-registry',
         'skills',
         'revisions',
-        'list',
+        'delete',
+        revision,
         `--skill=${registryId}`,
-        `--location=${LOCATION}`,
-        `--project=${PROJECT}`,
-        '--format=value(name.basename())',
+        ...REGISTRY_FLAGS,
         '--quiet',
       ],
       'gcloud',
       true,
     );
-    const defaultRevision = (
-      (await execGcloud(
-        [
-          'alpha',
-          'agent-registry',
-          'skills',
-          'describe',
-          registryId,
-          `--location=${LOCATION}`,
-          `--project=${PROJECT}`,
-          '--format=value(defaultRevision.basename())',
-          '--quiet',
-        ],
-        'gcloud',
-        true,
-      )) ?? ''
-    ).trim();
-    const all = [
-      ...new Set(
-        (output ?? '')
-          .split('\n')
-          .map((v) => v.trim())
-          .filter((v) => REVISION_PATTERN.test(v)),
-      ),
-    ].sort(compareVersions);
+    try {
+      await execGcloud(['storage', 'rm', '-r', prefix], 'gcloud', true);
+    } catch (e) {
+      // A prefix that is already gone is success (a revision without artifacts, or a rerun).
+      if (!NOT_FOUND.test(e.message ?? '')) throw e;
+    }
+    core.info(`Pruned revision ${registryId}@${revision}`);
+  } catch (e) {
+    core.warning(
+      `Could not prune ${registryId}@${revision}: ${e.message?.split('\n')[0]}`,
+    );
+  }
+};
+
+const pruneRevisions = async (registryId, namespacedId, dryRun) => {
+  try {
+    const all = await listRevisionIds(registryId);
+    const defaultRevision = await getDefaultRevision(registryId);
     // One slot is reserved for the revision about to be created.
     const stale = all
       .slice(0, Math.max(0, all.length + 1 - KEEP_REVISIONS))
@@ -277,37 +312,8 @@ const pruneRevisions = async (registryId, namespacedId, dryRun) => {
         core.info(
           `[dry-run] Would prune revision ${registryId}@${revision} and ${prefix}`,
         );
-        continue;
-      }
-      try {
-        // Registry first, then artifacts, as in delete-skills.js.
-        await execGcloud(
-          [
-            'alpha',
-            'agent-registry',
-            'skills',
-            'revisions',
-            'delete',
-            revision,
-            `--skill=${registryId}`,
-            `--location=${LOCATION}`,
-            `--project=${PROJECT}`,
-            '--quiet',
-          ],
-          'gcloud',
-          true,
-        );
-        try {
-          await execGcloud(['storage', 'rm', '-r', prefix], 'gcloud', true);
-        } catch (e) {
-          // A prefix that is already gone is success (a revision without artifacts, or a rerun).
-          if (!NOT_FOUND.test(e.message ?? '')) throw e;
-        }
-        core.info(`Pruned revision ${registryId}@${revision}`);
-      } catch (e) {
-        core.warning(
-          `Could not prune ${registryId}@${revision}: ${e.message?.split('\n')[0]}`,
-        );
+      } else {
+        await pruneRevision(registryId, revision, prefix);
       }
     }
   } catch (e) {
@@ -320,14 +326,15 @@ const pruneRevisions = async (registryId, namespacedId, dryRun) => {
   }
 };
 
-const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
-  const skillContent = readFileSync(skillFilePath, 'utf8');
+// Validates SKILL.md content and returns the frontmatter fields the registry needs.
+const validateSkillContent = (skillId, skillContent) => {
   let meta;
   try {
     meta = parseSkillMeta(skillContent);
   } catch (e) {
     throw new Error(
       `SKILL.md for '${skillId}' has invalid YAML frontmatter: ${e.message.split('\n')[0]}`,
+      { cause: e },
     );
   }
   const { name: displayName, description } = meta;
@@ -351,6 +358,15 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
     throw new Error(
       `SKILL.md for '${skillId}' must have instructions after the frontmatter`,
     );
+  return { displayName, description };
+};
+
+const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
+  const skillContent = readFileSync(skillFilePath, 'utf8');
+  const { displayName, description } = validateSkillContent(
+    skillId,
+    skillContent,
+  );
   const skillDir = path.dirname(skillFilePath);
   const referenceFiles = listReferenceFiles(skillDir);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
@@ -434,8 +450,11 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
     await upload(path.join(skillDir, rel), `${revisionPrefix}/${rel}`);
   }
   await activate(registryId, revisionId);
+  const refSuffix = referenceFiles.length
+    ? ` (+${referenceFiles.length} reference file(s))`
+    : '';
   core.info(
-    `Skill registered: ${registryId}@${version} → ${gcsPath}${referenceFiles.length ? ` (+${referenceFiles.length} reference file(s))` : ''}`,
+    `Skill registered: ${registryId}@${version} → ${gcsPath}${refSuffix}`,
   );
 };
 
