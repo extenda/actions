@@ -47,21 +47,39 @@ const downloadIfMissing = async (options, cachedTool) => {
     core.info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
 
-    const tmpDir = path.dirname(downloadUuid);
+    // Extract into our own private scratch directory rather than wherever the
+    // download itself landed: tc.downloadTool() (the non-auth path) saves its
+    // file directly inside the *shared* RUNNER_TEMP directory, not a dedicated
+    // subdirectory, so path.dirname(downloadUuid) can be RUNNER_TEMP itself.
+    // That directory also holds the runner's own per-step bookkeeping files
+    // (e.g. _runner_file_commands/*), so it must never be wholesale deleted.
+    const scratchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'action-utils-'));
 
     if (downloadUrl.endsWith('.tar.gz')) {
-      await tc.extractTar(downloadUuid, tmpDir);
+      await tc.extractTar(downloadUuid, scratchDir);
     } else if (downloadUrl.endsWith('.zip')) {
-      await tc.extractZip(downloadUuid, tmpDir);
+      await tc.extractZip(downloadUuid, scratchDir);
     } else if (downloadUrl.endsWith('.7z')) {
-      await tc.extract7z(downloadUuid, tmpDir);
+      await tc.extract7z(downloadUuid, scratchDir);
     } else {
       // Raw file
-      const tmpFile = path.join(tmpDir, binary);
+      const tmpFile = path.join(scratchDir, binary);
       await io.cp(downloadUuid, tmpFile);
       fs.chmodSync(tmpFile, '0777');
     }
-    await tc.cacheDir(tmpDir, tool, version);
+    fs.rmSync(downloadUuid, { force: true });
+
+    // tc.cacheDir() copies (not moves) scratchDir's contents into
+    // RUNNER_TOOL_CACHE, so without this the extracted tree is left behind on
+    // the runner disk for the rest of the job (doubling disk usage for large
+    // tools like the gcloud SDK, which has filled runner disks to the point of
+    // "no space left on device" failures). Clean up in `finally` so a failed
+    // cacheDir() (e.g. itself hitting ENOSPC) still releases the scratch copy.
+    try {
+      await tc.cacheDir(scratchDir, tool, version);
+    } finally {
+      await io.rmRF(scratchDir);
+    }
     return find(options);
   }
   return cachedTool;
