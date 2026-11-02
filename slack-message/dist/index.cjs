@@ -70989,19 +70989,25 @@ var downloadIfMissing = /* @__PURE__ */ __name(async (options, cachedTool) => {
     const { tool, binary, version: version3, downloadUrl, auth } = options;
     info(`Downloading ${tool} from ${downloadUrl}`);
     const downloadUuid = await internalDownload(downloadUrl, auth);
-    const tmpDir = import_node_path2.default.dirname(downloadUuid);
+    const scratchDir = import_node_fs.default.mkdtempSync(import_node_path2.default.join(import_os3.default.tmpdir(), "a\
+ction-utils-"));
     if (downloadUrl.endsWith(".tar.gz")) {
-      await extractTar(downloadUuid, tmpDir);
+      await extractTar(downloadUuid, scratchDir);
     } else if (downloadUrl.endsWith(".zip")) {
-      await extractZip(downloadUuid, tmpDir);
+      await extractZip(downloadUuid, scratchDir);
     } else if (downloadUrl.endsWith(".7z")) {
-      await extract7z(downloadUuid, tmpDir);
+      await extract7z(downloadUuid, scratchDir);
     } else {
-      const tmpFile = import_node_path2.default.join(tmpDir, binary);
+      const tmpFile = import_node_path2.default.join(scratchDir, binary);
       await cp(downloadUuid, tmpFile);
       import_node_fs.default.chmodSync(tmpFile, "0777");
     }
-    await cacheDir(tmpDir, tool, version3);
+    import_node_fs.default.rmSync(downloadUuid, { force: true });
+    try {
+      await cacheDir(scratchDir, tool, version3);
+    } finally {
+      await rmRF(scratchDir);
+    }
     return find2(options);
   }
   return cachedTool;

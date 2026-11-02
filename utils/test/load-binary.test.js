@@ -21,6 +21,12 @@ vi.mock('@actions/io', async () => {
       // Simple copy for tests
       fs.writeFileSync(dest, fs.readFileSync(src));
     },
+    rmRF: async (target) => {
+      const fs = await import('fs');
+      if (fs.existsSync(target)) {
+        fs.rmSync(target, { recursive: true, force: true });
+      }
+    },
   };
 });
 
@@ -67,12 +73,29 @@ vi.mock('@actions/tool-cache', async () => {
       return dest;
     }),
 
-    // Fake cacheDir: Just map the tool to the SOURCE directory.
-    // This avoids needing to write complex recursive file copying logic in the mock.
-    // The test just wants to know if the file exists at the returned path.
+    // Fake cacheDir: copies sourceDir's contents into a separate destination,
+    // mirroring the real tc.cacheDir's copy (not move) semantics. This matters
+    // because load-binary.js removes sourceDir (tmpDir) after caching, so the
+    // mock must not alias the cache location to the source directory.
     cacheDir: vi.fn(async (sourceDir, tool, version) => {
-      cacheStore.set(`${tool}-${version}`, sourceDir);
-      return sourceDir;
+      const fs = await import('fs');
+      const path = await import('path');
+      const destDir = `/cache/${tool}/${version}`;
+      const copyRecursive = (src, dest) => {
+        fs.mkdirSync(dest, { recursive: true });
+        for (const name of fs.readdirSync(src)) {
+          const srcPath = path.join(src, name);
+          const destPath = path.join(dest, name);
+          if (fs.statSync(srcPath).isDirectory()) {
+            copyRecursive(srcPath, destPath);
+          } else {
+            fs.writeFileSync(destPath, fs.readFileSync(srcPath));
+          }
+        }
+      };
+      copyRecursive(sourceDir, destDir);
+      cacheStore.set(`${tool}-${version}`, destDir);
+      return destDir;
     }),
   };
 });
@@ -113,8 +136,12 @@ describe('Load tool', () => {
 
     // Setup virtual filesystem
     mockFs({
-      // Initial file for tc.downloadTool mock
+      // Initial file for tc.downloadTool mock. This directory stands in for
+      // RUNNER_TEMP: the real tc.downloadTool() saves its file directly here
+      // (not in its own subdirectory), and other in-flight runner state lives
+      // alongside it, which `other-runner-state` represents.
       '/tmp/downloads/temp-file': 'raw content',
+      '/tmp/downloads/other-runner-state': 'do not touch me',
 
       // We also need the "random" path for downloadToolWithAuth
       // uuid returns 'fixed-uuid', so path is os.tmpdir() + /fixed-uuid/fixed-uuid
@@ -134,9 +161,8 @@ describe('Load tool', () => {
   test('It can download a raw binary', async () => {
     // tc.downloadTool is mocked to return '/tmp/downloads/temp-file'
     // loadTool -> internalDownload -> downloadTool (mock)
-    // tmpDir = /tmp/downloads
-    // io.cp copies temp-file to /tmp/downloads/vswhere.exe
-    // cacheDir caches /tmp/downloads
+    // io.cp copies temp-file into a private scratch dir as vswhere.exe
+    // cacheDir caches that scratch dir's contents
 
     const tool = await loadTool(vswhere);
 
@@ -164,6 +190,53 @@ describe('Load tool', () => {
     // Verify extraction happened (our mock created these files)
     expect(fs.existsSync(path.join(tool, 'bin', 'gcloud'))).toBe(true);
     expect(fs.existsSync(path.join(tool, 'bin', 'gsutil'))).toBe(true);
+  });
+
+  // The private scratch directory created via fs.mkdtempSync() gets a random
+  // suffix we can't predict, so we detect it by what's left under /tmp
+  // afterwards rather than by spying on mkdtempSync's return value.
+  const scratchDirsRemaining = () =>
+    fs.readdirSync('/tmp').filter((name) => name.startsWith('action-utils-'));
+
+  test('It cleans up its own scratch directory after caching, without touching the shared download directory', async () => {
+    const tool = await loadTool(gcloud);
+
+    // Extraction really did happen into a private scratch dir (not the
+    // shared download directory) before it was cleaned up.
+    expect(tc.extractTar).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringMatching(/^\/tmp\/action-utils-/),
+    );
+    // The cached tool lives in its own directory...
+    expect(fs.existsSync(tool)).toBe(true);
+    // ...the private scratch directory used to extract it (which would
+    // otherwise be left behind holding a full duplicate copy of the tool,
+    // e.g. ~1GB+ for the gcloud SDK) must be gone...
+    expect(scratchDirsRemaining()).toEqual([]);
+    // ...but the directory the raw download landed in must be left alone:
+    // for the non-auth path that's RUNNER_TEMP itself, shared with the
+    // runner's own per-step bookkeeping files.
+    expect(fs.existsSync('/tmp/downloads')).toBe(true);
+    expect(fs.existsSync('/tmp/downloads/other-runner-state')).toBe(true);
+    // Only the downloaded archive itself should have been removed from it.
+    expect(fs.existsSync('/tmp/downloads/temp-file')).toBe(false);
+  });
+
+  test('It cleans up its scratch directory even if caching fails, without touching the shared download directory', async () => {
+    tc.cacheDir.mockRejectedValueOnce(new Error('ENOSPC: no space left on device'));
+
+    await expect(loadTool(gcloud)).rejects.toThrow('ENOSPC');
+
+    expect(tc.extractTar).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringMatching(/^\/tmp\/action-utils-/),
+    );
+    // The scratch directory must not be left behind just because cacheDir()
+    // itself failed (e.g. hit ENOSPC) - that would mean a failed install
+    // still leaks the full extracted tool tree on every retry.
+    expect(scratchDirsRemaining()).toEqual([]);
+    // And the shared download directory must still be untouched.
+    expect(fs.existsSync('/tmp/downloads/other-runner-state')).toBe(true);
   });
 
   test('It can download a zipped tool', async () => {
