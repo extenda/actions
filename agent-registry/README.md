@@ -153,7 +153,12 @@ You are a dependency upgrade specialist...
 | `description` | yes | Short description of what the skill does. Max 1024 characters (checked in dry-run too). Frontmatter is parsed as YAML, so quote values containing `: ` or use `>` for multi-line text. |
 | `metadata` | no | Arbitrary key/value pairs (e.g. `category`). |
 
-The skill is registered as `private-<clan>-<skill-id>` (`private-<skill-id>` when no clan is resolved) in the `eu` location. `SKILL.md` and every other file in the skill directory (e.g. `references/**`, including nested folders) are zipped, preserving relative paths, and uploaded as the skill payload. The same files are copied to `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/` (`skills/<skill-id>/<revision>/` when no clan is resolved). Symbolic links inside a skill directory are ignored. Each revision gets its own prefix, so reference files removed from the skill do not appear in the new revision. A change to any file under `skills/<skill-id>/`, including references, triggers a new revision of that skill.
+The skill is registered as `private-<clan>-<skill-id>` (`private-<skill-id>` when no clan is resolved) in the `eu` location.
+`SKILL.md` and every other file in the skill directory (e.g. `references/**`, including nested folders) are zipped, preserving relative paths, and uploaded as the skill payload.
+The same files are copied to `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/` (`skills/<skill-id>/<revision>/` when no clan is resolved).
+Symbolic links inside a skill directory are ignored.
+Each revision gets its own prefix, so reference files removed from the skill do not appear in the new revision.
+A change to any file under `skills/<skill-id>/`, including references, triggers a new revision of that skill.
 
 ### Skill limits
 
@@ -170,9 +175,11 @@ Dry-run reports failures the same way.
 
 ### Revision pruning
 
-Before a new revision of an existing skill is created, the action prunes so that at most 19 old revisions remain and the new one makes 20 (the registry allows 100 per skill, and a skill at the cap could not otherwise get a new revision).
+Before a new revision of an existing skill is created, the action prunes the old ones.
+Afterwards exactly 20 revisions remain once the new one exists: the new revision, the default (active) revision, and the newest of the others.
+The registry allows 100 revisions per skill, and a skill at the cap could not otherwise get a new revision.
 Each pruned revision is deleted from the registry, then its `gs://extenda-agent-artifacts/skills/<clan>-<skill-id>/<revision>/` prefix is removed; a prefix that is already gone is not an error.
-The registry's default (active) revision is never deleted.
+The default revision is never deleted, even when it is among the oldest.
 Pruning problems are logged as warnings and never fail the run.
 In dry-run the action only logs which revisions it would prune, and logs nothing for a skill that does not exist yet.
 

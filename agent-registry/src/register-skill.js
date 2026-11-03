@@ -125,41 +125,6 @@ const skillExists = async (skillId) => {
   }
 };
 
-// Revision IDs in GCP must start with the skill name: {registryId}-{version}
-// e.g. private-fix-dependabot-pr-v0-1. We extract just the version suffix for tracking.
-const getLatestRevision = async (registryId) => {
-  try {
-    core.info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud(
-      [
-        'alpha',
-        'agent-registry',
-        'skills',
-        'revisions',
-        'list',
-        `--skill=${registryId}`,
-        `--location=${LOCATION}`,
-        `--project=${PROJECT}`,
-        '--format=value(name.basename())',
-        '--quiet',
-      ],
-      'gcloud',
-      true,
-    );
-    const versions = output
-      .split('\n')
-      .filter(Boolean)
-      .filter((v) => /^v\d+-\d+$/.test(v));
-    if (!versions.length) return null;
-    return versions.reduce(
-      (newest, v) => (compareVersions(v, newest) > 0 ? v : newest),
-      versions[0],
-    );
-  } catch {
-    return null;
-  }
-};
-
 const compareVersions = (a, b) => {
   const [aMaj, aMin] = a.slice(1).split('-').map(Number);
   const [bMaj, bMin] = b.slice(1).split('-').map(Number);
@@ -249,6 +214,18 @@ const listRevisionIds = async (registryId) => {
   ].sort(compareVersions);
 };
 
+// Revision IDs in GCP must start with the skill name: {registryId}-{version}
+// e.g. private-fix-dependabot-pr-v0-1. Only the vN-NN suffix is tracked, ascending, so .at(-1) is the latest.
+// Listed once per skill and shared by the version bump and pruning. A failure is returned, not thrown: the
+// version bump then falls back to v0-01 and pruning reports the error and is skipped.
+const listRevisionsSafe = async (registryId) => {
+  try {
+    return { revisions: await listRevisionIds(registryId) };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const getDefaultRevision = async (registryId) => {
   const output = await execGcloud(
     [
@@ -299,14 +276,18 @@ const pruneRevision = async (registryId, revision, prefix) => {
   }
 };
 
-const pruneRevisions = async (registryId, namespacedId, dryRun) => {
+const pruneRevisions = async (registryId, namespacedId, dryRun, listed) => {
   try {
-    const all = await listRevisionIds(registryId);
+    if (listed.error) throw listed.error;
+    const all = listed.revisions;
     const defaultRevision = await getDefaultRevision(registryId);
-    // One slot is reserved for the revision about to be created.
-    const stale = all
-      .slice(0, Math.max(0, all.length + 1 - KEEP_REVISIONS))
-      .filter((r) => r !== defaultRevision);
+    // Exactly KEEP_REVISIONS revisions remain once the new one exists: the new one, the default revision when it
+    // is listed, and the newest of the others. The default is filtered out before slicing, so it never takes a
+    // slot of the stale window and nothing is under-pruned.
+    const others = all.filter((r) => r !== defaultRevision);
+    const keepOthers =
+      KEEP_REVISIONS - 1 - (all.includes(defaultRevision) ? 1 : 0);
+    const stale = others.slice(0, Math.max(0, others.length - keepOthers));
     for (const revision of stale) {
       const prefix = `gs://extenda-agent-artifacts/skills/${namespacedId}/${revision}/`;
       if (dryRun) {
@@ -384,14 +365,24 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
       core.info(
         `[dry-run] Would include ${referenceFiles.length} reference file(s): ${referenceFiles.join(', ')}`,
       );
-    await pruneRevisions(registryId, namespacedId, true);
+    await pruneRevisions(
+      registryId,
+      namespacedId,
+      true,
+      await listRevisionsSafe(registryId),
+    );
     return;
   }
 
   const exists = await skillExists(registryId);
-  const currentVersion = exists ? await getLatestRevision(registryId) : null;
+  let listed = { revisions: [] };
+  if (exists) {
+    core.info(`[skill] fetching latest revision for: ${registryId}`);
+    listed = await listRevisionsSafe(registryId);
+  }
+  const currentVersion = listed.revisions?.at(-1) ?? null;
   // Make room first: a skill at the registry's revision cap could not otherwise get a new revision.
-  if (exists) await pruneRevisions(registryId, namespacedId, false);
+  if (exists) await pruneRevisions(registryId, namespacedId, false, listed);
   const version = currentVersion ? bumpVersion(currentVersion) : 'v0-01';
   const revisionId = version;
 

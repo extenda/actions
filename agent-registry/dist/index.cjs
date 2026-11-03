@@ -101671,35 +101671,6 @@ var skillExists = /* @__PURE__ */ __name(async (skillId) => {
     return false;
   }
 }, "skillExists");
-var getLatestRevision = /* @__PURE__ */ __name(async (registryId) => {
-  try {
-    info(`[skill] fetching latest revision for: ${registryId}`);
-    const output = await execGcloud(
-      [
-        "alpha",
-        "agent-registry",
-        "skills",
-        "revisions",
-        "list",
-        `--skill=${registryId}`,
-        `--location=${LOCATION4}`,
-        `--project=${PROJECT4}`,
-        "--format=value(name.basename())",
-        "--quiet"
-      ],
-      "gcloud",
-      true
-    );
-    const versions = output.split("\n").filter(Boolean).filter((v2) => /^v\d+-\d+$/.test(v2));
-    if (!versions.length) return null;
-    return versions.reduce(
-      (newest, v2) => compareVersions(v2, newest) > 0 ? v2 : newest,
-      versions[0]
-    );
-  } catch {
-    return null;
-  }
-}, "getLatestRevision");
 var compareVersions = /* @__PURE__ */ __name((a, b2) => {
   const [aMaj, aMin] = a.slice(1).split("-").map(Number);
   const [bMaj, bMin] = b2.slice(1).split("-").map(Number);
@@ -101768,6 +101739,13 @@ var listRevisionIds = /* @__PURE__ */ __name(async (registryId) => {
     )
   ].sort(compareVersions);
 }, "listRevisionIds");
+var listRevisionsSafe = /* @__PURE__ */ __name(async (registryId) => {
+  try {
+    return { revisions: await listRevisionIds(registryId) };
+  } catch (error2) {
+    return { error: error2 };
+  }
+}, "listRevisionsSafe");
 var getDefaultRevision = /* @__PURE__ */ __name(async (registryId) => {
   const output = await execGcloud(
     [
@@ -101814,11 +101792,14 @@ var pruneRevision = /* @__PURE__ */ __name(async (registryId, revision, prefix2)
     );
   }
 }, "pruneRevision");
-var pruneRevisions = /* @__PURE__ */ __name(async (registryId, namespacedId, dryRun) => {
+var pruneRevisions = /* @__PURE__ */ __name(async (registryId, namespacedId, dryRun, listed) => {
   try {
-    const all3 = await listRevisionIds(registryId);
+    if (listed.error) throw listed.error;
+    const all3 = listed.revisions;
     const defaultRevision = await getDefaultRevision(registryId);
-    const stale = all3.slice(0, Math.max(0, all3.length + 1 - KEEP_REVISIONS)).filter((r2) => r2 !== defaultRevision);
+    const others = all3.filter((r2) => r2 !== defaultRevision);
+    const keepOthers = KEEP_REVISIONS - 1 - (all3.includes(defaultRevision) ? 1 : 0);
+    const stale = others.slice(0, Math.max(0, others.length - keepOthers));
     for (const revision of stale) {
       const prefix2 = `gs://extenda-agent-artifacts/skills/${namespacedId}/${revision}/`;
       if (dryRun) {
@@ -101888,12 +101869,22 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       info(
         `[dry-run] Would include ${referenceFiles.length} reference file(s): ${referenceFiles.join(", ")}`
       );
-    await pruneRevisions(registryId, namespacedId, true);
+    await pruneRevisions(
+      registryId,
+      namespacedId,
+      true,
+      await listRevisionsSafe(registryId)
+    );
     return;
   }
   const exists2 = await skillExists(registryId);
-  const currentVersion = exists2 ? await getLatestRevision(registryId) : null;
-  if (exists2) await pruneRevisions(registryId, namespacedId, false);
+  let listed = { revisions: [] };
+  if (exists2) {
+    info(`[skill] fetching latest revision for: ${registryId}`);
+    listed = await listRevisionsSafe(registryId);
+  }
+  const currentVersion = listed.revisions?.at(-1) ?? null;
+  if (exists2) await pruneRevisions(registryId, namespacedId, false, listed);
   const version3 = currentVersion ? bumpVersion2(currentVersion) : "v0-01";
   const revisionId = version3;
   if (!exists2) {

@@ -165,14 +165,13 @@ describe('registerSkill', () => {
     test('bumps minor from v0.1 to v0.2', async () => {
       execGcloud.mockResolvedValueOnce(''); // skillExists
       execGcloud.mockResolvedValueOnce(revisionsList('v0-01')); // revisions list
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce(''); // revisions create
       execGcloud.mockResolvedValueOnce(''); // activate
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(4)).toContain('v0-02');
+      expect(call(3)).toContain('v0-02');
     });
 
     test('picks the highest version when multiple revisions exist', async () => {
@@ -180,27 +179,25 @@ describe('registerSkill', () => {
       execGcloud.mockResolvedValueOnce(
         revisionsList('v0-01', 'v0-03', 'v0-02'),
       );
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(4)).toContain('v0-04');
+      expect(call(3)).toContain('v0-04');
     });
 
     test('uses skills revisions create (not skills create) for existing skill', async () => {
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce(revisionsList('v0-01'));
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      const revCreateArgs = call(4);
+      const revCreateArgs = call(3);
       expect(revCreateArgs).toContain('revisions');
       expect(revCreateArgs).toContain('create');
       expect(revCreateArgs).toContain('--skill=private-my-skill');
@@ -212,42 +209,39 @@ describe('registerSkill', () => {
       process.env.GITHUB_HEAD_REF = 'breaking/redesign';
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce(revisionsList('v2-04'));
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(4)).toContain('v3-00');
+      expect(call(3)).toContain('v3-00');
     });
 
     test('bumps major on major/ branch', async () => {
       process.env.GITHUB_HEAD_REF = 'major/overhaul';
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce(revisionsList('v1-05'));
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(4)).toContain('v2-00');
+      expect(call(3)).toContain('v2-00');
     });
 
     test('does not bump major on branch that merely contains "major" mid-word', async () => {
       process.env.GITHUB_HEAD_REF = 'fix/fix-major-bug';
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce(revisionsList('v0-03'));
-      execGcloud.mockResolvedValueOnce(''); // prune: revisions list
       execGcloud.mockResolvedValueOnce(''); // prune: describe default
       execGcloud.mockResolvedValueOnce('');
       execGcloud.mockResolvedValueOnce('');
 
       await registerSkill('my-skill', '/SKILL.md', false);
 
-      expect(call(4)).toContain('v0-04');
+      expect(call(3)).toContain('v0-04');
     });
   });
 
@@ -702,6 +696,15 @@ describe('registerSkill', () => {
       expect(rm).toBeGreaterThan(del);
     });
 
+    test('lists revisions only once per existing skill', async () => {
+      setupRegistry(versions(3));
+      await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
+      const lists = execGcloud.mock.calls.filter(
+        ([a]) => a.includes('revisions') && a.includes('list'),
+      );
+      expect(lists).toHaveLength(1);
+    });
+
     test('prunes nothing at or below 20 revisions', async () => {
       setupRegistry(versions(19)); // new one makes 20
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
@@ -709,16 +712,50 @@ describe('registerSkill', () => {
       expect(removed()).toEqual([]);
     });
 
-    test('never deletes the registry default revision', async () => {
-      const revs = versions(22);
+    // The new revision, the default revision (when listed) and the newest others make exactly KEEP_REVISIONS.
+    const setupWithDefault = (revisions, defaultRevision) => {
       execGcloud.mockImplementation(async (args) => {
         if (args.includes('describe'))
-          return args.some((a) => a.includes('defaultRevision')) ? 'v0-01' : '';
-        if (args.includes('list')) return revs.join('\n');
+          return args.some((a) => a.includes('defaultRevision'))
+            ? defaultRevision
+            : '';
+        if (args.includes('list')) return revisions.join('\n');
         return '';
       });
+    };
+
+    test('default is the oldest at 20 revisions: it is kept and one other is pruned', async () => {
+      setupWithDefault(versions(20), 'v0-01');
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
-      expect(deleted()).toEqual(['v0-02', 'v0-03']);
+      // Kept: v0-01 (default), v0-03..v0-20 (18 newest others), plus the new v0-21 = 20.
+      expect(deleted()).toEqual(['v0-02']);
+    });
+
+    test('default is the oldest at 22 revisions: it is not pruned and does not use up a slot', async () => {
+      setupWithDefault(versions(22), 'v0-01');
+      await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
+      // Kept: v0-01, v0-05..v0-22 (18 others), plus the new one = 20.
+      expect(deleted()).toEqual(['v0-02', 'v0-03', 'v0-04']);
+    });
+
+    test('default is the newest: the oldest are pruned', async () => {
+      setupWithDefault(versions(22), 'v0-22');
+      await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
+      // Kept: v0-22 (default), v0-04..v0-21 (18 others), plus the new one = 20.
+      expect(deleted()).toEqual(['v0-01', 'v0-02', 'v0-03']);
+    });
+
+    test('default is missing from the list: the newest 19 are kept', async () => {
+      setupWithDefault(versions(22), 'v0-99');
+      await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
+      // Kept: v0-04..v0-22 (19) plus the new one = 20.
+      expect(deleted()).toEqual(['v0-01', 'v0-02', 'v0-03']);
+    });
+
+    test('an empty default (none set) prunes like a missing default', async () => {
+      setupWithDefault(versions(22), '');
+      await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
+      expect(deleted()).toEqual(['v0-01', 'v0-02', 'v0-03']);
     });
 
     test('ignores revision ids that are not vN-NN', async () => {
@@ -741,7 +778,7 @@ describe('registerSkill', () => {
 
     test('a failing revisions list only warns', async () => {
       setupRegistry(versions(22), { failList: true });
-      // getLatestRevision also lists and swallows the error, so this registers v0-01 afresh.
+      // The shared list failed, so the version falls back to v0-01 (known behaviour) and pruning is skipped.
       await expect(
         registerSkill('my-skill', '/skills/my-skill/SKILL.md', false),
       ).resolves.toBeUndefined();
