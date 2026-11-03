@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('@actions/exec');
+vi.mock('../../utils/src/branch-info.js', () => ({
+  getShortSha: async (sha) => sha.slice(0, 7),
+}));
 import * as exec from '@actions/exec';
 
 import { createConfigMap, deleteConfigMap } from '../src/configmap.js';
