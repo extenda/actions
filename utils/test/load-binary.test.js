@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import mockFs from 'mock-fs';
@@ -145,10 +146,10 @@ describe('Load tool', () => {
 
       // We also need the "random" path for downloadToolWithAuth
       // uuid returns 'fixed-uuid', so path is os.tmpdir() + /fixed-uuid/fixed-uuid
-      // os.tmpdir() usually defaults to /tmp in memfs or real os.
-      // We'll rely on recursive mkdir in the source code to handle creation,
-      // but let's ensure the root exists.
-      '/tmp': { '.keep': '' },
+      // os.tmpdir() is /tmp on Linux but /var/folders/... on macOS, so make
+      // sure that root exists in the mock filesystem on both. The
+      // '/tmp/downloads' fixtures above are literal paths, independent of it.
+      [os.tmpdir()]: { '.keep': '' },
     });
   });
 
@@ -193,10 +194,15 @@ describe('Load tool', () => {
   });
 
   // The private scratch directory created via fs.mkdtempSync() gets a random
-  // suffix we can't predict, so we detect it by what's left under /tmp
+  // suffix we can't predict, so we detect it by what's left under os.tmpdir()
   // afterwards rather than by spying on mkdtempSync's return value.
+  const scratchDirPattern = new RegExp(
+    `^${RegExp.escape(path.join(os.tmpdir(), 'action-utils-'))}`,
+  );
   const scratchDirsRemaining = () =>
-    fs.readdirSync('/tmp').filter((name) => name.startsWith('action-utils-'));
+    fs
+      .readdirSync(os.tmpdir())
+      .filter((name) => name.startsWith('action-utils-'));
 
   test('It cleans up its own scratch directory after caching, without touching the shared download directory', async () => {
     const tool = await loadTool(gcloud);
@@ -205,7 +211,7 @@ describe('Load tool', () => {
     // shared download directory) before it was cleaned up.
     expect(tc.extractTar).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringMatching(/^\/tmp\/action-utils-/),
+      expect.stringMatching(scratchDirPattern),
     );
     // The cached tool lives in its own directory...
     expect(fs.existsSync(tool)).toBe(true);
@@ -223,13 +229,15 @@ describe('Load tool', () => {
   });
 
   test('It cleans up its scratch directory even if caching fails, without touching the shared download directory', async () => {
-    tc.cacheDir.mockRejectedValueOnce(new Error('ENOSPC: no space left on device'));
+    tc.cacheDir.mockRejectedValueOnce(
+      new Error('ENOSPC: no space left on device'),
+    );
 
     await expect(loadTool(gcloud)).rejects.toThrow('ENOSPC');
 
     expect(tc.extractTar).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringMatching(/^\/tmp\/action-utils-/),
+      expect.stringMatching(scratchDirPattern),
     );
     // The scratch directory must not be left behind just because cacheDir()
     // itself failed (e.g. hit ENOSPC) - that would mean a failed install

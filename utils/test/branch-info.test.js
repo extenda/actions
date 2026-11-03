@@ -113,7 +113,10 @@ describe('Branch info test suite', () => {
     const shaSize = 10;
 
     const resultShort = await getShortSha(sha);
-    expect(resultShort).toEqual('921103d');
+    // Git's default abbreviation length grows with repository size, so only
+    // assert that it is a short hex prefix (7-12 characters) of the full sha.
+    expect(resultShort).toMatch(/^[0-9a-f]{7,12}$/);
+    expect(sha.startsWith(resultShort)).toBe(true);
 
     const resultSize = await getShortSha(sha, shaSize);
     expect(resultSize).toEqual('921103db82');
