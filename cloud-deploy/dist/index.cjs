@@ -113824,7 +113824,15 @@ var action5 = /* @__PURE__ */ __name(async () => {
   let previousRevision = null;
   if (isNewCanary && env2 === "prod" && !platformGKE) {
     previousRevision = await getPreviousRevision(serviceName, projectID, "europe-west1");
-    info(`Canary: previous revision is ${previousRevision}`);
+    if (previousRevision) {
+      info(`Canary: previous revision is ${previousRevision}`);
+    } else {
+      warning(
+        "Automatic canary skipped: no revision serves 100% of the traffic. On a first deploy this is expected and the ne\
+w revision gets all traffic. If the service already had a serving revision, the new revision gets no traffic until it is\
+ shifted manually."
+      );
+    }
   }
   info("Run cloud-deploy");
   const succesfulDeploy = await deploy_default(

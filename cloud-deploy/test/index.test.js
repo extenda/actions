@@ -366,6 +366,9 @@ describe('Action', () => {
       steps: [10, 50, 100],
       slackChannel: '#deployments',
     });
+    expect(core.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Automatic canary skipped'),
+    );
   });
 
   test('It deploys without automatic canary on the first prod deploy with canary enabled', async () => {
@@ -442,6 +445,9 @@ describe('Action', () => {
     expect(deploy).toHaveBeenCalledTimes(1);
     expect(getNewRevision).not.toHaveBeenCalled();
     expect(registerAutomaticCanary).not.toHaveBeenCalled();
+    expect(core.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Automatic canary skipped'),
+    );
   });
 
   test('It throws when canary steps do not each increment by at least 5', async () => {
