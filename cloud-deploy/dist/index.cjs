@@ -111963,7 +111963,7 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
             "2 active revisions found, set revision to 100% traffic before deploying"
           );
         }
-        return checkMultipleActive[0];
+        return checkMultipleActive[0] ?? "";
       });
     }
     const cloudrunManifest = await cloudrunManifestTemplate(
@@ -112541,8 +112541,11 @@ var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, regi
     `--region=${region}`,
     "--format=json(status.traffic)"
   ]);
+  if (!output) {
+    return null;
+  }
   const { status } = JSON.parse(output);
-  const serving = status.traffic.find((t2) => t2.percent === 100);
+  const serving = (status?.traffic ?? []).find((t2) => t2.percent === 100);
   return serving?.revisionName ?? null;
 }, "getPreviousRevision");
 var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {

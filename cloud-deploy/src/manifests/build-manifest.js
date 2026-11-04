@@ -363,7 +363,8 @@ const buildManifest = async (
             '2 active revisions found, set revision to 100% traffic before deploying',
           );
         }
-        return checkMultipleActive[0];
+        // No active revision (first deploy): the latest revision takes 100%.
+        return checkMultipleActive[0] ?? '';
       });
     }
 

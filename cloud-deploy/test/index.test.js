@@ -368,6 +368,82 @@ describe('Action', () => {
     });
   });
 
+  test('It deploys without automatic canary on the first prod deploy with canary enabled', async () => {
+    core.getInput
+      .mockReturnValueOnce('service-account')
+      .mockReturnValueOnce('clan-service-account')
+      .mockReturnValueOnce('cloud-run.yaml')
+      .mockReturnValueOnce('gcr.io/project/image:tag');
+    loadCredentials
+      .mockResolvedValueOnce('envoy-certs')
+      .mockResolvedValueOnce('internal-key')
+      .mockResolvedValueOnce('internal-cert');
+
+    const serviceDefCanary = {
+      'cloud-run': {
+        service: 'service-name',
+        resources: { cpu: 1, memory: '512Mi' },
+        protocol: 'http',
+        scaling: { concurrency: 40 },
+        traffic: {
+          'static-egress-ip': false,
+          canary: { steps: [10, 20, 50] },
+        },
+      },
+      security: 'none',
+      labels: { product: 'actions', component: 'jest' },
+      environments: {
+        production: {
+          'min-instances': 0,
+          'max-instances': 10,
+          'domain-mappings': ['example.com'],
+          env: {},
+        },
+        staging: {
+          'min-instances': 0,
+          'max-instances': 1,
+          'domain-mappings': ['example.dev'],
+          env: {},
+        },
+      },
+    };
+
+    loadServiceDefinition.mockReturnValueOnce(serviceDefCanary);
+    getImageWithSha256.mockResolvedValueOnce('gcr.io/project/image@sha256:1');
+    projectInfo.mockReturnValueOnce({ project: 'clan-name', env: 'prod' });
+    buildManifest.mockResolvedValueOnce();
+    deploy.mockResolvedValueOnce(true);
+    setupGcloud.mockResolvedValueOnce('project-id');
+    publishPolicies.mockResolvedValueOnce();
+    runScan.mockResolvedValueOnce();
+    // The service does not exist yet, so there is no previous revision.
+    getPreviousRevision.mockResolvedValueOnce(null);
+
+    await action();
+
+    expect(buildManifest).toHaveBeenCalledWith(
+      'gcr.io/project/image@sha256:1',
+      serviceDefCanary,
+      'project-id',
+      'clan-name',
+      'prod',
+      300,
+      'envoy-certs',
+      'internal-cert',
+      'internal-key',
+      'clan-service-account',
+      false,
+    );
+    expect(getPreviousRevision).toHaveBeenCalledWith(
+      'service-name',
+      'project-id',
+      'europe-west1',
+    );
+    expect(deploy).toHaveBeenCalledTimes(1);
+    expect(getNewRevision).not.toHaveBeenCalled();
+    expect(registerAutomaticCanary).not.toHaveBeenCalled();
+  });
+
   test('It throws when canary steps do not each increment by at least 5', async () => {
     core.getInput
       .mockReturnValueOnce('service-account')

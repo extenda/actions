@@ -1188,6 +1188,71 @@ metadata:
     );
   });
 
+  test('It should serve the latest revision on a first deploy while serve traffic false', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        traffic: {
+          'serve-traffic': false,
+          canary: {
+            steps: [10, 20, 50],
+          },
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    // The service does not exist yet, so gcloud lists no revisions.
+    getRevisions.mockResolvedValueOnce([]);
+
+    await buildManifest(
+      image,
+      service,
+      'example-project',
+      'example-clan',
+      'prod',
+      '',
+      '',
+      '',
+      '',
+      '',
+      false,
+    );
+
+    const manifest = yaml.load(readFileSync('cloudrun-service.yaml'));
+    mockFs.restore();
+    expect(getRevisions).toHaveBeenCalledWith(
+      'example-service',
+      'example-project',
+      'europe-west1',
+    );
+    expect(manifest.spec.traffic).toEqual([
+      { percent: 100, latestRevision: true },
+    ]);
+  });
+
   test('It should deploy with iam bindings and audiences', async () => {
     const image = 'example-image:latest';
     const service = {
