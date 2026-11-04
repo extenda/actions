@@ -111402,7 +111402,7 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
       latestRevision: true
     }
   ];
-  if (activeRevisionName !== "") {
+  if (activeRevisionName) {
     traffic[0].percent = 0;
     traffic.push({
       percent: 100,
@@ -111963,7 +111963,7 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
             "2 active revisions found, set revision to 100% traffic before deploying"
           );
         }
-        return checkMultipleActive[0] ?? "";
+        return checkMultipleActive[0];
       });
     }
     const cloudrunManifest = await cloudrunManifestTemplate(

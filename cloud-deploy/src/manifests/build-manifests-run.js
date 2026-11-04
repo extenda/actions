@@ -115,7 +115,9 @@ const cloudrunManifestTemplate = async (
     },
   ];
 
-  if (activeRevisionName !== '') {
+  // No active revision (for example a first deploy): the latest revision
+  // keeps 100% of the traffic.
+  if (activeRevisionName) {
     traffic[0].percent = 0;
     traffic.push({
       percent: 100,
