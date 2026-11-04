@@ -57,6 +57,23 @@ describe('canary-revisions', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null when the service does not exist yet', async () => {
+      // gcloudOutput logs the failed describe and returns an empty string.
+      gcloudOutput.mockResolvedValue('');
+
+      const result = await getPreviousRevision('my-service', 'my-project');
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when the service has no traffic status', async () => {
+      gcloudOutput.mockResolvedValue(JSON.stringify({}));
+
+      const result = await getPreviousRevision('my-service', 'my-project');
+
+      expect(result).toBeNull();
+    });
+
     it('accepts a custom region', async () => {
       gcloudOutput.mockResolvedValue(
         JSON.stringify({

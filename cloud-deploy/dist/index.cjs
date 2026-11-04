@@ -111402,7 +111402,7 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
       latestRevision: true
     }
   ];
-  if (activeRevisionName !== "") {
+  if (activeRevisionName) {
     traffic[0].percent = 0;
     traffic.push({
       percent: 100,
@@ -112541,8 +112541,11 @@ var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, regi
     `--region=${region}`,
     "--format=json(status.traffic)"
   ]);
+  if (!output) {
+    return null;
+  }
   const { status } = JSON.parse(output);
-  const serving = status.traffic.find((t2) => t2.percent === 100);
+  const serving = (status?.traffic ?? []).find((t2) => t2.percent === 100);
   return serving?.revisionName ?? null;
 }, "getPreviousRevision");
 var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
@@ -113821,7 +113824,15 @@ var action5 = /* @__PURE__ */ __name(async () => {
   let previousRevision = null;
   if (isNewCanary && env2 === "prod" && !platformGKE) {
     previousRevision = await getPreviousRevision(serviceName, projectID, "europe-west1");
-    info(`Canary: previous revision is ${previousRevision}`);
+    if (previousRevision) {
+      info(`Canary: previous revision is ${previousRevision}`);
+    } else {
+      warning(
+        "Automatic canary skipped: no revision serves 100% of the traffic. On a first deploy this is expected and the ne\
+w revision gets all traffic. If the service already had a serving revision, the new revision gets no traffic until it is\
+ shifted manually."
+      );
+    }
   }
   info("Run cloud-deploy");
   const succesfulDeploy = await deploy_default(
