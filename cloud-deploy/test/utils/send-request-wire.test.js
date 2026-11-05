@@ -1,5 +1,17 @@
+import * as core from '@actions/core';
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import nock from 'nock';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
@@ -169,6 +181,152 @@ describe('platform-api requests on the wire', () => {
           revisions,
         ),
       ).rejects.toThrow('Request failed with status code 400');
+    });
+  });
+
+  // In the built action, publish-policies.js installs this retry setup on the
+  // shared axios instance, so it applies to every request.
+  describe('with the retry setup of the built action', () => {
+    let interceptors;
+
+    beforeAll(() => {
+      interceptors = axiosRetry(axios, {
+        retries: 4,
+        retryDelay: (retryCount) => {
+          core.info(
+            `Request to das sync worker failed.. retrying(${retryCount})`,
+          );
+          return retryCount * 500;
+        },
+      });
+    });
+
+    afterAll(() => {
+      axios.interceptors.request.eject(interceptors.requestInterceptorId);
+      axios.interceptors.response.eject(interceptors.responseInterceptorId);
+    });
+
+    const countRequests = (scope) => {
+      const seen = { requests: 0 };
+      scope.on('request', () => {
+        seen.requests += 1;
+      });
+      return seen;
+    };
+
+    // Answers the canary status with each status in turn, then repeats the last.
+    const canaryStatusAnswers = (...statuses) => {
+      let answered = 0;
+      return countRequests(
+        nock(PLATFORM_API)
+          .persist()
+          .get('/canary/automatic/my-service')
+          .query(true)
+          .reply(() => {
+            const status = statuses[Math.min(answered, statuses.length - 1)];
+            answered += 1;
+            return [status, status === 200 ? canary : { statusCode: status }];
+          }),
+      );
+    };
+
+    // The retries wait in real time.
+    const slow = { timeout: 10000 };
+
+    const infoLines = () => core.info.mock.calls.map(([line]) => line);
+
+    it(
+      'reads the canary status three times on a 503 and names the call in the log',
+      slow,
+      async () => {
+        const seen = canaryStatusAnswers(503);
+
+        await expect(
+          getAutomaticCanary('my-service', 'my-project', 'europe-west1'),
+        ).rejects.toThrow('Request failed with status code 503');
+
+        expect(seen.requests).toBe(3);
+        expect(infoLines()).toEqual([
+          'Request to platform-api for the canary status failed, retrying (1)',
+          'Request to platform-api for the canary status failed, retrying (2)',
+        ]);
+      },
+    );
+
+    it('returns the canary record when a retry succeeds', slow, async () => {
+      const seen = canaryStatusAnswers(503, 503, 200);
+
+      await expect(
+        getAutomaticCanary('my-service', 'my-project', 'europe-west1'),
+      ).resolves.toEqual(canary);
+
+      expect(seen.requests).toBe(3);
+    });
+
+    it(
+      'reads the canary status three times when the connection drops',
+      slow,
+      async () => {
+        const seen = countRequests(
+          nock(PLATFORM_API)
+            .persist()
+            .get('/canary/automatic/my-service')
+            .query(true)
+            .replyWithError(
+              Object.assign(new Error('socket hang up'), {
+                code: 'ECONNRESET',
+              }),
+            ),
+        );
+
+        await expect(
+          getAutomaticCanary('my-service', 'my-project', 'europe-west1'),
+        ).rejects.toThrow('socket hang up');
+
+        expect(seen.requests).toBe(3);
+        expect(infoLines().join('\n')).not.toContain('das sync worker');
+      },
+    );
+
+    it('reads the canary status once on a 404', async () => {
+      const seen = canaryStatusAnswers(404);
+
+      await expect(
+        getAutomaticCanary('my-service', 'my-project', 'europe-west1'),
+      ).resolves.toBeNull();
+
+      expect(seen.requests).toBe(1);
+      expect(infoLines()).toEqual([]);
+    });
+
+    it('reads the canary status once on a 403', async () => {
+      const seen = canaryStatusAnswers(403);
+
+      await expect(
+        getAutomaticCanary('my-service', 'my-project', 'europe-west1'),
+      ).rejects.toThrow('Request failed with status code 403');
+
+      expect(seen.requests).toBe(1);
+      expect(infoLines()).toEqual([]);
+    });
+
+    it('sets the traffic once on a 500', async () => {
+      const seen = countRequests(
+        nock(PLATFORM_API)
+          .persist()
+          .post('/services/revisions')
+          .query(true)
+          .reply(500, { statusCode: 500 }),
+      );
+
+      await expect(
+        setRevisionTraffic('my-service', 'my-project', 'europe-west1', [
+          { name: 'my-service-00001-xyz', trafficPercent: 100 },
+        ]),
+      ).rejects.toThrow('Request failed with status code 500');
+
+      expect(seen.requests).toBe(1);
+      expect(infoLines()).toEqual([]);
     });
   });
 });

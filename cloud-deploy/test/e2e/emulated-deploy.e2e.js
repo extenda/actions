@@ -313,12 +313,30 @@ describe('cloud-deploy, emulated', scenarios, () => {
     assert.deepEqual(trafficRequests(result), []);
   });
 
-  for (const [name, canaryStatus] of [
-    ['answers 503', 503],
-    ['answers 403', 403],
+  // The canary status is read again twice after a server error or a dropped
+  // connection, and once after any other answer.
+  const assertCanaryStatusRequests = (result, requests) => {
+    assert.equal(canaryStatusRequests(result).length, requests);
+    const retryLines = result.output
+      .split('\n')
+      .filter((line) => line.includes('retrying'));
+    assert.deepEqual(
+      retryLines,
+      Array.from(
+        { length: requests - 1 },
+        (_, retry) =>
+          `Request to platform-api for the canary status failed, retrying (${retry + 1})`,
+      ),
+    );
+    assert.doesNotMatch(result.output, /das sync worker/);
+  };
+
+  for (const [name, canaryStatus, requests] of [
+    ['answers 503', 503, 3],
+    ['answers 403', 403, 1],
     // A 404 that is not in the shape of platform-api tells nothing.
-    ['answers 404 with an empty body', 404],
-    ['drops the connection', 'reset'],
+    ['answers 404 with an empty body', 404, 1],
+    ['drops the connection', 'reset', 3],
   ]) {
     test(`platform-api ${name}: one active revision deploys`, async () => {
       const emulation = await emulate({ state: oneActive(), canaryStatus });
@@ -329,7 +347,7 @@ describe('cloud-deploy, emulated', scenarios, () => {
       });
 
       assertSucceeded(result);
-      assert.ok(canaryStatusRequests(result).length >= 1);
+      assertCanaryStatusRequests(result, requests);
       assert.match(
         result.output,
         /::warning::Unable to read the canary status from platform-api/,
@@ -351,6 +369,7 @@ describe('cloud-deploy, emulated', scenarios, () => {
       });
 
       assertFailedBeforeRelease(result, new RegExp(`^${MULTIPLE_ACTIVE}$`));
+      assertCanaryStatusRequests(result, requests);
       assert.deepEqual(trafficRequests(result), []);
     });
   }

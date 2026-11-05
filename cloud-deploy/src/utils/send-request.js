@@ -8,6 +8,10 @@ axios.defaults.baseURL = 'https://platform-api.retailsvc.com';
 // The canary status is read before every deploy without traffic.
 // A slow platform-api must not hold the deploy up.
 const CANARY_STATUS_TIMEOUT_MS = 10000;
+// The canary status request has its own retry policy. It replaces a retry
+// setup on the shared axios instance for this request.
+const CANARY_STATUS_RETRIES = 2;
+const CANARY_STATUS_RETRY_DELAY_MS = 500;
 // platform-api answers when the traffic change is complete.
 const SET_TRAFFIC_TIMEOUT_MS = 60000;
 
@@ -74,6 +78,15 @@ const getAutomaticCanary = async (service, project, region) => {
     },
     timeout: CANARY_STATUS_TIMEOUT_MS,
     validateStatus: (code) => code === 200 || code === 404,
+    'axios-retry': {
+      retries: CANARY_STATUS_RETRIES,
+      retryDelay: (retryCount) => retryCount * CANARY_STATUS_RETRY_DELAY_MS,
+      onRetry: (retryCount) => {
+        core.info(
+          `Request to platform-api for the canary status failed, retrying (${retryCount})`,
+        );
+      },
+    },
   });
   // Only an answer in platform-api's own shape tells whether a canary exists.
   // A 404 or a 200 from anything else in front of it does not.

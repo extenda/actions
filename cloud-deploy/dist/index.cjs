@@ -109934,6 +109934,8 @@ var identity_token_default = getToken;
 // cloud-deploy/src/utils/send-request.js
 axios_default.defaults.baseURL = "https://platform-api.retailsvc.com";
 var CANARY_STATUS_TIMEOUT_MS = 1e4;
+var CANARY_STATUS_RETRIES = 2;
+var CANARY_STATUS_RETRY_DELAY_MS = 500;
 var SET_TRAFFIC_TIMEOUT_MS = 6e4;
 var sendRequest2 = /* @__PURE__ */ __name(async (url3, data) => {
   return axios_default.post(url3, data, {
@@ -109984,7 +109986,16 @@ var getAutomaticCanary = /* @__PURE__ */ __name(async (service, project, region)
       Authorization: `Bearer ${await identity_token_default()}`
     },
     timeout: CANARY_STATUS_TIMEOUT_MS,
-    validateStatus: /* @__PURE__ */ __name((code) => code === 200 || code === 404, "validateStatus")
+    validateStatus: /* @__PURE__ */ __name((code) => code === 200 || code === 404, "validateStatus"),
+    "axios-retry": {
+      retries: CANARY_STATUS_RETRIES,
+      retryDelay: /* @__PURE__ */ __name((retryCount) => retryCount * CANARY_STATUS_RETRY_DELAY_MS, "retryDelay"),
+      onRetry: /* @__PURE__ */ __name((retryCount) => {
+        info(
+          `Request to platform-api for the canary status failed, retrying (${retryCount})`
+        );
+      }, "onRetry")
+    }
   });
   if (status === 200 && isCanaryRecord(data)) {
     return data;
