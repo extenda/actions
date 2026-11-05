@@ -185,6 +185,7 @@ const action = async () => {
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
     serveTraffic,
+    isNewCanary,
   );
 
   await publishPolicies(

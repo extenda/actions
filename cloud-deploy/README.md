@@ -388,6 +388,17 @@ between each step. If errors are detected the rollout is rolled back automatical
 
 **Important:** Automatic canary only activates in production (`env: prod`). Staging deployments are unaffected.
 
+**Deploying again:**
+- A deploy fails while a canary is in progress for the service. The error names the revision and the step.
+  To stop a canary that never ends, set the traffic of the service in the platform UI. This cancels the canary.
+- The new revision has no traffic target until its first canary step, so it is not active before that.
+  If a deploy stops before it registers the canary, for example because the job is cancelled, the next deploy
+  works as usual.
+- If two revisions are active, one of them has 100% of the traffic and no canary is in progress, the next deploy
+  first sets 100% traffic to that revision and writes a notice on the run page. Any other state with two active
+  revisions fails the deploy.
+- If the platform does not answer, a service with two active revisions fails the deploy.
+
 **Simple form** — uses default steps `[10, 25, 50, 75, 100]`:
 
 ```yaml
@@ -460,6 +471,26 @@ cloud-run:
 
 **Slack notifications** are always sent for every canary to the clan Slack channel. Use `slack-channel`
 to override with a specific channel.
+
+#### Cloud Run with manual promotion
+
+With `serve-traffic: false` and no canary, a production deploy gives the new revision no traffic. You move the
+traffic to it yourself in the platform UI. Staging deployments are unaffected.
+
+```yaml
+cloud-run:
+  traffic:
+    static-egress-ip: false
+    serve-traffic: false
+```
+
+- The serving revision keeps 100% of the traffic. The new revision has no traffic target, so it is not active
+  until you give it traffic.
+- A deploy before the last revision is promoted does not fail. The service then has several revisions
+  without traffic.
+- A deploy fails if two revisions are active, for example during a traffic split. Set one revision to 100%
+  traffic first.
+- A deploy also fails while a canary is in progress for the service, for example after the canary was turned off.
 
 #### Cloud Run with Prometheus and Open Telemetry monitoring
 
