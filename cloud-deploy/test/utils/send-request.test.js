@@ -4,12 +4,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
+  getAutomaticCanary,
   isProjectWhitelisted,
   refreshCanaryStatus,
   registerAutomaticCanary,
   sendDeployInfo,
   sendDeployRequest,
   sendScaleSetup,
+  setRevisionTraffic,
 } from '../../src/utils/send-request.js';
 
 vi.mock('@actions/core');
@@ -306,6 +308,55 @@ describe('Send request to platform api', () => {
       expect(result).toBe(false);
       expect(core.warning).toHaveBeenCalledWith(
         expect.stringContaining('Failed to register automatic canary'),
+      );
+    });
+  });
+
+  describe('getAutomaticCanary', () => {
+    it('sends the request with a timeout', async () => {
+      getToken.mockResolvedValue('token');
+      axios.get.mockResolvedValue({ status: 404, data: { statusCode: 404 } });
+
+      await getAutomaticCanary('my-service', 'my-project', 'europe-west1');
+
+      expect(axios.get).toHaveBeenCalledWith(
+        '/canary/automatic/my-service',
+        expect.objectContaining({
+          params: { project: 'my-project', region: 'europe-west1' },
+          timeout: 10000,
+        }),
+      );
+    });
+  });
+
+  describe('setRevisionTraffic', () => {
+    it('sends the request with a timeout', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockResolvedValue({ status: 200 });
+      const revisions = [{ name: 'my-service-00001-xyz', trafficPercent: 100 }];
+
+      await setRevisionTraffic(
+        'my-service',
+        'my-project',
+        'europe-west1',
+        revisions,
+      );
+
+      expect(axios.post).toHaveBeenCalledWith(
+        '/services/revisions',
+        revisions,
+        {
+          params: {
+            project: 'my-project',
+            service: 'my-service',
+            region: 'europe-west1',
+          },
+          timeout: 60000,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer token',
+          },
+        },
       );
     });
   });

@@ -37,6 +37,14 @@ const setContainerDependencies = (annotations, containers) => {
   }
 };
 
+// A named revision keeps all traffic when the deploy withholds it. The new
+// revision then has no traffic target, so it is not active until it gets
+// traffic by name.
+const trafficTarget = (activeRevisionName) =>
+  activeRevisionName
+    ? { percent: 100, revisionName: activeRevisionName }
+    : { percent: 100, latestRevision: true };
+
 const cloudrunManifestTemplate = async (
   name,
   image,
@@ -108,20 +116,7 @@ const cloudrunManifestTemplate = async (
   if (SQLInstance) {
     annotations['run.googleapis.com/cloudsql-instances'] = SQLInstance;
   }
-  const traffic = [
-    {
-      percent: 100,
-      latestRevision: true,
-    },
-  ];
-
-  if (activeRevisionName !== '') {
-    traffic[0].percent = 0;
-    traffic.push({
-      percent: 100,
-      revisionName: activeRevisionName,
-    });
-  }
+  const traffic = [trafficTarget(activeRevisionName)];
 
   const containers = [
     {
