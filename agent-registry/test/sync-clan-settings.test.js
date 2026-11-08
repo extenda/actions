@@ -61,6 +61,16 @@ describe('buildSettingsJson', () => {
     expect(sessionCommands(result).length).toBeGreaterThan(1);
   });
 
+  test('SessionStart runs on startup, clear and fork, not on resume or compact', () => {
+    const matcher = (clanName) =>
+      buildSettingsJson(baseline, {}, clanName).hooks.SessionStart[0].matcher;
+    expect(matcher('retail')).toBe('startup|clear|fork');
+    expect(matcher(null)).toBe('startup|clear|fork');
+    const re = new RegExp(`^(?:${matcher('retail')})$`);
+    const matching = (sources) => sources.filter((s) => re.test(s));
+    expect(matching(['startup', 'resume', 'clear', 'compact', 'fork'])).toEqual(['startup', 'clear', 'fork']);
+  });
+
   test('SessionStart downloads every script before it runs one', () => {
     const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
     const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));

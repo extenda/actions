@@ -210,7 +210,15 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
   return {
     permissions: { allow: allPerms },
     hooks: {
-      SessionStart: [{ hooks: buildSessionStartHooks(baseline, clanConfig, clanName) }],
+      // Run for events that begin a new session id: startup, clear and fork. Skip resume and
+      // compact, which keep the session id: running verify-on-stop.sh --baseline again there
+      // would hide earlier edits from Stop.
+      SessionStart: [
+        {
+          matcher: 'startup|clear|fork',
+          hooks: buildSessionStartHooks(baseline, clanConfig, clanName),
+        },
+      ],
       ...(preToolUse.length ? { PreToolUse: preToolUse } : {}),
       ...(stop.length ? { Stop: stop } : {}),
     },
