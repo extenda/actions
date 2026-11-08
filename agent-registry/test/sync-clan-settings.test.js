@@ -141,6 +141,8 @@ describe('buildSettingsJson', () => {
       const ok = (bootstrap) => validate({ bootstrap }, globalSchema).valid;
       expect(ok('hooks/session-start.sh')).toBe(true);
       expect(ok('hooks/sub/x.sh')).toBe(false);
+      expect(ok('hooks/foo bar.sh')).toBe(false);
+      expect(ok('hooks/$(x).sh')).toBe(false);
     });
 
     test('without bootstrap the inline steps are generated as before', () => {

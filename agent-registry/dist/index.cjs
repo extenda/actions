@@ -102686,7 +102686,7 @@ var global_settings_schema_default = {
 It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when\
  a repository does not have it.",
       type: "string",
-      pattern: "^hooks/[^/]+\\.sh$"
+      pattern: "^hooks/[A-Za-z0-9_.-]+\\.sh$"
     },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/GlobalHooks" },
