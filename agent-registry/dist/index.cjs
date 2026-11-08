@@ -102681,6 +102681,13 @@ var global_settings_schema_default = {
   type: "object",
   additionalProperties: false,
   properties: {
+    bootstrap: {
+      description: "Optional. Script under hooks/ that the SessionStart hook runs instead of the inline download steps. \
+It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when\
+ a repository does not have it.",
+      type: "string",
+      pattern: "^hooks/[A-Za-z0-9_.-]+\\.sh$"
+    },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/GlobalHooks" },
     commands: { $ref: "#/definitions/Commands" }
@@ -102949,7 +102956,42 @@ var sequential = /* @__PURE__ */ __name((steps) => {
   const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : void 0;
   return hookCmd(steps.map((step) => step.command).join("\n"), timeout);
 }, "sequential");
+var sessionStartScripts = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
+  const global2 = baseline?.hooks?.SessionStart ?? [];
+  if (!clanName) return global2;
+  const globalNames = new Set(global2.map((e) => filename(e.script)));
+  const clan = (clanConfig?.hooks?.SessionStart ?? []).filter(
+    (e) => !globalNames.has(filename(e.script))
+  );
+  return [...global2, ...clan];
+}, "sessionStartScripts");
+var runArg = /* @__PURE__ */ __name((entry) => {
+  const words = [filename(entry.script), ...(entry.args ?? []).map(String)];
+  const bad = words.find((w) => !SHELL_SAFE_ARG.test(w));
+  if (bad !== void 0) {
+    throw new Error(
+      `SessionStart script names and args must match ${SHELL_SAFE_ARG} when bootstrap is set: ${JSON.stringify(bad)} (${entry.
+      script})`
+    );
+  }
+  return ` --run ${shellQuote(words.join(" "))}`;
+}, "runArg");
+var bootstrapHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
+  const name = filename(baseline.bootstrap);
+  const clanArg = clanName ? ` --clan ${shellQuote(clanName)}` : "";
+  const scripts = sessionStartScripts(baseline, clanConfig, clanName);
+  const runs = scripts.map(runArg).join("");
+  const command = `s="${CD}/.claude/hooks/${name}"; [ -f "$s" ] || CLOUDSDK_CORE_DISABLE_PROMPTS=1 gcloud storage cp ${GCS2}\
+/hooks/${name} "$s" </dev/null >/dev/null 2>&1; if bash -n "$s" 2>/dev/null; then bash "$s"${clanArg}${runs}; else echo \
+'{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded. Run gcloud auth login, then\
+ start a new session."}'; fi`;
+  const timeout = scripts.reduce((sum, e) => sum + (e.timeout ?? 0), 0) + SETUP_TIMEOUT_ALLOWANCE;
+  return [hookCmd(command, timeout)];
+}, "bootstrapHooks");
 var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
+  if (baseline?.bootstrap) {
+    return bootstrapHooks(baseline, clanConfig, clanName);
+  }
   const cmds = [];
   cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
   if (clanName) {
@@ -103105,6 +103147,12 @@ agent-registry/${prefix2}`)), "affected");
     startGroup("Global baseline");
     const globalConfig = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
+    const { bootstrap } = globalConfig;
+    if (bootstrap && !(0, import_node_fs8.existsSync)(import_node_path7.default.join(registryRoot, "global", bootstrap))) {
+      throw new Error(
+        `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`
+      );
+    }
     await syncFiles(import_node_path7.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
     await syncFiles(import_node_path7.default.join(registryRoot, "global", "commands"), "commands", dryRun);
     if (dryRun) {

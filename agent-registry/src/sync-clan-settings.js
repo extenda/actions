@@ -93,7 +93,55 @@ const sequential = (steps) => {
   return hookCmd(steps.map((step) => step.command).join('\n'), timeout);
 };
 
+// Global SessionStart scripts, then the clan's; a clan script named like a global one is skipped.
+const sessionStartScripts = (baseline, clanConfig, clanName) => {
+  const global = baseline?.hooks?.SessionStart ?? [];
+  if (!clanName) return global;
+  const globalNames = new Set(global.map((e) => filename(e.script)));
+  const clan = (clanConfig?.hooks?.SessionStart ?? []).filter(
+    (e) => !globalNames.has(filename(e.script)),
+  );
+  return [...global, ...clan];
+};
+
+// `--run 'script args'`: the bootstrap script splits the value on spaces, so the
+// script name and every argument must be shell-safe words.
+const runArg = (entry) => {
+  const words = [filename(entry.script), ...(entry.args ?? []).map(String)];
+  const bad = words.find((w) => !SHELL_SAFE_ARG.test(w));
+  if (bad !== undefined) {
+    throw new Error(
+      `SessionStart script names and args must match ${SHELL_SAFE_ARG} when bootstrap is set: ${JSON.stringify(bad)} (${entry.script})`,
+    );
+  }
+  return ` --run ${shellQuote(words.join(' '))}`;
+};
+
+// With `bootstrap` in the global baseline, SessionStart is one command that runs
+// that script: it checks the gcloud credentials, downloads the config in one copy,
+// validates and installs it, then runs the SessionStart scripts given with --run.
+// The command downloads the script first when the repository does not have it yet
+// (its settings.json came from an older version).
+const bootstrapHooks = (baseline, clanConfig, clanName) => {
+  const name = filename(baseline.bootstrap);
+  const clanArg = clanName ? ` --clan ${shellQuote(clanName)}` : '';
+  const scripts = sessionStartScripts(baseline, clanConfig, clanName);
+  const runs = scripts.map(runArg).join('');
+  const command =
+    `s="${CD}/.claude/hooks/${name}"; ` +
+    `[ -f "$s" ] || CLOUDSDK_CORE_DISABLE_PROMPTS=1 gcloud storage cp ${GCS}/hooks/${name} "$s" </dev/null >/dev/null 2>&1; ` +
+    `if bash -n "$s" 2>/dev/null; then bash "$s"${clanArg}${runs}; ` +
+    `else echo '{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded. Run gcloud auth login, then start a new session."}'; fi`;
+  const timeout =
+    scripts.reduce((sum, e) => sum + (e.timeout ?? 0), 0) +
+    SETUP_TIMEOUT_ALLOWANCE;
+  return [hookCmd(command, timeout)];
+};
+
 const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
+  if (baseline?.bootstrap) {
+    return bootstrapHooks(baseline, clanConfig, clanName);
+  }
   const cmds = [];
 
   // Setup
@@ -292,6 +340,16 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     core.startGroup('Global baseline');
     const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
     validateSettings('global/settings.yaml', globalConfig, globalSchema);
+    // Never publish a settings.json that runs a script which is not uploaded with it.
+    const { bootstrap } = globalConfig;
+    if (
+      bootstrap &&
+      !existsSync(path.join(registryRoot, 'global', bootstrap))
+    ) {
+      throw new Error(
+        `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`,
+      );
+    }
 
     await syncFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
     await syncFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);

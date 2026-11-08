@@ -267,6 +267,8 @@ Every hook entry (in any event, global or clan) accepts two optional fields: `ar
 The SessionStart hook has matcher `startup|clear|fork`: it does not run on resume or compaction.
 All SessionStart setup steps run sequentially in one hook, so its timeout is the sum of the scripts' `timeout` values plus a 60-second allowance for setup and downloads.
 
+With `bootstrap: hooks/<script>.sh` in the global `settings.yaml` (platform team only), the SessionStart hook runs that script instead of the steps above: `bash .claude/hooks/<script>.sh [--clan <clan>] --run '<script> [args]'...`. It downloads the script first when the repository does not have it. The platform's `session-start.sh` checks that gcloud has credentials, downloads `hooks/`, `commands/`, `config/<clan>/` and the orchestrator instructions in one copy, validates and installs them, then runs the `--run` scripts in order. In this mode SessionStart script names and `args` must match `^[A-Za-z0-9_@%+=:,./-]+$`, and the hook timeout is always set: the sum of the scripts' `timeout` values plus 60 seconds. The publish fails when the bootstrap script is missing from `agent-registry/global/`.
+
 Hook `script` paths must be direct children of `hooks/` (for example `hooks/my-guard.sh`). Subdirectories are rejected, because scripts are stored and downloaded by file name. A clan script with the same file name as a global script is ignored; the global script wins.
 
 ### Clan conventions
