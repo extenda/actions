@@ -5,6 +5,11 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "bootstrap": {
+      "description": "Optional. Script under hooks/ that the SessionStart hook runs instead of the inline download steps. It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when a repository does not have it.",
+      "type": "string",
+      "pattern": "^hooks/[^/]+\\.sh$"
+    },
     "permissions": { "$ref": "#/definitions/Permissions" },
     "hooks": { "$ref": "#/definitions/GlobalHooks" },
     "commands": { "$ref": "#/definitions/Commands" }

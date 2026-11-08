@@ -71,6 +71,85 @@ describe('buildSettingsJson', () => {
     expect(matching(['startup', 'resume', 'clear', 'compact', 'fork'])).toEqual(['startup', 'clear', 'fork']);
   });
 
+  describe('bootstrap', () => {
+    const boot = {
+      ...baseline,
+      bootstrap: 'hooks/session-start.sh',
+      hooks: {
+        ...baseline.hooks,
+        SessionStart: [
+          { script: 'hooks/ensure-pre-commit.sh' },
+          {
+            script: 'hooks/verify-on-stop.sh',
+            args: ['--baseline'],
+            timeout: 30,
+          },
+        ],
+      },
+    };
+    const command = (result) => sessionHooks(result)[0].command;
+
+    test('runs the bootstrap script with the clan and the SessionStart scripts', () => {
+      const result = buildSettingsJson(boot, {}, 'retail');
+      expect(result.hooks.SessionStart).toEqual([
+        { matcher: 'startup|clear|fork', hooks: [expect.any(Object)] },
+      ]);
+      expect(command(result)).toContain(
+        `bash "$s" --clan retail --run ensure-pre-commit.sh --run 'verify-on-stop.sh --baseline'`,
+      );
+      expect(sessionHooks(result)[0].timeout).toBe(90);
+    });
+
+    test('downloads only the bootstrap script, and only when it is missing', () => {
+      const cmd = command(buildSettingsJson(boot, {}, 'retail'));
+      expect(cmd).toContain(
+        '[ -f "$s" ] || CLOUDSDK_CORE_DISABLE_PROMPTS=1 gcloud storage cp gs://extenda-agent-artifacts/hooks/session-start.sh "$s"',
+      );
+      expect(cmd.match(/gcloud storage/g)).toHaveLength(1);
+      expect(cmd).not.toContain('orchestrator/instructions.md');
+    });
+
+    test('template mode (clanName=null) passes no --clan', () => {
+      expect(command(buildSettingsJson(boot, {}, null))).not.toContain(
+        '--clan',
+      );
+    });
+
+    test('appends clan SessionStart scripts, skipping global file names', () => {
+      const clan = {
+        hooks: {
+          SessionStart: [
+            { script: 'hooks/ensure-pre-commit.sh' },
+            { script: 'hooks/clan-setup.sh' },
+          ],
+        },
+      };
+      const cmd = command(buildSettingsJson(boot, clan, 'retail'));
+      expect(cmd.match(/--run ensure-pre-commit\.sh/g)).toHaveLength(1);
+      expect(cmd).toMatch(/--baseline' --run clan-setup\.sh;/);
+    });
+
+    test('rejects SessionStart args the script cannot split safely', () => {
+      const bad = {
+        ...boot,
+        hooks: { SessionStart: [{ script: 'hooks/x.sh', args: ['a b'] }] },
+      };
+      expect(() => buildSettingsJson(bad, {}, 'retail')).toThrow(/must match/);
+    });
+
+    test('the global schema accepts bootstrap under hooks/', () => {
+      const ok = (bootstrap) => validate({ bootstrap }, globalSchema).valid;
+      expect(ok('hooks/session-start.sh')).toBe(true);
+      expect(ok('hooks/sub/x.sh')).toBe(false);
+    });
+
+    test('without bootstrap the inline steps are generated as before', () => {
+      expect(command(buildSettingsJson(baseline, {}, 'retail'))).toContain(
+        'chmod +x',
+      );
+    });
+  });
+
   test('SessionStart downloads every script before it runs one', () => {
     const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
     const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));
@@ -387,6 +466,18 @@ describe('syncClanSettings', () => {
       });
       // No existing clans in GCS by default
       execGcloud.mockResolvedValue('');
+    });
+
+    test('fails before uploading anything when the bootstrap script is missing', async () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml')
+          ? `bootstrap: hooks/session-start.sh\n${GLOBAL_YAML}`
+          : '',
+      );
+      await expect(
+        syncClanSettings('/root/agent-registry', [], false, 'platform'),
+      ).rejects.toThrow(/bootstrap/);
+      expect(upload).not.toHaveBeenCalled();
     });
 
     test('uploads global settings.yaml to config/settings.yaml', async () => {
