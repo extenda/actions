@@ -21762,6 +21762,33 @@ var require_constants6 = __commonJS({
     9007199254740991;
     var MAX_SAFE_COMPONENT_LENGTH = 16;
     var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
+    var WHITESPACE_CHARACTERS = [
+      "	",
+      "\n",
+      "\v",
+      "\f",
+      "\r",
+      " ",
+      "\xA0",
+      "\u1680",
+      "\u2000",
+      "\u2001",
+      "\u2002",
+      "\u2003",
+      "\u2004",
+      "\u2005",
+      "\u2006",
+      "\u2007",
+      "\u2008",
+      "\u2009",
+      "\u200A",
+      "\u2028",
+      "\u2029",
+      "\u202F",
+      "\u205F",
+      "\u3000",
+      "\uFEFF"
+    ];
     var RELEASE_TYPES = [
       "major",
       "premajor",
@@ -21776,6 +21803,7 @@ var require_constants6 = __commonJS({
       MAX_SAFE_COMPONENT_LENGTH,
       MAX_SAFE_BUILD_LENGTH,
       MAX_SAFE_INTEGER,
+      WHITESPACE_CHARACTERS,
       RELEASE_TYPES,
       SEMVER_SPEC_VERSION,
       FLAG_INCLUDE_PRERELEASE: 1,
@@ -22689,6 +22717,202 @@ var require_lrucache = __commonJS({
   }
 });
 
+// node_modules/semver/internal/trim-comparator-whitespace.js
+var require_trim_comparator_whitespace = __commonJS({
+  "node_modules/semver/internal/trim-comparator-whitespace.js"(exports2, module2) {
+    "use strict";
+    var {
+      MAX_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      WHITESPACE_CHARACTERS
+    } = require_constants6();
+    var whitespace = new Uint8Array(65536);
+    for (const char of WHITESPACE_CHARACTERS) {
+      whitespace[char.charCodeAt(0)] = 1;
+    }
+    var isWhitespace = /* @__PURE__ */ __name((char) => char !== void 0 && whitespace[char.charCodeAt(0)] === 1, "isWhit\
+espace");
+    var isVersionPrefix = /* @__PURE__ */ __name((char) => char === "v" || char === "=" || isWhitespace(char), "isVersio\
+nPrefix");
+    var isDigit = /* @__PURE__ */ __name((char) => char !== void 0 && char >= "0" && char <= "9", "isDigit");
+    var isLetter = /* @__PURE__ */ __name((char) => char !== void 0 && (char >= "a" && char <= "z" || char >= "A" && char <=
+    "Z"), "isLetter");
+    var isIdentifierCharacter = /* @__PURE__ */ __name((char) => isDigit(char) || isLetter(char) || char === "-", "isIde\
+ntifierCharacter");
+    var isVersionStart = /* @__PURE__ */ __name((char) => isDigit(char) || char === "x" || char === "X" || char === "*",
+    "isVersionStart");
+    var findDigitsEndIndex = /* @__PURE__ */ __name((range3, start, limit, digitRuns) => {
+      if (!isDigit(range3[start])) {
+        return start;
+      }
+      if (start >= digitRuns.start && start < digitRuns.end) {
+        return Math.min(start + limit, digitRuns.end);
+      }
+      if (start >= digitRuns.previousStart && start < digitRuns.previousEnd) {
+        return Math.min(start + limit, digitRuns.previousEnd);
+      }
+      let end = start + 1;
+      while (isDigit(range3[end])) {
+        end++;
+      }
+      digitRuns.previousStart = digitRuns.start;
+      digitRuns.previousEnd = digitRuns.end;
+      digitRuns.start = start;
+      digitRuns.end = end;
+      return Math.min(start + limit, end);
+    }, "findDigitsEndIndex");
+    var findVersionNumberEndIndex = /* @__PURE__ */ __name((range3, start, loose, digitRuns) => {
+      if (!loose && range3[start] === "0") {
+        return start + 1;
+      }
+      return findDigitsEndIndex(range3, start, loose ? MAX_LENGTH : MAX_LENGTH + 1, digitRuns);
+    }, "findVersionNumberEndIndex");
+    var findPrereleaseIdentifierEndIndex = /* @__PURE__ */ __name((range3, start, loose, digitRuns) => {
+      const digitsEnd = findDigitsEndIndex(range3, start, MAX_LENGTH, digitRuns);
+      if (isLetter(range3[digitsEnd]) || range3[digitsEnd] === "-") {
+        let end = digitsEnd + 1;
+        const limit = end + MAX_SAFE_BUILD_LENGTH;
+        while (end < limit && isIdentifierCharacter(range3[end])) {
+          end++;
+        }
+        return end;
+      }
+      return findVersionNumberEndIndex(range3, start, loose, digitRuns);
+    }, "findPrereleaseIdentifierEndIndex");
+    var findPrereleaseEndIndex = /* @__PURE__ */ __name((range3, start, loose, digitRuns) => {
+      const hyphen = range3[start] === "-";
+      if (!loose && !hyphen) {
+        return start;
+      }
+      const identifierStart = start + (hyphen ? 1 : 0);
+      let end = findPrereleaseIdentifierEndIndex(range3, identifierStart, loose, digitRuns);
+      if (end === identifierStart) {
+        if (!loose || !hyphen) {
+          return start;
+        }
+        end = findPrereleaseIdentifierEndIndex(range3, start, loose, digitRuns);
+      }
+      while (range3[end] === ".") {
+        const next = findPrereleaseIdentifierEndIndex(range3, end + 1, loose, digitRuns);
+        if (next === end + 1) {
+          break;
+        }
+        end = next;
+      }
+      return end;
+    }, "findPrereleaseEndIndex");
+    var findBuildIdentifierEndIndex = /* @__PURE__ */ __name((range3, start) => {
+      let end = start;
+      while (end - start < MAX_SAFE_BUILD_LENGTH && isIdentifierCharacter(range3[end])) {
+        end++;
+      }
+      return end;
+    }, "findBuildIdentifierEndIndex");
+    var findBuildEndIndex = /* @__PURE__ */ __name((range3, start) => {
+      if (range3[start] !== "+") {
+        return start;
+      }
+      let end = findBuildIdentifierEndIndex(range3, start + 1);
+      if (end === start + 1) {
+        return start;
+      }
+      while (range3[end] === ".") {
+        const next = findBuildIdentifierEndIndex(range3, end + 1);
+        if (next === end + 1) {
+          break;
+        }
+        end = next;
+      }
+      return end;
+    }, "findBuildEndIndex");
+    var findLooseFullVersionEndIndex = /* @__PURE__ */ __name((range3, start, digitRuns) => {
+      let end = start;
+      for (let component = 0; component < 3; component++) {
+        const next = findVersionNumberEndIndex(range3, end, true, digitRuns);
+        if (next === end) {
+          return start;
+        }
+        end = next;
+        if (component < 2) {
+          if (range3[end] !== ".") {
+            return start;
+          }
+          end++;
+        }
+      }
+      const prereleaseEnd = findPrereleaseEndIndex(range3, end, true, digitRuns);
+      return findBuildEndIndex(range3, prereleaseEnd);
+    }, "findLooseFullVersionEndIndex");
+    var findPartialVersionComponentEndIndex = /* @__PURE__ */ __name((range3, start, digitRuns) => {
+      if (isDigit(range3[start])) {
+        return findVersionNumberEndIndex(range3, start, false, digitRuns);
+      }
+      return isVersionStart(range3[start]) ? start + 1 : start;
+    }, "findPartialVersionComponentEndIndex");
+    var findPartialVersionEndIndex = /* @__PURE__ */ __name((range3, start, digitRuns) => {
+      let end = findPartialVersionComponentEndIndex(range3, start, digitRuns);
+      for (let component = 0; component < 2; component++) {
+        if (range3[end] !== ".") {
+          return end;
+        }
+        const next = findPartialVersionComponentEndIndex(range3, end + 1, digitRuns);
+        if (next === end + 1) {
+          return end;
+        }
+        end = next;
+      }
+      const prereleaseEnd = findPrereleaseEndIndex(range3, end, false, digitRuns);
+      return findBuildEndIndex(range3, prereleaseEnd);
+    }, "findPartialVersionEndIndex");
+    var findVersionEndIndex = /* @__PURE__ */ __name((range3, start, digitRuns) => {
+      const fullVersionEnd = findLooseFullVersionEndIndex(range3, start, digitRuns);
+      return fullVersionEnd !== start ? fullVersionEnd : findPartialVersionEndIndex(range3, start, digitRuns);
+    }, "findVersionEndIndex");
+    var findRemovableWhitespaceIndex = /* @__PURE__ */ __name((range3, matchStart) => {
+      let position = matchStart;
+      if (isWhitespace(range3[position])) {
+        position++;
+      }
+      if (range3[position] === "<" || range3[position] === ">") {
+        position++;
+      }
+      if (range3[position] === "=") {
+        position++;
+      }
+      return isWhitespace(range3[position]) ? position : -1;
+    }, "findRemovableWhitespaceIndex");
+    var trimComparatorWhitespace = /* @__PURE__ */ __name((range3) => {
+      let result = "";
+      let copyFrom = 0;
+      let cursor = 0;
+      const digitRuns = { start: -1, end: -1, previousStart: -1, previousEnd: -1 };
+      while (cursor < range3.length) {
+        const matchStart = cursor;
+        if (range3[cursor] === "<" || range3[cursor] === ">") {
+          cursor++;
+        } else if (!isVersionPrefix(range3[cursor]) && !isVersionStart(range3[cursor])) {
+          cursor++;
+          continue;
+        }
+        while (cursor < range3.length && isVersionPrefix(range3[cursor])) {
+          cursor++;
+        }
+        if (!isVersionStart(range3[cursor])) {
+          continue;
+        }
+        const whitespacePosition = findRemovableWhitespaceIndex(range3, matchStart);
+        if (whitespacePosition !== -1) {
+          result += range3.slice(copyFrom, whitespacePosition);
+          copyFrom = whitespacePosition + 1;
+        }
+        cursor = findVersionEndIndex(range3, cursor, digitRuns);
+      }
+      return result + range3.slice(copyFrom);
+    }, "trimComparatorWhitespace");
+    module2.exports = trimComparatorWhitespace;
+  }
+});
+
 // node_modules/semver/classes/range.js
 var require_range = __commonJS({
   "node_modules/semver/classes/range.js"(exports2, module2) {
@@ -22773,7 +22997,7 @@ var require_range = __commonJS({
         const hr2 = loose ? re2[t2.HYPHENRANGELOOSE] : re2[t2.HYPHENRANGE];
         range3 = range3.replace(hr2, hyphenReplace(this.options.includePrerelease));
         debug2("hyphen replace", range3);
-        range3 = range3.replace(re2[t2.COMPARATORTRIM], comparatorTrimReplace);
+        range3 = trimComparatorWhitespace(range3);
         debug2("comparator trim", range3);
         range3 = range3.replace(re2[t2.TILDETRIM], tildeTrimReplace);
         debug2("tilde trim", range3);
@@ -22844,11 +23068,11 @@ var require_range = __commonJS({
     var Comparator = require_comparator();
     var debug2 = require_debug();
     var SemVer = require_semver();
+    var trimComparatorWhitespace = require_trim_comparator_whitespace();
     var {
       safeRe: re2,
       src,
       t: t2,
-      comparatorTrimReplace,
       tildeTrimReplace,
       caretTrimReplace
     } = require_re();
