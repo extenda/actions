@@ -106372,15 +106372,38 @@ var isolateConfigDir = /* @__PURE__ */ __name(async (toolPath = void 0) => {
   exportVariable("CLOUDSDK_CONFIG", configDirPath);
   return toolPath;
 }, "isolateConfigDir");
+var withInstallerPython = /* @__PURE__ */ __name(async (operation) => {
+  const bundledPython = process.env.CLOUDSDK_PYTHON;
+  if (process.platform !== "win32" || !bundledPython) {
+    return operation();
+  }
+  try {
+    const copiedPython = (await execGcloud(["components", "copy-bundled-python"], "gcloud", true)).split(/\r?\n/).pop().
+    trim();
+    info(
+      `Use copied bundled python for component install: ${copiedPython}`
+    );
+    process.env.CLOUDSDK_PYTHON = copiedPython;
+  } catch (err) {
+    warning(`Failed to copy bundled python: ${err.message}`);
+  }
+  try {
+    return await operation();
+  } finally {
+    process.env.CLOUDSDK_PYTHON = bundledPython;
+  }
+}, "withInstallerPython");
 var installComponents = /* @__PURE__ */ __name(async (toolPath) => {
-  await execGcloud([
-    "components",
-    "install",
-    "gke-gcloud-auth-plugin",
-    "beta",
-    "--quiet",
-    "--no-user-output-enabled"
-  ]).then(() => {
+  await withInstallerPython(
+    () => execGcloud([
+      "components",
+      "install",
+      "gke-gcloud-auth-plugin",
+      "beta",
+      "--quiet",
+      "--no-user-output-enabled"
+    ])
+  ).then(() => {
     exportVariable("USE_GKE_GCLOUD_AUTH_PLUGIN", "True");
     return null;
   });

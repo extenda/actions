@@ -68,20 +68,57 @@ const isolateConfigDir = async (toolPath = undefined) => {
 };
 
 /**
+ * Run a gcloud components operation with a python that gcloud accepts for self-updates.
+ * Since gcloud 593.0.0, Windows refuses to update components non-interactively when
+ * CLOUDSDK_PYTHON points to the bundled python. Use a copy of the bundled python for the
+ * duration of the operation and restore CLOUDSDK_PYTHON afterwards, so the cached gcloud
+ * keeps using the bundled python.
+ * @param operation the function to run
+ * @returns {Promise<*>} the operation result
+ */
+const withInstallerPython = async (operation) => {
+  const bundledPython = process.env.CLOUDSDK_PYTHON;
+  if (process.platform !== 'win32' || !bundledPython) {
+    return operation();
+  }
+  try {
+    const copiedPython = (
+      await execGcloud(['components', 'copy-bundled-python'], 'gcloud', true)
+    )
+      .split(/\r?\n/)
+      .pop()
+      .trim();
+    core.info(
+      `Use copied bundled python for component install: ${copiedPython}`,
+    );
+    process.env.CLOUDSDK_PYTHON = copiedPython;
+  } catch (err) {
+    core.warning(`Failed to copy bundled python: ${err.message}`);
+  }
+  try {
+    return await operation();
+  } finally {
+    process.env.CLOUDSDK_PYTHON = bundledPython;
+  }
+};
+
+/**
  * Install additional gcloud components. This method only runs if gcloud isn't cached.
  * Remember to bump the CACHE_VERSION constant if you modify this method.
  * @param toolPath the gcloud tool path
  * @returns {Promise<void>} a promise completed with gcloud
  */
 const installComponents = async (toolPath) => {
-  await execGcloud([
-    'components',
-    'install',
-    'gke-gcloud-auth-plugin',
-    'beta',
-    '--quiet',
-    '--no-user-output-enabled',
-  ]).then(() => {
+  await withInstallerPython(() =>
+    execGcloud([
+      'components',
+      'install',
+      'gke-gcloud-auth-plugin',
+      'beta',
+      '--quiet',
+      '--no-user-output-enabled',
+    ]),
+  ).then(() => {
     core.exportVariable('USE_GKE_GCLOUD_AUTH_PLUGIN', 'True');
     return null;
   });
