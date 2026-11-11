@@ -147,4 +147,106 @@ describe('Setup Gcloud', () => {
     // Authenticate is still invoked.
     expect(core.setOutput).toHaveBeenCalledWith('project-id', 'test-project');
   });
+
+  describe('On Windows', () => {
+    const orgPlatform = process.platform;
+    const bundledPython = path.join(
+      '/gcloud',
+      'platform',
+      'bundledpython',
+      'python.exe',
+    );
+
+    beforeEach(() => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      mockFs({
+        '/gcloud/platform/bundledpython': { 'python.exe': '' },
+        '/tmp/gcloud-config-12345-1': { '.keep': '' },
+      });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(process, 'platform', { value: orgPlatform });
+    });
+
+    test('It installs components with a copy of the bundled python', async () => {
+      restoreCache.mockResolvedValueOnce(undefined);
+      const pythonDuringInstall = [];
+      execGcloud.mockImplementation(async (args) => {
+        pythonDuringInstall.push(process.env.CLOUDSDK_PYTHON);
+        if (args[1] === 'copy-bundled-python') {
+          return 'C:\\Temp\\tmpabc\\python\\python.exe';
+        }
+        return '';
+      });
+
+      await setupGcloud(base64Key);
+
+      expect(execGcloud).toHaveBeenNthCalledWith(
+        1,
+        ['components', 'copy-bundled-python'],
+        'gcloud',
+        true,
+      );
+      expect(execGcloud).toHaveBeenNthCalledWith(2, [
+        'components',
+        'install',
+        'gke-gcloud-auth-plugin',
+        'beta',
+        '--quiet',
+        '--no-user-output-enabled',
+      ]);
+      expect(pythonDuringInstall).toEqual([
+        bundledPython,
+        'C:\\Temp\\tmpabc\\python\\python.exe',
+      ]);
+      expect(process.env.CLOUDSDK_PYTHON).toEqual(bundledPython);
+      expect(core.exportVariable).toHaveBeenCalledWith(
+        'CLOUDSDK_PYTHON',
+        bundledPython,
+      );
+      expect(core.exportVariable).toHaveBeenCalledWith(
+        'USE_GKE_GCLOUD_AUTH_PLUGIN',
+        'True',
+      );
+      expect(saveCache).toHaveBeenCalled();
+    });
+
+    test('It falls back to the bundled python if copy fails', async () => {
+      restoreCache.mockResolvedValueOnce(undefined);
+      execGcloud.mockImplementation(async (args) => {
+        if (args[1] === 'copy-bundled-python') {
+          throw new Error('unknown command');
+        }
+        return '';
+      });
+
+      await setupGcloud(base64Key);
+
+      expect(core.warning).toHaveBeenCalledWith(
+        'Failed to copy bundled python: unknown command',
+      );
+      expect(execGcloud).toHaveBeenCalledTimes(2);
+      expect(process.env.CLOUDSDK_PYTHON).toEqual(bundledPython);
+      expect(saveCache).toHaveBeenCalled();
+    });
+
+    test('It falls back to the bundled python if copy returns no path', async () => {
+      restoreCache.mockResolvedValueOnce(undefined);
+      const pythonDuringInstall = [];
+      execGcloud.mockImplementation(async () => {
+        pythonDuringInstall.push(process.env.CLOUDSDK_PYTHON);
+        return '';
+      });
+
+      await setupGcloud(base64Key);
+
+      expect(core.warning).toHaveBeenCalledWith(
+        'Failed to copy bundled python: gcloud returned no python path',
+      );
+      expect(pythonDuringInstall).toEqual([bundledPython, bundledPython]);
+      expect(process.env.CLOUDSDK_PYTHON).toEqual(bundledPython);
+      expect(saveCache).toHaveBeenCalled();
+    });
+  });
 });
