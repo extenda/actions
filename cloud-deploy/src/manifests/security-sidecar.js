@@ -7,7 +7,7 @@ import getImageWithSha256 from './image-sha256.js';
 const IMAGE_NAME = 'eu.gcr.io/extenda/security';
 
 // The generally available and stable security sidecar version.
-export const STABLE_VERSION = 'v2.0.1';
+export const STABLE_VERSION = 'v2.0.3';
 
 const volumeMounts = (protocol) => {
   const volumes = [];
