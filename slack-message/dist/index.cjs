@@ -111845,6 +111845,9 @@ var withInstallerPython = /* @__PURE__ */ __name(async (operation) => {
   try {
     const copiedPython = (await execGcloud(["components", "copy-bundled-python"], "gcloud", true)).split(/\r?\n/).pop().
     trim();
+    if (!copiedPython) {
+      throw new Error("gcloud returned no python path");
+    }
     info(
       `Use copied bundled python for component install: ${copiedPython}`
     );

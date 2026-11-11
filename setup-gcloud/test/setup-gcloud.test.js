@@ -230,5 +230,23 @@ describe('Setup Gcloud', () => {
       expect(process.env.CLOUDSDK_PYTHON).toEqual(bundledPython);
       expect(saveCache).toHaveBeenCalled();
     });
+
+    test('It falls back to the bundled python if copy returns no path', async () => {
+      restoreCache.mockResolvedValueOnce(undefined);
+      const pythonDuringInstall = [];
+      execGcloud.mockImplementation(async () => {
+        pythonDuringInstall.push(process.env.CLOUDSDK_PYTHON);
+        return '';
+      });
+
+      await setupGcloud(base64Key);
+
+      expect(core.warning).toHaveBeenCalledWith(
+        'Failed to copy bundled python: gcloud returned no python path',
+      );
+      expect(pythonDuringInstall).toEqual([bundledPython, bundledPython]);
+      expect(process.env.CLOUDSDK_PYTHON).toEqual(bundledPython);
+      expect(saveCache).toHaveBeenCalled();
+    });
   });
 });

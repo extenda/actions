@@ -88,6 +88,9 @@ const withInstallerPython = async (operation) => {
       .split(/\r?\n/)
       .pop()
       .trim();
+    if (!copiedPython) {
+      throw new Error('gcloud returned no python path');
+    }
     core.info(
       `Use copied bundled python for component install: ${copiedPython}`,
     );
