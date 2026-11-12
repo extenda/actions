@@ -67484,9 +67484,56 @@ function readAttributeStr(xmlData, i) {
   };
 }
 __name(readAttributeStr, "readAttributeStr");
-var validAttrStrRegxp = new RegExp(`(\\s*)([^\\s=]+)(\\s*=)?(\\s*(['"])(([\\s\\S])*?)\\5)?`, "g");
+function scanAttributeTokens(attrStr) {
+  const tokens = [];
+  const len = attrStr.length;
+  let i = 0;
+  while (i < len) {
+    const tokenStart = i;
+    while (i < len && isWhiteSpace(attrStr[i])) i++;
+    if (i >= len) break;
+    if (attrStr[i] === "=") {
+      i = tokenStart + 1;
+      continue;
+    }
+    const leadingWs = attrStr.slice(tokenStart, i);
+    const nameStart = i;
+    while (i < len && !isWhiteSpace(attrStr[i]) && attrStr[i] !== "=") i++;
+    const name = attrStr.slice(nameStart, i);
+    let equalsGroup;
+    let j2 = i;
+    while (j2 < len && isWhiteSpace(attrStr[j2])) j2++;
+    if (j2 < len && attrStr[j2] === "=") {
+      equalsGroup = attrStr.slice(i, j2 + 1);
+      i = j2 + 1;
+    }
+    let quoteChar;
+    let value;
+    let k = i;
+    while (k < len && isWhiteSpace(attrStr[k])) k++;
+    if (k < len && (attrStr[k] === '"' || attrStr[k] === "'")) {
+      const valueStart = k + 1;
+      const closeIdx = attrStr.indexOf(attrStr[k], valueStart);
+      if (closeIdx !== -1) {
+        quoteChar = attrStr[k];
+        value = attrStr.slice(valueStart, closeIdx);
+        i = closeIdx + 1;
+      }
+    }
+    const token = { startIndex: tokenStart };
+    token[1] = leadingWs;
+    token[2] = name;
+    token[3] = equalsGroup;
+    token[4] = quoteChar !== void 0 ? true : void 0;
+    token[5] = quoteChar;
+    token[6] = value;
+    tokens.push(token);
+  }
+  return tokens;
+}
+__name(scanAttributeTokens, "scanAttributeTokens");
 function validateAttributeString(attrStr, options) {
-  const matches = getAllMatches(attrStr, validAttrStrRegxp);
+  const matches = scanAttributeTokens(attrStr);
   const attrNames = {};
   for (let i = 0; i < matches.length; i++) {
     if (matches[i][1].length === 0) {
@@ -67579,956 +67626,6 @@ function getPositionFromMatch(match3) {
 __name(getPositionFromMatch, "getPositionFromMatch");
 
 // node_modules/@nodable/entities/src/entities.js
-var BASIC_LATIN = {
-  amp: "&",
-  AMP: "&",
-  lt: "<",
-  LT: "<",
-  gt: ">",
-  GT: ">",
-  quot: '"',
-  QUOT: '"',
-  apos: "'",
-  lsquo: "\u2018",
-  rsquo: "\u2019",
-  ldquo: "\u201C",
-  rdquo: "\u201D",
-  lsquor: "\u201A",
-  rsquor: "\u2019",
-  ldquor: "\u201E",
-  bdquo: "\u201E",
-  comma: ",",
-  period: ".",
-  colon: ":",
-  semi: ";",
-  excl: "!",
-  quest: "?",
-  num: "#",
-  dollar: "$",
-  percent: "%",
-  amp: "&",
-  ast: "*",
-  commat: "@",
-  lowbar: "_",
-  verbar: "|",
-  vert: "|",
-  sol: "/",
-  bsol: "\\",
-  lbrace: "{",
-  rbrace: "}",
-  lbrack: "[",
-  rbrack: "]",
-  lpar: "(",
-  rpar: ")",
-  nbsp: "\xA0",
-  iexcl: "\xA1",
-  cent: "\xA2",
-  pound: "\xA3",
-  curren: "\xA4",
-  yen: "\xA5",
-  brvbar: "\xA6",
-  sect: "\xA7",
-  uml: "\xA8",
-  copy: "\xA9",
-  COPY: "\xA9",
-  ordf: "\xAA",
-  laquo: "\xAB",
-  not: "\xAC",
-  shy: "\xAD",
-  reg: "\xAE",
-  REG: "\xAE",
-  macr: "\xAF",
-  deg: "\xB0",
-  plusmn: "\xB1",
-  sup2: "\xB2",
-  sup3: "\xB3",
-  acute: "\xB4",
-  micro: "\xB5",
-  para: "\xB6",
-  middot: "\xB7",
-  cedil: "\xB8",
-  sup1: "\xB9",
-  ordm: "\xBA",
-  raquo: "\xBB",
-  frac14: "\xBC",
-  frac12: "\xBD",
-  half: "\xBD",
-  frac34: "\xBE",
-  iquest: "\xBF",
-  times: "\xD7",
-  div: "\xF7",
-  divide: "\xF7"
-};
-var LATIN_ACCENTS = {
-  Agrave: "\xC0",
-  agrave: "\xE0",
-  Aacute: "\xC1",
-  aacute: "\xE1",
-  Acirc: "\xC2",
-  acirc: "\xE2",
-  Atilde: "\xC3",
-  atilde: "\xE3",
-  Auml: "\xC4",
-  auml: "\xE4",
-  Aring: "\xC5",
-  aring: "\xE5",
-  AElig: "\xC6",
-  aelig: "\xE6",
-  Ccedil: "\xC7",
-  ccedil: "\xE7",
-  Egrave: "\xC8",
-  egrave: "\xE8",
-  Eacute: "\xC9",
-  eacute: "\xE9",
-  Ecirc: "\xCA",
-  ecirc: "\xEA",
-  Euml: "\xCB",
-  euml: "\xEB",
-  Igrave: "\xCC",
-  igrave: "\xEC",
-  Iacute: "\xCD",
-  iacute: "\xED",
-  Icirc: "\xCE",
-  icirc: "\xEE",
-  Iuml: "\xCF",
-  iuml: "\xEF",
-  ETH: "\xD0",
-  eth: "\xF0",
-  Ntilde: "\xD1",
-  ntilde: "\xF1",
-  Ograve: "\xD2",
-  ograve: "\xF2",
-  Oacute: "\xD3",
-  oacute: "\xF3",
-  Ocirc: "\xD4",
-  ocirc: "\xF4",
-  Otilde: "\xD5",
-  otilde: "\xF5",
-  Ouml: "\xD6",
-  ouml: "\xF6",
-  Oslash: "\xD8",
-  oslash: "\xF8",
-  Ugrave: "\xD9",
-  ugrave: "\xF9",
-  Uacute: "\xDA",
-  uacute: "\xFA",
-  Ucirc: "\xDB",
-  ucirc: "\xFB",
-  Uuml: "\xDC",
-  uuml: "\xFC",
-  Yacute: "\xDD",
-  yacute: "\xFD",
-  THORN: "\xDE",
-  thorn: "\xFE",
-  szlig: "\xDF",
-  yuml: "\xFF",
-  Yuml: "\u0178"
-};
-var LATIN_EXTENDED = {
-  Amacr: "\u0100",
-  amacr: "\u0101",
-  Abreve: "\u0102",
-  abreve: "\u0103",
-  Aogon: "\u0104",
-  aogon: "\u0105",
-  Cacute: "\u0106",
-  cacute: "\u0107",
-  Ccirc: "\u0108",
-  ccirc: "\u0109",
-  Cdot: "\u010A",
-  cdot: "\u010B",
-  Ccaron: "\u010C",
-  ccaron: "\u010D",
-  Dcaron: "\u010E",
-  dcaron: "\u010F",
-  Dstrok: "\u0110",
-  dstrok: "\u0111",
-  Emacr: "\u0112",
-  emacr: "\u0113",
-  Ecaron: "\u011A",
-  ecaron: "\u011B",
-  Edot: "\u0116",
-  edot: "\u0117",
-  Eogon: "\u0118",
-  eogon: "\u0119",
-  Gcirc: "\u011C",
-  gcirc: "\u011D",
-  Gbreve: "\u011E",
-  gbreve: "\u011F",
-  Gdot: "\u0120",
-  gdot: "\u0121",
-  Gcedil: "\u0122",
-  Hcirc: "\u0124",
-  hcirc: "\u0125",
-  Hstrok: "\u0126",
-  hstrok: "\u0127",
-  Itilde: "\u0128",
-  itilde: "\u0129",
-  Imacr: "\u012A",
-  imacr: "\u012B",
-  Iogon: "\u012E",
-  iogon: "\u012F",
-  Idot: "\u0130",
-  IJlig: "\u0132",
-  ijlig: "\u0133",
-  Jcirc: "\u0134",
-  jcirc: "\u0135",
-  Kcedil: "\u0136",
-  kcedil: "\u0137",
-  kgreen: "\u0138",
-  Lacute: "\u0139",
-  lacute: "\u013A",
-  Lcedil: "\u013B",
-  lcedil: "\u013C",
-  Lcaron: "\u013D",
-  lcaron: "\u013E",
-  Lmidot: "\u013F",
-  lmidot: "\u0140",
-  Lstrok: "\u0141",
-  lstrok: "\u0142",
-  Nacute: "\u0143",
-  nacute: "\u0144",
-  Ncaron: "\u0147",
-  ncaron: "\u0148",
-  Ncedil: "\u0145",
-  ncedil: "\u0146",
-  ENG: "\u014A",
-  eng: "\u014B",
-  Omacr: "\u014C",
-  omacr: "\u014D",
-  Odblac: "\u0150",
-  odblac: "\u0151",
-  OElig: "\u0152",
-  oelig: "\u0153",
-  Racute: "\u0154",
-  racute: "\u0155",
-  Rcaron: "\u0158",
-  rcaron: "\u0159",
-  Rcedil: "\u0156",
-  rcedil: "\u0157",
-  Sacute: "\u015A",
-  sacute: "\u015B",
-  Scirc: "\u015C",
-  scirc: "\u015D",
-  Scedil: "\u015E",
-  scedil: "\u015F",
-  Scaron: "\u0160",
-  scaron: "\u0161",
-  Tcedil: "\u0162",
-  tcedil: "\u0163",
-  Tcaron: "\u0164",
-  tcaron: "\u0165",
-  Tstrok: "\u0166",
-  tstrok: "\u0167",
-  Utilde: "\u0168",
-  utilde: "\u0169",
-  Umacr: "\u016A",
-  umacr: "\u016B",
-  Ubreve: "\u016C",
-  ubreve: "\u016D",
-  Uring: "\u016E",
-  uring: "\u016F",
-  Udblac: "\u0170",
-  udblac: "\u0171",
-  Uogon: "\u0172",
-  uogon: "\u0173",
-  Wcirc: "\u0174",
-  wcirc: "\u0175",
-  Ycirc: "\u0176",
-  ycirc: "\u0177",
-  Zacute: "\u0179",
-  zacute: "\u017A",
-  Zdot: "\u017B",
-  zdot: "\u017C",
-  Zcaron: "\u017D",
-  zcaron: "\u017E"
-};
-var GREEK = {
-  Alpha: "\u0391",
-  alpha: "\u03B1",
-  Beta: "\u0392",
-  beta: "\u03B2",
-  Gamma: "\u0393",
-  gamma: "\u03B3",
-  Delta: "\u0394",
-  delta: "\u03B4",
-  Epsilon: "\u0395",
-  epsilon: "\u03B5",
-  epsiv: "\u03F5",
-  varepsilon: "\u03F5",
-  Zeta: "\u0396",
-  zeta: "\u03B6",
-  Eta: "\u0397",
-  eta: "\u03B7",
-  Theta: "\u0398",
-  theta: "\u03B8",
-  thetasym: "\u03D1",
-  vartheta: "\u03D1",
-  Iota: "\u0399",
-  iota: "\u03B9",
-  Kappa: "\u039A",
-  kappa: "\u03BA",
-  kappav: "\u03F0",
-  varkappa: "\u03F0",
-  Lambda: "\u039B",
-  lambda: "\u03BB",
-  Mu: "\u039C",
-  mu: "\u03BC",
-  Nu: "\u039D",
-  nu: "\u03BD",
-  Xi: "\u039E",
-  xi: "\u03BE",
-  Omicron: "\u039F",
-  omicron: "\u03BF",
-  Pi: "\u03A0",
-  pi: "\u03C0",
-  piv: "\u03D6",
-  varpi: "\u03D6",
-  Rho: "\u03A1",
-  rho: "\u03C1",
-  rhov: "\u03F1",
-  varrho: "\u03F1",
-  Sigma: "\u03A3",
-  sigma: "\u03C3",
-  sigmaf: "\u03C2",
-  sigmav: "\u03C2",
-  varsigma: "\u03C2",
-  Tau: "\u03A4",
-  tau: "\u03C4",
-  Upsilon: "\u03A5",
-  upsilon: "\u03C5",
-  upsi: "\u03C5",
-  Upsi: "\u03D2",
-  upsih: "\u03D2",
-  Phi: "\u03A6",
-  phi: "\u03C6",
-  phiv: "\u03D5",
-  varphi: "\u03D5",
-  Chi: "\u03A7",
-  chi: "\u03C7",
-  Psi: "\u03A8",
-  psi: "\u03C8",
-  Omega: "\u03A9",
-  omega: "\u03C9",
-  ohm: "\u03A9",
-  Gammad: "\u03DC",
-  gammad: "\u03DD",
-  digamma: "\u03DD"
-};
-var CYRILLIC = {
-  Afr: "\u{1D504}",
-  afr: "\u{1D51E}",
-  Acy: "\u0410",
-  acy: "\u0430",
-  Bcy: "\u0411",
-  bcy: "\u0431",
-  Vcy: "\u0412",
-  vcy: "\u0432",
-  Gcy: "\u0413",
-  gcy: "\u0433",
-  Dcy: "\u0414",
-  dcy: "\u0434",
-  IEcy: "\u0415",
-  iecy: "\u0435",
-  IOcy: "\u0401",
-  iocy: "\u0451",
-  ZHcy: "\u0416",
-  zhcy: "\u0436",
-  Zcy: "\u0417",
-  zcy: "\u0437",
-  Icy: "\u0418",
-  icy: "\u0438",
-  Jcy: "\u0419",
-  jcy: "\u0439",
-  Kcy: "\u041A",
-  kcy: "\u043A",
-  Lcy: "\u041B",
-  lcy: "\u043B",
-  Mcy: "\u041C",
-  mcy: "\u043C",
-  Ncy: "\u041D",
-  ncy: "\u043D",
-  Ocy: "\u041E",
-  ocy: "\u043E",
-  Pcy: "\u041F",
-  pcy: "\u043F",
-  Rcy: "\u0420",
-  rcy: "\u0440",
-  Scy: "\u0421",
-  scy: "\u0441",
-  Tcy: "\u0422",
-  tcy: "\u0442",
-  Ucy: "\u0423",
-  ucy: "\u0443",
-  Fcy: "\u0424",
-  fcy: "\u0444",
-  KHcy: "\u0425",
-  khcy: "\u0445",
-  TScy: "\u0426",
-  tscy: "\u0446",
-  CHcy: "\u0427",
-  chcy: "\u0447",
-  SHcy: "\u0428",
-  shcy: "\u0448",
-  SHCHcy: "\u0429",
-  shchcy: "\u0449",
-  HARDcy: "\u042A",
-  hardcy: "\u044A",
-  Ycy: "\u042B",
-  ycy: "\u044B",
-  SOFTcy: "\u042C",
-  softcy: "\u044C",
-  Ecy: "\u042D",
-  ecy: "\u044D",
-  YUcy: "\u042E",
-  yucy: "\u044E",
-  YAcy: "\u042F",
-  yacy: "\u044F",
-  DJcy: "\u0402",
-  djcy: "\u0452",
-  GJcy: "\u0403",
-  gjcy: "\u0453",
-  Jukcy: "\u0404",
-  jukcy: "\u0454",
-  DScy: "\u0405",
-  dscy: "\u0455",
-  Iukcy: "\u0406",
-  iukcy: "\u0456",
-  YIcy: "\u0407",
-  yicy: "\u0457",
-  Jsercy: "\u0408",
-  jsercy: "\u0458",
-  LJcy: "\u0409",
-  ljcy: "\u0459",
-  NJcy: "\u040A",
-  njcy: "\u045A",
-  TSHcy: "\u040B",
-  tshcy: "\u045B",
-  KJcy: "\u040C",
-  kjcy: "\u045C",
-  Ubrcy: "\u040E",
-  ubrcy: "\u045E",
-  DZcy: "\u040F",
-  dzcy: "\u045F"
-};
-var MATH = {
-  plus: "+",
-  minus: "\u2212",
-  mnplus: "\u2213",
-  mp: "\u2213",
-  pm: "\xB1",
-  times: "\xD7",
-  div: "\xF7",
-  divide: "\xF7",
-  sdot: "\u22C5",
-  star: "\u2606",
-  starf: "\u2605",
-  bigstar: "\u2605",
-  lowast: "\u2217",
-  ast: "*",
-  midast: "*",
-  compfn: "\u2218",
-  smallcircle: "\u2218",
-  bullet: "\u2022",
-  bull: "\u2022",
-  nbsp: "\xA0",
-  hellip: "\u2026",
-  mldr: "\u2026",
-  prime: "\u2032",
-  Prime: "\u2033",
-  tprime: "\u2034",
-  bprime: "\u2035",
-  backprime: "\u2035",
-  minus: "\u2212",
-  minusd: "\u2238",
-  dotminus: "\u2238",
-  plusdo: "\u2214",
-  dotplus: "\u2214",
-  plusmn: "\xB1",
-  minusplus: "\u2213",
-  mnplus: "\u2213",
-  mp: "\u2213",
-  setminus: "\u2216",
-  smallsetminus: "\u2216",
-  Backslash: "\u2216",
-  setmn: "\u2216",
-  ssetmn: "\u2216",
-  lowbar: "_",
-  verbar: "|",
-  vert: "|",
-  VerticalLine: "|",
-  colon: ":",
-  Colon: "\u2237",
-  Proportion: "\u2237",
-  ratio: "\u2236",
-  equals: "=",
-  ne: "\u2260",
-  nequiv: "\u2262",
-  equiv: "\u2261",
-  Congruent: "\u2261",
-  sim: "\u223C",
-  thicksim: "\u223C",
-  thksim: "\u223C",
-  sime: "\u2243",
-  simeq: "\u2243",
-  TildeEqual: "\u2243",
-  asymp: "\u2248",
-  approx: "\u2248",
-  thickapprox: "\u2248",
-  thkap: "\u2248",
-  TildeTilde: "\u2248",
-  ncong: "\u2247",
-  cong: "\u2245",
-  TildeFullEqual: "\u2245",
-  asympeq: "\u224D",
-  CupCap: "\u224D",
-  bump: "\u224E",
-  Bumpeq: "\u224E",
-  HumpDownHump: "\u224E",
-  bumpe: "\u224F",
-  bumpeq: "\u224F",
-  HumpEqual: "\u224F",
-  dotminus: "\u2238",
-  minusd: "\u2238",
-  plusdo: "\u2214",
-  dotplus: "\u2214",
-  le: "\u2264",
-  LessEqual: "\u2264",
-  ge: "\u2265",
-  GreaterEqual: "\u2265",
-  lesseqgtr: "\u22DA",
-  lesseqqgtr: "\u2A8B",
-  greater: ">",
-  less: "<"
-};
-var MATH_ADVANCED = {
-  alefsym: "\u2135",
-  aleph: "\u2135",
-  beth: "\u2136",
-  gimel: "\u2137",
-  daleth: "\u2138",
-  forall: "\u2200",
-  ForAll: "\u2200",
-  part: "\u2202",
-  PartialD: "\u2202",
-  exist: "\u2203",
-  Exists: "\u2203",
-  nexist: "\u2204",
-  nexists: "\u2204",
-  empty: "\u2205",
-  emptyset: "\u2205",
-  emptyv: "\u2205",
-  varnothing: "\u2205",
-  nabla: "\u2207",
-  Del: "\u2207",
-  isin: "\u2208",
-  isinv: "\u2208",
-  in: "\u2208",
-  Element: "\u2208",
-  notin: "\u2209",
-  notinva: "\u2209",
-  ni: "\u220B",
-  niv: "\u220B",
-  SuchThat: "\u220B",
-  ReverseElement: "\u220B",
-  notni: "\u220C",
-  notniva: "\u220C",
-  prod: "\u220F",
-  Product: "\u220F",
-  coprod: "\u2210",
-  Coproduct: "\u2210",
-  sum: "\u2211",
-  Sum: "\u2211",
-  minus: "\u2212",
-  mp: "\u2213",
-  plusdo: "\u2214",
-  dotplus: "\u2214",
-  setminus: "\u2216",
-  lowast: "\u2217",
-  radic: "\u221A",
-  Sqrt: "\u221A",
-  prop: "\u221D",
-  propto: "\u221D",
-  Proportional: "\u221D",
-  varpropto: "\u221D",
-  infin: "\u221E",
-  infintie: "\u29DD",
-  ang: "\u2220",
-  angle: "\u2220",
-  angmsd: "\u2221",
-  measuredangle: "\u2221",
-  angsph: "\u2222",
-  mid: "\u2223",
-  VerticalBar: "\u2223",
-  nmid: "\u2224",
-  nsmid: "\u2224",
-  npar: "\u2226",
-  parallel: "\u2225",
-  spar: "\u2225",
-  nparallel: "\u2226",
-  nspar: "\u2226",
-  and: "\u2227",
-  wedge: "\u2227",
-  or: "\u2228",
-  vee: "\u2228",
-  cap: "\u2229",
-  cup: "\u222A",
-  int: "\u222B",
-  Integral: "\u222B",
-  conint: "\u222E",
-  ContourIntegral: "\u222E",
-  Conint: "\u222F",
-  DoubleContourIntegral: "\u222F",
-  Cconint: "\u2230",
-  there4: "\u2234",
-  therefore: "\u2234",
-  Therefore: "\u2234",
-  becaus: "\u2235",
-  because: "\u2235",
-  Because: "\u2235",
-  ratio: "\u2236",
-  Proportion: "\u2237",
-  minusd: "\u2238",
-  dotminus: "\u2238",
-  mDDot: "\u223A",
-  homtht: "\u223B",
-  sim: "\u223C",
-  bsimg: "\u223D",
-  backsim: "\u223D",
-  ac: "\u223E",
-  mstpos: "\u223E",
-  acd: "\u223F",
-  VerticalTilde: "\u2240",
-  wr: "\u2240",
-  wreath: "\u2240",
-  nsime: "\u2244",
-  nsimeq: "\u2244",
-  nsimeq: "\u2244",
-  ncong: "\u2247",
-  simne: "\u2246",
-  ncongdot: "\u2A6D\u0338",
-  ngsim: "\u2275",
-  nsim: "\u2241",
-  napprox: "\u2249",
-  nap: "\u2249",
-  ngeq: "\u2271",
-  nge: "\u2271",
-  nleq: "\u2270",
-  nle: "\u2270",
-  ngtr: "\u226F",
-  ngt: "\u226F",
-  nless: "\u226E",
-  nlt: "\u226E",
-  nprec: "\u2280",
-  npr: "\u2280",
-  nsucc: "\u2281",
-  nsc: "\u2281"
-};
-var ARROWS = {
-  larr: "\u2190",
-  leftarrow: "\u2190",
-  LeftArrow: "\u2190",
-  uarr: "\u2191",
-  uparrow: "\u2191",
-  UpArrow: "\u2191",
-  rarr: "\u2192",
-  rightarrow: "\u2192",
-  RightArrow: "\u2192",
-  darr: "\u2193",
-  downarrow: "\u2193",
-  DownArrow: "\u2193",
-  harr: "\u2194",
-  leftrightarrow: "\u2194",
-  LeftRightArrow: "\u2194",
-  varr: "\u2195",
-  updownarrow: "\u2195",
-  UpDownArrow: "\u2195",
-  nwarr: "\u2196",
-  nwarrow: "\u2196",
-  UpperLeftArrow: "\u2196",
-  nearr: "\u2197",
-  nearrow: "\u2197",
-  UpperRightArrow: "\u2197",
-  searr: "\u2198",
-  searrow: "\u2198",
-  LowerRightArrow: "\u2198",
-  swarr: "\u2199",
-  swarrow: "\u2199",
-  LowerLeftArrow: "\u2199",
-  lArr: "\u21D0",
-  Leftarrow: "\u21D0",
-  uArr: "\u21D1",
-  Uparrow: "\u21D1",
-  rArr: "\u21D2",
-  Rightarrow: "\u21D2",
-  dArr: "\u21D3",
-  Downarrow: "\u21D3",
-  hArr: "\u21D4",
-  Leftrightarrow: "\u21D4",
-  iff: "\u21D4",
-  vArr: "\u21D5",
-  Updownarrow: "\u21D5",
-  lAarr: "\u21DA",
-  Lleftarrow: "\u21DA",
-  rAarr: "\u21DB",
-  Rrightarrow: "\u21DB",
-  lrarr: "\u21C6",
-  leftrightarrows: "\u21C6",
-  rlarr: "\u21C4",
-  rightleftarrows: "\u21C4",
-  lrhar: "\u21CB",
-  leftrightharpoons: "\u21CB",
-  ReverseEquilibrium: "\u21CB",
-  rlhar: "\u21CC",
-  rightleftharpoons: "\u21CC",
-  Equilibrium: "\u21CC",
-  udarr: "\u21C5",
-  UpArrowDownArrow: "\u21C5",
-  duarr: "\u21F5",
-  DownArrowUpArrow: "\u21F5",
-  llarr: "\u21C7",
-  leftleftarrows: "\u21C7",
-  rrarr: "\u21C9",
-  rightrightarrows: "\u21C9",
-  ddarr: "\u21CA",
-  downdownarrows: "\u21CA",
-  har: "\u21BD",
-  lhard: "\u21BD",
-  leftharpoondown: "\u21BD",
-  lharu: "\u21BC",
-  leftharpoonup: "\u21BC",
-  rhard: "\u21C1",
-  rightharpoondown: "\u21C1",
-  rharu: "\u21C0",
-  rightharpoonup: "\u21C0",
-  lsh: "\u21B0",
-  Lsh: "\u21B0",
-  rsh: "\u21B1",
-  Rsh: "\u21B1",
-  ldsh: "\u21B2",
-  rdsh: "\u21B3",
-  hookleftarrow: "\u21A9",
-  hookrightarrow: "\u21AA",
-  mapstoleft: "\u21A4",
-  mapstoup: "\u21A5",
-  map: "\u21A6",
-  mapsto: "\u21A6",
-  mapstodown: "\u21A7",
-  crarr: "\u21B5",
-  nwarrow: "\u2196",
-  nearrow: "\u2197",
-  searrow: "\u2198",
-  swarrow: "\u2199",
-  nleftarrow: "\u219A",
-  nleftrightarrow: "\u21AE",
-  nrightarrow: "\u219B",
-  nrarr: "\u219B",
-  larrtl: "\u21A2",
-  rarrtl: "\u21A3",
-  leftarrowtail: "\u21A2",
-  rightarrowtail: "\u21A3",
-  twoheadleftarrow: "\u219E",
-  twoheadrightarrow: "\u21A0",
-  Larr: "\u219E",
-  Rarr: "\u21A0",
-  larrhk: "\u21A9",
-  rarrhk: "\u21AA",
-  larrlp: "\u21AB",
-  looparrowleft: "\u21AB",
-  rarrlp: "\u21AC",
-  looparrowright: "\u21AC",
-  harrw: "\u21AD",
-  leftrightsquigarrow: "\u21AD",
-  nrarrw: "\u219D\u0338",
-  rarrw: "\u219D",
-  rightsquigarrow: "\u219D",
-  larrbfs: "\u291F",
-  rarrbfs: "\u2920",
-  nvHarr: "\u2904",
-  nvlArr: "\u2902",
-  nvrArr: "\u2903",
-  larrfs: "\u291D",
-  rarrfs: "\u291E",
-  Map: "\u2905",
-  larrsim: "\u2973",
-  rarrsim: "\u2974",
-  harrcir: "\u2948",
-  Uarrocir: "\u2949",
-  lurdshar: "\u294A",
-  ldrdhar: "\u2967",
-  ldrushar: "\u294B",
-  rdldhar: "\u2969",
-  lrhard: "\u296D",
-  rlhar: "\u21CC",
-  uharr: "\u21BE",
-  uharl: "\u21BF",
-  dharr: "\u21C2",
-  dharl: "\u21C3",
-  Uarr: "\u219F",
-  Darr: "\u21A1",
-  zigrarr: "\u21DD",
-  nwArr: "\u21D6",
-  neArr: "\u21D7",
-  seArr: "\u21D8",
-  swArr: "\u21D9",
-  nharr: "\u21AE",
-  nhArr: "\u21CE",
-  nlarr: "\u219A",
-  nlArr: "\u21CD",
-  nrarr: "\u219B",
-  nrArr: "\u21CF",
-  larrb: "\u21E4",
-  LeftArrowBar: "\u21E4",
-  rarrb: "\u21E5",
-  RightArrowBar: "\u21E5"
-};
-var SHAPES = {
-  square: "\u25A1",
-  Square: "\u25A1",
-  squ: "\u25A1",
-  squf: "\u25AA",
-  squarf: "\u25AA",
-  blacksquar: "\u25AA",
-  blacksquare: "\u25AA",
-  FilledVerySmallSquare: "\u25AA",
-  blk34: "\u2593",
-  blk12: "\u2592",
-  blk14: "\u2591",
-  block: "\u2588",
-  srect: "\u25AD",
-  rect: "\u25AD",
-  sdot: "\u22C5",
-  sdotb: "\u22A1",
-  dotsquare: "\u22A1",
-  triangle: "\u25B5",
-  tri: "\u25B5",
-  trine: "\u25B5",
-  utri: "\u25B5",
-  triangledown: "\u25BF",
-  dtri: "\u25BF",
-  tridown: "\u25BF",
-  triangleleft: "\u25C3",
-  ltri: "\u25C3",
-  triangleright: "\u25B9",
-  rtri: "\u25B9",
-  blacktriangle: "\u25B4",
-  utrif: "\u25B4",
-  blacktriangledown: "\u25BE",
-  dtrif: "\u25BE",
-  blacktriangleleft: "\u25C2",
-  ltrif: "\u25C2",
-  blacktriangleright: "\u25B8",
-  rtrif: "\u25B8",
-  loz: "\u25CA",
-  lozenge: "\u25CA",
-  blacklozenge: "\u29EB",
-  lozf: "\u29EB",
-  bigcirc: "\u25EF",
-  xcirc: "\u25EF",
-  circ: "\u02C6",
-  Circle: "\u25CB",
-  cir: "\u25CB",
-  o: "\u25CB",
-  bullet: "\u2022",
-  bull: "\u2022",
-  hellip: "\u2026",
-  mldr: "\u2026",
-  nldr: "\u2025",
-  boxh: "\u2500",
-  HorizontalLine: "\u2500",
-  boxv: "\u2502",
-  boxdr: "\u250C",
-  boxdl: "\u2510",
-  boxur: "\u2514",
-  boxul: "\u2518",
-  boxvr: "\u251C",
-  boxvl: "\u2524",
-  boxhd: "\u252C",
-  boxhu: "\u2534",
-  boxvh: "\u253C",
-  boxH: "\u2550",
-  boxV: "\u2551",
-  boxdR: "\u2552",
-  boxDr: "\u2553",
-  boxDR: "\u2554",
-  boxDl: "\u2555",
-  boxdL: "\u2556",
-  boxDL: "\u2557",
-  boxuR: "\u2558",
-  boxUr: "\u2559",
-  boxUR: "\u255A",
-  boxUl: "\u255C",
-  boxuL: "\u255B",
-  boxUL: "\u255D",
-  boxvR: "\u255E",
-  boxVr: "\u255F",
-  boxVR: "\u2560",
-  boxVl: "\u2562",
-  boxvL: "\u2561",
-  boxVL: "\u2563",
-  boxHd: "\u2564",
-  boxhD: "\u2565",
-  boxHD: "\u2566",
-  boxHu: "\u2567",
-  boxhU: "\u2568",
-  boxHU: "\u2569",
-  boxvH: "\u256A",
-  boxVh: "\u256B",
-  boxVH: "\u256C"
-};
-var PUNCTUATION = {
-  excl: "!",
-  iexcl: "\xA1",
-  brvbar: "\xA6",
-  sect: "\xA7",
-  uml: "\xA8",
-  copy: "\xA9",
-  ordf: "\xAA",
-  laquo: "\xAB",
-  not: "\xAC",
-  shy: "\xAD",
-  reg: "\xAE",
-  macr: "\xAF",
-  deg: "\xB0",
-  plusmn: "\xB1",
-  sup2: "\xB2",
-  sup3: "\xB3",
-  acute: "\xB4",
-  micro: "\xB5",
-  para: "\xB6",
-  middot: "\xB7",
-  cedil: "\xB8",
-  sup1: "\xB9",
-  ordm: "\xBA",
-  raquo: "\xBB",
-  frac14: "\xBC",
-  frac12: "\xBD",
-  frac34: "\xBE",
-  iquest: "\xBF",
-  nbsp: "\xA0",
-  comma: ",",
-  period: ".",
-  colon: ":",
-  semi: ";",
-  vert: "|",
-  Verbar: "\u2016",
-  verbar: "|",
-  dblac: "\u02DD",
-  circ: "\u02C6",
-  caron: "\u02C7",
-  breve: "\u02D8",
-  dot: "\u02D9",
-  ring: "\u02DA",
-  ogon: "\u02DB",
-  tilde: "\u02DC",
-  DiacriticalGrave: "`",
-  DiacriticalAcute: "\xB4",
-  DiacriticalTilde: "\u02DC",
-  DiacriticalDot: "\u02D9",
-  DiacriticalDoubleAcute: "\u02DD",
-  grave: "`",
-  acute: "\xB4"
-};
 var CURRENCY = {
   cent: "\xA2",
   pound: "\xA3",
@@ -68536,7 +67633,6 @@ var CURRENCY = {
   yen: "\xA5",
   euro: "\u20AC",
   dollar: "$",
-  euro: "\u20AC",
   fnof: "\u0192",
   inr: "\u20B9",
   af: "\u060B",
@@ -68546,107 +67642,6 @@ var CURRENCY = {
   won: "\u20A9",
   yuan: "\xA5",
   cedil: "\xB8"
-};
-var FRACTIONS = {
-  frac12: "\xBD",
-  half: "\xBD",
-  frac13: "\u2153",
-  frac14: "\xBC",
-  frac15: "\u2155",
-  frac16: "\u2159",
-  frac18: "\u215B",
-  frac23: "\u2154",
-  frac25: "\u2156",
-  frac34: "\xBE",
-  frac35: "\u2157",
-  frac38: "\u215C",
-  frac45: "\u2158",
-  frac56: "\u215A",
-  frac58: "\u215D",
-  frac78: "\u215E",
-  frasl: "\u2044"
-};
-var MISC_SYMBOLS = {
-  trade: "\u2122",
-  TRADE: "\u2122",
-  telrec: "\u2315",
-  target: "\u2316",
-  ulcorn: "\u231C",
-  ulcorner: "\u231C",
-  urcorn: "\u231D",
-  urcorner: "\u231D",
-  dlcorn: "\u231E",
-  llcorner: "\u231E",
-  drcorn: "\u231F",
-  lrcorner: "\u231F",
-  intercal: "\u22BA",
-  intcal: "\u22BA",
-  oplus: "\u2295",
-  CirclePlus: "\u2295",
-  ominus: "\u2296",
-  CircleMinus: "\u2296",
-  otimes: "\u2297",
-  CircleTimes: "\u2297",
-  osol: "\u2298",
-  odot: "\u2299",
-  CircleDot: "\u2299",
-  oast: "\u229B",
-  circledast: "\u229B",
-  odash: "\u229D",
-  circleddash: "\u229D",
-  ocirc: "\u229A",
-  circledcirc: "\u229A",
-  boxplus: "\u229E",
-  plusb: "\u229E",
-  boxminus: "\u229F",
-  minusb: "\u229F",
-  boxtimes: "\u22A0",
-  timesb: "\u22A0",
-  boxdot: "\u22A1",
-  sdotb: "\u22A1",
-  veebar: "\u22BB",
-  vee: "\u2228",
-  barvee: "\u22BD",
-  and: "\u2227",
-  wedge: "\u2227",
-  Cap: "\u22D2",
-  Cup: "\u22D3",
-  Fork: "\u22D4",
-  pitchfork: "\u22D4",
-  epar: "\u22D5",
-  ltlarr: "\u2976",
-  nvap: "\u224D\u20D2",
-  nvsim: "\u223C\u20D2",
-  nvge: "\u2265\u20D2",
-  nvle: "\u2264\u20D2",
-  nvlt: "<\u20D2",
-  nvgt: ">\u20D2",
-  nvltrie: "\u22B4\u20D2",
-  nvrtrie: "\u22B5\u20D2",
-  Vdash: "\u22A9",
-  dashv: "\u22A3",
-  vDash: "\u22A8",
-  Vdash: "\u22A9",
-  Vvdash: "\u22AA",
-  nvdash: "\u22AC",
-  nvDash: "\u22AD",
-  nVdash: "\u22AE",
-  nVDash: "\u22AF"
-};
-var ALL_ENTITIES = {
-  ...BASIC_LATIN,
-  ...LATIN_ACCENTS,
-  ...LATIN_EXTENDED,
-  ...GREEK,
-  ...CYRILLIC,
-  ...MATH,
-  ...MATH_ADVANCED,
-  ...ARROWS,
-  ...SHAPES,
-  ...PUNCTUATION,
-  ...CURRENCY,
-  ...FRACTIONS,
-  ...MISC_SYMBOLS
 };
 var XML = {
   amp: "&",
@@ -68679,6 +67674,14 @@ var COMMON_HTML = {
 };
 
 // node_modules/@nodable/entities/src/EntityDecoder.js
+var ENTITY_ACTION = Object.freeze({
+  /** Resolve and expand the entity normally. */
+  ALLOW: "allow",
+  /** Silently skip this entity — it will not be registered. */
+  BLOCK: "block",
+  /** Throw an error, aborting entity registration entirely. */
+  THROW: "throw"
+});
 var SPECIAL_CHARS = new Set("!?\\\\/[]$%{}^&*()<>|+");
 function validateEntityName(name) {
   if (name[0] === "#") {
@@ -68765,6 +67768,14 @@ var EntityDecoder = class {
    *   the effective action is max(onNCR, rangeMinimum).
    * @param {'remove'|'throw'} [options.ncr.nullNCR='remove']
    *   Action for U+0000 (null). 'allow' and 'leave' are clamped to 'remove' since null is never safe.
+   * @param {((name: string, value: string) => 'allow'|'block'|'throw')|null} [options.onExternalEntity=null]
+   *   Hook called when an external entity is registered via `setExternalEntities()` or
+   *   `addExternalEntity()`. Return `ENTITY_ACTION.ALLOW` to accept the entity,
+   *   `ENTITY_ACTION.BLOCK` to silently skip it, or `ENTITY_ACTION.THROW` to abort with an error.
+   * @param {((name: string, value: string) => 'allow'|'block'|'throw')|null} [options.onInputEntity=null]
+   *   Hook called when an input entity is registered via `addInputEntities()`. Return
+   *   `ENTITY_ACTION.ALLOW` to accept, `ENTITY_ACTION.BLOCK` to silently skip, or
+   *   `ENTITY_ACTION.THROW` to abort with an error.
    */
   constructor(options = {}) {
     this._limit = options.limit || {};
@@ -68784,6 +67795,33 @@ var EntityDecoder = class {
     this._ncrXmlVersion = ncrCfg.xmlVersion;
     this._ncrOnLevel = ncrCfg.onLevel;
     this._ncrNullLevel = ncrCfg.nullLevel;
+    this._onExternalEntity = typeof options.onExternalEntity === "function" ? options.onExternalEntity : null;
+    this._onInputEntity = typeof options.onInputEntity === "function" ? options.onInputEntity : null;
+  }
+  // -------------------------------------------------------------------------
+  // Private: registration hook dispatch
+  // -------------------------------------------------------------------------
+  /**
+   * Invoke a registration hook for a single entity name/value pair.
+   * Returns true when the entity should be accepted, false when it should be
+   * silently skipped (BLOCK), and throws when the hook returns THROW.
+   *
+   * @param {((name: string, value: string) => 'allow'|'block'|'throw')|null} hook
+   * @param {string} name
+   * @param {string} value
+   * @param {string} context  — used in error messages ('external' | 'input')
+   * @returns {boolean}  true = accept, false = skip
+   */
+  _applyRegistrationHook(hook, name, value, context3) {
+    if (!hook) return true;
+    const action6 = hook(name, value);
+    if (action6 === ENTITY_ACTION.BLOCK) return false;
+    if (action6 === ENTITY_ACTION.THROW) {
+      throw new Error(
+        `[EntityDecoder] Registration of ${context3} entity "&${name};" was rejected by hook`
+      );
+    }
+    return true;
   }
   // -------------------------------------------------------------------------
   // Persistent external entity registration
@@ -68791,6 +67829,9 @@ var EntityDecoder = class {
   /**
    * Replace the full set of persistent external entities.
    * All keys are validated — throws on invalid characters.
+   * If `onExternalEntity` is set, it is called once per entry; entries that
+   * return `ENTITY_ACTION.BLOCK` are silently omitted, `ENTITY_ACTION.THROW`
+   * aborts the whole call.
    * @param {Record<string, string | { regex?: RegExp, val: string }>} map
    */
   setExternalEntities(map) {
@@ -68799,17 +67840,32 @@ var EntityDecoder = class {
         validateEntityName(key);
       }
     }
-    this._externalMap = mergeEntityMaps(map);
+    if (!this._onExternalEntity) {
+      this._externalMap = mergeEntityMaps(map);
+      return;
+    }
+    const flat = mergeEntityMaps(map);
+    const filtered = /* @__PURE__ */ Object.create(null);
+    for (const [name, value] of Object.entries(flat)) {
+      if (this._applyRegistrationHook(this._onExternalEntity, name, value, "external")) {
+        filtered[name] = value;
+      }
+    }
+    this._externalMap = filtered;
   }
   /**
    * Add a single persistent external entity.
+   * If `onExternalEntity` is set it is called before the entity is stored;
+   * `ENTITY_ACTION.BLOCK` silently skips storage, `ENTITY_ACTION.THROW` raises.
    * @param {string} key
    * @param {string} value
    */
   addExternalEntity(key, value) {
     validateEntityName(key);
     if (typeof value === "string" && value.indexOf("&") === -1) {
-      this._externalMap[key] = value;
+      if (this._applyRegistrationHook(this._onExternalEntity, key, value, "external")) {
+        this._externalMap[key] = value;
+      }
     }
   }
   // -------------------------------------------------------------------------
@@ -68818,12 +67874,25 @@ var EntityDecoder = class {
   /**
    * Inject DOCTYPE entities for the current document.
    * Also resets per-document expansion counters.
+   * If `onInputEntity` is set it is called once per entry; entries returning
+   * `ENTITY_ACTION.BLOCK` are silently omitted, `ENTITY_ACTION.THROW` aborts.
    * @param {Record<string, string | { regx?: RegExp, regex?: RegExp, val: string }>} map
    */
   addInputEntities(map) {
     this._totalExpansions = 0;
     this._expandedLength = 0;
-    this._inputMap = mergeEntityMaps(map);
+    if (!this._onInputEntity) {
+      this._inputMap = mergeEntityMaps(map);
+      return;
+    }
+    const flat = mergeEntityMaps(map);
+    const filtered = /* @__PURE__ */ Object.create(null);
+    for (const [name, value] of Object.entries(flat)) {
+      if (this._applyRegistrationHook(this._onInputEntity, name, value, "input")) {
+        filtered[name] = value;
+      }
+    }
+    this._inputMap = filtered;
   }
   // -------------------------------------------------------------------------
   // Per-document reset
@@ -68861,6 +67930,7 @@ var EntityDecoder = class {
    */
   decode(str) {
     if (typeof str !== "string" || str.length === 0) return str;
+    if (str.indexOf("&") === -1) return str;
     const original = str;
     const chunks = [];
     const len = str.length;
@@ -69081,7 +68151,8 @@ var defaultOptions2 = {
   numberParseOptions: {
     hex: true,
     leadingZeros: true,
-    eNotation: true
+    eNotation: true,
+    unicode: false
   },
   tagValueProcessor: /* @__PURE__ */ __name(function(tagName, val) {
     return val;
@@ -69220,8 +68291,17 @@ var XmlNode = class {
     } else {
       this.child.push({ [node.tagname]: node.child });
     }
+    this.addStartIndex(startIndex);
+  }
+  addStartIndex(startIndex) {
     if (startIndex !== void 0) {
       this.child[this.child.length - 1][METADATA_SYMBOL] = { startIndex };
+    }
+  }
+  addEndIndex(endIndex) {
+    const lastChild = this.child[this.child.length - 1];
+    if (lastChild !== void 0 && lastChild[METADATA_SYMBOL] !== void 0 && lastChild[METADATA_SYMBOL].endIndex === void 0) {
+      lastChild[METADATA_SYMBOL].endIndex = endIndex;
     }
   }
   /** symbol used for metadata */
@@ -69230,14 +68310,68 @@ var XmlNode = class {
   }
 };
 
+// node_modules/xml-naming/src/index.js
+var nameStartChar10 = ":A-Za-z_\xC0-\xD6\xD8-\xF6\xF8-\u02FF\u0370-\u037D\u037F-\u0486\u0488-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD";
+var nameChar10 = nameStartChar10 + "\\-\\.\\d\xB7\u0300-\u036F\u203F-\u2040";
+var nameStartChar11 = ":A-Za-z_\xC0-\u02FF\u0370-\u037D\u037F-\u0486\u0488-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u{10000}-\u{EFFFF}";
+var nameChar11 = nameStartChar11 + "\\-\\.\\d\xB7\u0300-\u036F\u0487\u203F-\u2040";
+var buildRegexes = /* @__PURE__ */ __name((startChar, char, flags = "") => {
+  const ncStart = startChar.replace(":", "");
+  const ncChar = char.replace(":", "");
+  const ncNamePat = `[${ncStart}][${ncChar}]*`;
+  return {
+    name: new RegExp(`^[${startChar}][${char}]*$`, flags),
+    ncName: new RegExp(`^${ncNamePat}$`, flags),
+    qName: new RegExp(`^${ncNamePat}(?::${ncNamePat})?$`, flags),
+    nmToken: new RegExp(`^[${char}]+$`, flags),
+    nmTokens: new RegExp(`^[${char}]+(?:\\s+[${char}]+)*$`, flags)
+  };
+}, "buildRegexes");
+var regexes10 = buildRegexes(nameStartChar10, nameChar10);
+var regexes11 = buildRegexes(nameStartChar11, nameChar11, "u");
+var nameStartCharAscii = ":A-Za-z_";
+var nameCharAscii = nameStartCharAscii + "\\-\\.\\d";
+var regexesAscii = buildRegexes(nameStartCharAscii, nameCharAscii);
+var getRegexes = /* @__PURE__ */ __name((xmlVersion = "1.0", asciiOnly = false) => {
+  if (asciiOnly) return regexesAscii;
+  return xmlVersion === "1.1" ? regexes11 : regexes10;
+}, "getRegexes");
+var qName = /* @__PURE__ */ __name((str, { xmlVersion = "1.0", asciiOnly = false } = {}) => getRegexes(xmlVersion, asciiOnly).
+qName.test(str), "qName");
+var PRODUCTIONS = ["name", "ncName", "qName", "nmToken", "nmTokens"];
+var createValidator = /* @__PURE__ */ __name((production, { xmlVersion = "1.0", asciiOnly = false, maxCacheSize = 2048 } = {}) => {
+  if (!PRODUCTIONS.includes(production)) {
+    throw new TypeError(
+      `Unknown production "${production}". Must be one of: ${PRODUCTIONS.join(", ")}`
+    );
+  }
+  const regex = getRegexes(xmlVersion, asciiOnly)[production];
+  let cache = /* @__PURE__ */ new Map();
+  const validator = /* @__PURE__ */ __name((str) => {
+    const cached = cache.get(str);
+    if (cached !== void 0) return cached;
+    const result = regex.test(str);
+    if (cache.size < maxCacheSize) cache.set(str, result);
+    return result;
+  }, "validator");
+  validator.reset = () => {
+    cache = /* @__PURE__ */ new Map();
+  };
+  return validator;
+}, "createValidator");
+
 // node_modules/fast-xml-parser/src/xmlparser/DocTypeReader.js
 var DocTypeReader = class {
   static {
     __name(this, "DocTypeReader");
   }
-  constructor(options) {
+  constructor(options, xmlVersion) {
     this.suppressValidationErr = !options;
     this.options = options;
+    this.xmlVersion = xmlVersion || 1;
+  }
+  setXmlVersion(xmlVersion = 1) {
+    this.xmlVersion = xmlVersion;
   }
   readDocType(xmlData, i) {
     const entities = /* @__PURE__ */ Object.create(null);
@@ -69247,8 +68381,19 @@ var DocTypeReader = class {
       i = i + 9;
       let angleBracketsCount = 1;
       let hasBody = false, comment = false;
+      let quoteChar = null;
       let exp = "";
       for (; i < xmlData.length; i++) {
+        if (quoteChar !== null) {
+          if (xmlData[i] === quoteChar) quoteChar = null;
+          exp += xmlData[i];
+          continue;
+        }
+        if (!hasBody && !comment && (xmlData[i] === '"' || xmlData[i] === "'")) {
+          quoteChar = xmlData[i];
+          exp += xmlData[i];
+          continue;
+        }
         if (xmlData[i] === "<" && !comment) {
           if (hasBody && hasSeq(xmlData, "!ENTITY", i)) {
             i += 7;
@@ -69295,7 +68440,7 @@ var DocTypeReader = class {
           exp += xmlData[i];
         }
       }
-      if (angleBracketsCount !== 0) {
+      if (quoteChar !== null || angleBracketsCount !== 0) {
         throw new Error(`Unclosed DOCTYPE`);
       }
     } else {
@@ -69310,7 +68455,7 @@ var DocTypeReader = class {
       i++;
     }
     let entityName = xmlData.substring(startIndex, i);
-    validateEntityName2(entityName);
+    validateEntityName2(entityName, { xmlVersion: this.xmlVersion });
     i = skipWhitespace(xmlData, i);
     if (!this.suppressValidationErr) {
       if (xmlData.substring(i, i + 6).toUpperCase() === "SYSTEM") {
@@ -69337,7 +68482,7 @@ var DocTypeReader = class {
       i++;
     }
     let notationName = xmlData.substring(startIndex, i);
-    !this.suppressValidationErr && validateEntityName2(notationName);
+    !this.suppressValidationErr && validateEntityName2(notationName, { xmlVersion: this.xmlVersion });
     i = skipWhitespace(xmlData, i);
     const identifierType = xmlData.substring(i, i + 6).toUpperCase();
     if (!this.suppressValidationErr && identifierType !== "SYSTEM" && identifierType !== "PUBLIC") {
@@ -69386,7 +68531,7 @@ var DocTypeReader = class {
       i++;
     }
     let elementName = xmlData.substring(startIndex, i);
-    if (!this.suppressValidationErr && !isName(elementName)) {
+    if (!this.suppressValidationErr && !qName(elementName, { xmlVersion: this.xmlVersion })) {
       throw new Error(`Invalid element name: "${elementName}"`);
     }
     i = skipWhitespace(xmlData, i);
@@ -69419,14 +68564,14 @@ var DocTypeReader = class {
       i++;
     }
     let elementName = xmlData.substring(startIndex, i);
-    validateEntityName2(elementName);
+    validateEntityName2(elementName, { xmlVersion: this.xmlVersion });
     i = skipWhitespace(xmlData, i);
     startIndex = i;
     while (i < xmlData.length && !/\s/.test(xmlData[i])) {
       i++;
     }
     let attributeName = xmlData.substring(startIndex, i);
-    if (!validateEntityName2(attributeName)) {
+    if (!validateEntityName2(attributeName, { xmlVersion: this.xmlVersion })) {
       throw new Error(`Invalid attribute name: "${attributeName}"`);
     }
     i = skipWhitespace(xmlData, i);
@@ -69447,7 +68592,7 @@ var DocTypeReader = class {
         }
         let notation = xmlData.substring(startIndex2, i);
         notation = notation.trim();
-        if (!validateEntityName2(notation)) {
+        if (!validateEntityName2(notation, { xmlVersion: this.xmlVersion })) {
           throw new Error(`Invalid notation name: "${notation}"`);
         }
         allowedNotations.push(notation);
@@ -69505,26 +68650,259 @@ function hasSeq(data, seq, i) {
   return true;
 }
 __name(hasSeq, "hasSeq");
-function validateEntityName2(name) {
-  if (isName(name))
+function validateEntityName2(name, xmlVersion) {
+  if (qName(name, { xmlVersion }))
     return name;
   else
     throw new Error(`Invalid entity name ${name}`);
 }
 __name(validateEntityName2, "validateEntityName");
 
+// node_modules/anynum/digitTable.js
+var SCRIPT_ZEROS = [
+  // Basic Latin (ASCII) — included for completeness / pass-through
+  48,
+  // 0-9
+  // Arabic scripts
+  1632,
+  // Arabic-Indic ٠١٢٣٤٥٦٧٨٩
+  1776,
+  // Extended Arabic-Indic (Urdu/Persian/Sindhi) ۰۱۲۳
+  // Indic scripts
+  2406,
+  // Devanagari ०१२३४५६७८९
+  2534,
+  // Bengali ০১২৩৪৫৬৭৮৯
+  2662,
+  // Gurmukhi ੦੧੨੩੪੫੬੭੮੯
+  2790,
+  // Gujarati ૦૧૨૩૪૫૬૭૮૯
+  2918,
+  // Odia ୦୧୨୩୪୫୬୭୮୯
+  3046,
+  // Tamil ௦௧௨௩௪௫௬௭௮௯
+  3174,
+  // Telugu ౦౧౨౩౪౫౬౭౮౯
+  3302,
+  // Kannada ೦೧೨೩೪೫೬೭೮೯
+  3430,
+  // Malayalam ൦൧൨൩൪൫൬൭൮൯
+  3558,
+  // Sinhala Archaic ෦෧෨෩෪෫෬෭෮෯
+  // Southeast Asian scripts
+  3664,
+  // Thai ๐๑๒๓๔๕๖๗๘๙
+  3792,
+  // Lao ໐໑໒໓໔໕໖໗໘໙
+  3872,
+  // Tibetan ༠༡༢༣༤༥༦༧༨༩
+  4160,
+  // Myanmar ၀၁၂၃၄၅၆၇၈၉
+  4240,
+  // Myanmar Shan ႐႑႒႓႔႕႖႗႘႙
+  6112,
+  // Khmer ០១២៣៤៥៦៧៨៩
+  6160,
+  // Mongolian ᠐᠑᠒᠓᠔᠕᠖᠗᠘᠙
+  6470,
+  // Limbu ᥆᥇᥈᥉᥊᥋᥌᥍᥎᥏
+  6608,
+  // New Tai Lue ᧐᧑᧒᧓᧔᧕᧖᧗᧘᧙
+  6784,
+  // Tai Tham Hora ᪀᪁᪂᪃᪄᪅᪆᪇᪈᪉
+  6800,
+  // Tai Tham Tham ᪐᪑᪒᪓᪔᪕᪖᪗᪘᪙
+  6992,
+  // Balinese ᭐᭑᭒᭓᭔᭕᭖᭗᭘᭙
+  7088,
+  // Sundanese ᮰᮱᮲᮳᮴᮵᮶᮷᮸᮹
+  7232,
+  // Lepcha ᱀᱁᱂᱃᱄᱅᱆᱇᱈᱉
+  7248,
+  // Ol Chiki ᱐᱑᱒᱓᱔᱕᱖᱗᱘᱙
+  // Fullwidth (CJK context)
+  65296,
+  // Fullwidth ０１２３４５６７８９
+  // Mathematical digit variants (Unicode math block)
+  120782,
+  // Mathematical Bold
+  120792,
+  // Mathematical Double-Struck
+  120802,
+  // Mathematical Sans-Serif
+  120812,
+  // Mathematical Sans-Serif Bold
+  120822,
+  // Mathematical Monospace
+  // Other scripts
+  66720,
+  // Osmanya 𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩
+  68912,
+  // Hanifi Rohingya 𐴰𐴱𐴲𐴳𐴴𐴵𐴶𐴷𐴸𐴹
+  69734,
+  // Brahmi 𑁦𑁧𑁨𑁩𑁪𑁫𑁬𑁭𑁮𑁯
+  69872,
+  // Sora Sompeng 𑃰𑃱𑃲𑃳𑃴𑃵𑃶𑃷𑃸𑃹
+  69942,
+  // Chakma 𑄶𑄷𑄸𑄹𑄺𑄻𑄼𑄽𑄾𑄿
+  70096,
+  // Sharada 𑇐𑇑𑇒𑇓𑇔𑇕𑇖𑇗𑇘𑇙
+  70384,
+  // Khudawadi 𑋰𑋱𑋲𑋳𑋴𑋵𑋶𑋷𑋸𑋹
+  70736,
+  // Newa 𑑐𑑑𑑒𑑓𑑔𑑕𑑖𑑗𑑘𑑙
+  70864,
+  // Tirhuta 𑓐𑓑𑓒𑓓𑓔𑓕𑓖𑓗𑓘𑓙
+  71248,
+  // Modi 𑙐𑙑𑙒𑙓𑙔𑙕𑙖𑙗𑙘𑙙
+  71360,
+  // Takri 𑛀𑛁𑛂𑛃𑛄𑛅𑛆𑛇𑛈𑛉
+  71472,
+  // Ahom 𑜰𑜱𑜲𑜳𑜴𑜵𑜶𑜷𑜸𑜹
+  71904,
+  // Warang Citi 𑣠𑣡𑣢𑣣𑣤𑣥𑣦𑣧𑣨𑣩
+  72016,
+  // Dives Akuru 𑥐𑥑𑥒𑥓𑥔𑥕𑥖𑥗𑥘𑥙
+  72688,
+  // Khitan Small Script 𑯰𑯱𑯲𑯳𑯴𑯵𑯶𑯷𑯸𑯹
+  72784,
+  // Bhaiksuki 𑱐𑱑𑱒𑱓𑱔𑱕𑱖𑱗𑱘𑱙
+  73040,
+  // Masaram Gondi 𑵐𑵑𑵒𑵓𑵔𑵕𑵖𑵗𑵘𑵙
+  73120,
+  // Gunjala Gondi 𑶠𑶡𑶢𑶣𑶤𑶥𑶦𑶧𑶨𑶩
+  73552,
+  // Kawi 𑽐𑽑𑽒𑽓𑽔𑽕𑽖𑽗𑽘𑽙
+  92768,
+  // Mro 𖩠𖩡𖩢𖩣𖩤𖩥𖩦𖩧𖩨𖩩
+  92864,
+  // Tangsa 𖫀𖫁𖫂𖫃𖫄𖫅𖫆𖫇𖫈𖫉
+  93008,
+  // Pahawh Hmong 𖭐𖭑𖭒𖭓𖭔𖭕𖭖𖭗𖭘𖭙
+  123200,
+  // Nyiakeng Puachue Hmong 𞅀𞅁𞅂𞅃𞅄𞅅𞅆𞅇𞅈𞅉
+  123632,
+  // Wancho 𞋰𞋱𞋲𞋳𞋴𞋵𞋶𞋷𞋸𞋹
+  124144,
+  // Nag Mundari 𞓰𞓱𞓲𞓳𞓴𞓵𞓶𞓷𞓸𞓹
+  125264,
+  // Adlam 𞥐𞥑𞥒𞥓𞥔𞥕𞥖𞥗𞥘𞥙
+  130032
+  // Segmented digit symbols 🯰🯱🯲🯳🯴🯵🯶🯷🯸🯹
+];
+var NOT_DIGIT = 255;
+var HIGH_MAP = /* @__PURE__ */ new Map();
+var LOW_MAX = 65535;
+var LOW_MIN = 1632;
+var TABLE_OFFSET = LOW_MIN;
+var TABLE_SIZE = LOW_MAX - LOW_MIN + 1;
+var TABLE = new Uint8Array(TABLE_SIZE).fill(NOT_DIGIT);
+for (const zero of SCRIPT_ZEROS) {
+  for (let d2 = 0; d2 < 10; d2++) {
+    const cp2 = zero + d2;
+    if (cp2 <= LOW_MAX) {
+      TABLE[cp2 - TABLE_OFFSET] = d2;
+    } else {
+      HIGH_MAP.set(cp2, d2);
+    }
+  }
+}
+
+// node_modules/anynum/anynum.js
+var CHAR_0 = 48;
+var CHAR_9 = 57;
+var CHAR_MINUS = 45;
+var MINUS_SET = /* @__PURE__ */ new Set([8722, 65293, 65123]);
+function anynum(str) {
+  if (typeof str !== "string") return str;
+  const len = str.length;
+  if (len === 0) return str;
+  let firstHit = -1;
+  for (let i = 0; i < len; i++) {
+    const cc = str.charCodeAt(i);
+    if (cc >= CHAR_0 && cc <= CHAR_9 || cc === CHAR_MINUS) continue;
+    if (cc < TABLE_OFFSET) {
+      if (MINUS_SET.has(cc)) {
+        firstHit = i;
+        break;
+      }
+      continue;
+    }
+    if (cc >= 55296 && cc <= 56319) {
+      if (i + 1 < len) {
+        const low = str.charCodeAt(i + 1);
+        if (low >= 56320 && low <= 57343) {
+          const cp2 = 65536 + (cc - 55296 << 10) + (low - 56320);
+          if (HIGH_MAP.has(cp2)) {
+            firstHit = i;
+            break;
+          }
+        }
+      }
+      continue;
+    }
+    if (TABLE[cc - TABLE_OFFSET] !== NOT_DIGIT || MINUS_SET.has(cc)) {
+      firstHit = i;
+      break;
+    }
+  }
+  if (firstHit === -1) return str;
+  const chars = [];
+  if (firstHit > 0) chars.push(str.slice(0, firstHit));
+  for (let i = firstHit; i < len; i++) {
+    const cc = str.charCodeAt(i);
+    if (cc >= CHAR_0 && cc <= CHAR_9 || cc === CHAR_MINUS) {
+      chars.push(str[i]);
+      continue;
+    }
+    if (cc < TABLE_OFFSET) {
+      chars.push(MINUS_SET.has(cc) ? "-" : str[i]);
+      continue;
+    }
+    if (cc >= 55296 && cc <= 56319) {
+      if (i + 1 < len) {
+        const low = str.charCodeAt(i + 1);
+        if (low >= 56320 && low <= 57343) {
+          const cp2 = 65536 + (cc - 55296 << 10) + (low - 56320);
+          const d3 = HIGH_MAP.get(cp2);
+          if (d3 !== void 0) {
+            chars.push(String.fromCharCode(d3 + 48));
+            i++;
+            continue;
+          }
+        }
+      }
+      chars.push(str[i]);
+      continue;
+    }
+    if (MINUS_SET.has(cc)) {
+      chars.push("-");
+      continue;
+    }
+    const d2 = TABLE[cc - TABLE_OFFSET];
+    chars.push(d2 !== NOT_DIGIT ? String.fromCharCode(d2 + 48) : str[i]);
+  }
+  return chars.join("");
+}
+__name(anynum, "anynum");
+var anynum_default = anynum;
+
 // node_modules/strnum/strnum.js
 var hexRegex = /^[-+]?0x[a-fA-F0-9]+$/;
+var binRegex = /^0b[01]+$/;
+var octRegex = /^0o[0-7]+$/;
 var numRegex = /^([\-\+])?(0*)([0-9]*(\.[0-9]*)?)$/;
 var consider = {
   hex: true,
-  // oct: false,
+  binary: false,
+  octal: false,
   leadingZeros: true,
   decimalPoint: ".",
   eNotation: true,
   //skipLike: /regex/,
-  infinity: "original"
+  infinity: "original",
   // "null", "infinity" (Infinity type), "string" ("Infinity" (the string literal))
+  unicode: false
 };
 function toNumber(str, options = {}) {
   options = Object.assign({}, consider, options);
@@ -69533,10 +68911,20 @@ function toNumber(str, options = {}) {
   if (trimmedStr.length === 0) return str;
   else if (options.skipLike !== void 0 && options.skipLike.test(trimmedStr)) return str;
   else if (trimmedStr === "0") return 0;
-  else if (options.hex && hexRegex.test(trimmedStr)) {
+  if (options.unicode) {
+    trimmedStr = anynum_default(trimmedStr);
+    if (trimmedStr === "0") return 0;
+  }
+  if (options.hex && hexRegex.test(trimmedStr)) {
     return parse_int(trimmedStr, 16);
+  } else if (options.binary && binRegex.test(trimmedStr)) {
+    return parse_int(trimmedStr, 2);
+  } else if (options.octal && octRegex.test(trimmedStr)) {
+    return parse_int(trimmedStr, 8);
   } else if (!isFinite(trimmedStr)) {
-    return handleInfinity(str, Number(trimmedStr), options);
+    const num = Number(trimmedStr);
+    if (Number.isNaN(num)) return str;
+    return handleInfinity(str, num, options);
   } else if (trimmedStr.includes("e") || trimmedStr.includes("E")) {
     return resolveEnotation(str, trimmedStr, options);
   } else {
@@ -69547,8 +68935,8 @@ function toNumber(str, options = {}) {
       let numTrimmedByZeros = trimZeros(match3[3]);
       const decimalAdjacentToLeadingZeros = sign ? (
         // 0., -00., 000.
-        str[leadingZeros.length + 1] === "."
-      ) : str[leadingZeros.length] === ".";
+        trimmedStr[leadingZeros.length + 1] === "."
+      ) : trimmedStr[leadingZeros.length] === ".";
       if (!options.leadingZeros && (leadingZeros.length > 1 || leadingZeros.length === 1 && !decimalAdjacentToLeadingZeros)) {
         return str;
       } else {
@@ -69587,14 +68975,13 @@ function resolveEnotation(str, trimmedStr, options) {
     const leadingZeros = notation[2];
     const eAdjacentToLeadingZeros = sign ? (
       // 0E.
-      str[leadingZeros.length + 1] === eChar
-    ) : str[leadingZeros.length] === eChar;
+      trimmedStr[leadingZeros.length + 1] === eChar
+    ) : trimmedStr[leadingZeros.length] === eChar;
     if (leadingZeros.length > 1 && eAdjacentToLeadingZeros) return str;
     else if (leadingZeros.length === 1 && (notation[3].startsWith(`.${eChar}`) || notation[3][0] === eChar)) {
       return Number(trimmedStr);
     } else if (leadingZeros.length > 0) {
       if (options.leadingZeros && !eAdjacentToLeadingZeros) {
-        trimmedStr = (notation[1] || "") + notation[3];
         return Number(trimmedStr);
       } else return str;
     } else {
@@ -69607,7 +68994,9 @@ function resolveEnotation(str, trimmedStr, options) {
 __name(resolveEnotation, "resolveEnotation");
 function trimZeros(numStr) {
   if (numStr && numStr.indexOf(".") !== -1) {
-    numStr = numStr.replace(/0+$/, "");
+    let end = numStr.length;
+    while (end > 0 && numStr.charCodeAt(end - 1) === 48) end--;
+    numStr = numStr.slice(0, end);
     if (numStr === ".") numStr = "0";
     else if (numStr[0] === ".") numStr = "0" + numStr;
     else if (numStr[numStr.length - 1] === ".") numStr = numStr.substring(0, numStr.length - 1);
@@ -69617,6 +69006,8 @@ function trimZeros(numStr) {
 }
 __name(trimZeros, "trimZeros");
 function parse_int(numStr, base) {
+  const str = numStr.trim();
+  if (base === 2 || base === 8) numStr = str.substring(2);
   if (parseInt) return parseInt(numStr, base);
   else if (Number.parseInt) return Number.parseInt(numStr, base);
   else if (window && window.parseInt) return window.parseInt(numStr, base);
@@ -69836,6 +69227,7 @@ var ExpressionSet = class {
     this._byDepthAndTag = /* @__PURE__ */ new Map();
     this._wildcardByDepth = /* @__PURE__ */ new Map();
     this._deepWildcards = [];
+    this._deepByTerminalTag = /* @__PURE__ */ new Map();
     this._patterns = /* @__PURE__ */ new Set();
     this._sealed = false;
   }
@@ -69860,7 +69252,14 @@ var ExpressionSet = class {
     if (this._patterns.has(expression.pattern)) return this;
     this._patterns.add(expression.pattern);
     if (expression.hasDeepWildcard()) {
-      this._deepWildcards.push(expression);
+      const lastSeg2 = expression.segments[expression.segments.length - 1];
+      if (lastSeg2 && lastSeg2.type !== "deep-wildcard" && lastSeg2.tag !== "*") {
+        const tag2 = lastSeg2.tag;
+        if (!this._deepByTerminalTag.has(tag2)) this._deepByTerminalTag.set(tag2, []);
+        this._deepByTerminalTag.get(tag2).push(expression);
+      } else {
+        this._deepWildcards.push(expression);
+      }
       return this;
     }
     const depth = expression.length;
@@ -69978,6 +69377,12 @@ var ExpressionSet = class {
         if (matcher.matches(wildcardBucket[i])) return wildcardBucket[i];
       }
     }
+    const deepBucket = this._deepByTerminalTag.get(tag);
+    if (deepBucket) {
+      for (let i = 0; i < deepBucket.length; i++) {
+        if (matcher.matches(deepBucket[i])) return deepBucket[i];
+      }
+    }
     for (let i = 0; i < this._deepWildcards.length; i++) {
       if (matcher.matches(this._deepWildcards[i])) return this._deepWildcards[i];
     }
@@ -70039,6 +69444,24 @@ var MatcherView = class {
     if (path19.length === 0) return false;
     const current = path19[path19.length - 1];
     return current.values !== void 0 && attrName in current.values;
+  }
+  /**
+   * Get the value of a "kept" attribute from the nearest ancestor (or
+   * current node) that declared it via `push(tag, attrs, ns, { keep: [...] })`.
+   * @param {string} attrName
+   * @returns {*}
+   */
+  getAnyParentAttr(attrName) {
+    return this._matcher.getAnyParentAttr(attrName);
+  }
+  /**
+   * Check whether any ancestor (or the current node) kept the given
+   * attribute via `push(tag, attrs, ns, { keep: [...] })`.
+   * @param {string} attrName
+   * @returns {boolean}
+   */
+  hasAnyParentAttr(attrName) {
+    return this._matcher.hasAnyParentAttr(attrName);
   }
   /**
    * Get current node's sibling position (child index in parent).
@@ -70121,30 +69544,32 @@ var Matcher = class {
     this.siblingStacks = [];
     this._pathStringCache = null;
     this._view = new MatcherView(this);
+    this._keptAttrs = [];
   }
   /**
    * Push a new tag onto the path.
    * @param {string} tagName
    * @param {Object|null} [attrValues=null]
    * @param {string|null} [namespace=null]
+   * @param {Object|null} [options=null]
+   * @param {string[]} [options.keep] - Names of attributes (from attrValues)
    */
-  push(tagName, attrValues = null, namespace = null) {
+  push(tagName, attrValues = null, namespace = null, options = null) {
     this._pathStringCache = null;
     if (this.path.length > 0) {
       this.path[this.path.length - 1].values = void 0;
     }
     const currentLevel = this.path.length;
-    if (!this.siblingStacks[currentLevel]) {
-      this.siblingStacks[currentLevel] = /* @__PURE__ */ new Map();
+    let level = this.siblingStacks[currentLevel];
+    if (!level) {
+      level = { counts: /* @__PURE__ */ new Map(), total: 0 };
+      this.siblingStacks[currentLevel] = level;
     }
-    const siblings = this.siblingStacks[currentLevel];
     const siblingKey = namespace ? `${namespace}:${tagName}` : tagName;
-    const counter = siblings.get(siblingKey) || 0;
-    let position = 0;
-    for (const count of siblings.values()) {
-      position += count;
-    }
-    siblings.set(siblingKey, counter + 1);
+    const counter = level.counts.get(siblingKey) || 0;
+    const position = level.total;
+    level.counts.set(siblingKey, counter + 1);
+    level.total++;
     const node = {
       tag: tagName,
       position,
@@ -70157,6 +69582,16 @@ var Matcher = class {
       node.values = attrValues;
     }
     this.path.push(node);
+    const depth = this.path.length;
+    const keep = options !== null ? options.keep : null;
+    if (keep !== null && keep !== void 0 && keep.length > 0 && attrValues) {
+      for (let i = 0; i < keep.length; i++) {
+        const name = keep[i];
+        if (attrValues[name] !== void 0) {
+          this._keptAttrs.push({ depth, name, value: attrValues[name] });
+        }
+      }
+    }
   }
   /**
    * Pop the last tag from the path.
@@ -70168,6 +69603,10 @@ var Matcher = class {
     const node = this.path.pop();
     if (this.siblingStacks.length > this.path.length + 1) {
       this.siblingStacks.length = this.path.length + 1;
+    }
+    const poppedDepth = this.path.length + 1;
+    while (this._keptAttrs.length > 0 && this._keptAttrs[this._keptAttrs.length - 1].depth >= poppedDepth) {
+      this._keptAttrs.pop();
     }
     return node;
   }
@@ -70218,6 +69657,36 @@ var Matcher = class {
     return current.values !== void 0 && attrName in current.values;
   }
   /**
+   * Get the value of a "kept" attribute from the nearest ancestor (or
+   * current node) that declared it via `push(tag, attrs, ns, { keep: [...] })`.
+   * Unlike getAttrValue(), this works regardless of how deep the path has
+   * gone since the attribute was pushed — but only for attribute names that
+   * were explicitly marked with `keep` at push time. Cost is proportional to
+   * the number of currently-kept attributes (typically 0-3), not path depth.
+   * @param {string} attrName
+   * @returns {*} the value, or undefined if no ancestor kept this attribute
+   */
+  getAnyParentAttr(attrName) {
+    const kept = this._keptAttrs;
+    for (let i = kept.length - 1; i >= 0; i--) {
+      if (kept[i].name === attrName) return kept[i].value;
+    }
+    return void 0;
+  }
+  /**
+   * Check whether any ancestor (or the current node) kept the given
+   * attribute via `push(tag, attrs, ns, { keep: [...] })`.
+   * @param {string} attrName
+   * @returns {boolean}
+   */
+  hasAnyParentAttr(attrName) {
+    const kept = this._keptAttrs;
+    for (let i = kept.length - 1; i >= 0; i--) {
+      if (kept[i].name === attrName) return true;
+    }
+    return false;
+  }
+  /**
    * Get current node's sibling position (child index in parent).
    * @returns {number}
    */
@@ -70255,21 +69724,21 @@ var Matcher = class {
    * @returns {string}
    */
   toString(separator, includeNamespace = true) {
-    const sep8 = separator || this.separator;
-    const isDefault = sep8 === this.separator && includeNamespace === true;
+    const sep9 = separator || this.separator;
+    const isDefault = sep9 === this.separator && includeNamespace === true;
     if (isDefault) {
       if (this._pathStringCache !== null) {
         return this._pathStringCache;
       }
       const result = this.path.map(
         (n) => n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-      ).join(sep8);
+      ).join(sep9);
       this._pathStringCache = result;
       return result;
     }
     return this.path.map(
       (n) => includeNamespace && n.namespace ? `${n.namespace}:${n.tag}` : n.tag
-    ).join(sep8);
+    ).join(sep9);
   }
   /**
    * Get path as array of tag names.
@@ -70285,6 +69754,7 @@ var Matcher = class {
     this._pathStringCache = null;
     this.path = [];
     this.siblingStacks = [];
+    this._keptAttrs = [];
   }
   /**
    * Match current path against an Expression.
@@ -70408,7 +69878,8 @@ var Matcher = class {
   snapshot() {
     return {
       path: this.path.map((node) => ({ ...node })),
-      siblingStacks: this.siblingStacks.map((map) => new Map(map))
+      siblingStacks: this.siblingStacks.map((level) => level ? { counts: new Map(level.counts), total: level.total } : level),
+      keptAttrs: this._keptAttrs.map((entry) => ({ ...entry }))
     };
   }
   /**
@@ -70418,7 +69889,9 @@ var Matcher = class {
   restore(snapshot2) {
     this._pathStringCache = null;
     this.path = snapshot2.path.map((node) => ({ ...node }));
-    this.siblingStacks = snapshot2.siblingStacks.map((map) => new Map(map));
+    this.siblingStacks = snapshot2.siblingStacks.map((level) => level ? { counts: new Map(level.counts), total: level.total } :
+    level);
+    this._keptAttrs = (snapshot2.keptAttrs || []).map((entry) => ({ ...entry }));
   }
   /**
    * Return the read-only {@link MatcherView} for this matcher.
@@ -70440,6 +69913,763 @@ var Matcher = class {
     return this._view;
   }
 };
+
+// node_modules/is-unsafe/src/contexts/html.js
+var HTML_PATTERNS = [
+  {
+    id: "html-script-open",
+    description: "<script opening tag",
+    pattern: /<script[\s>/]/i
+  },
+  {
+    id: "html-script-close",
+    description: "</script closing tag",
+    pattern: /<\/script[\s>]/i
+  },
+  {
+    id: "html-javascript-protocol",
+    description: "javascript: URI scheme (with optional whitespace/encoding)",
+    // Handles j&#x61;vascript:, j\u0061vascript:, and whitespace variants
+    pattern: /j[\t\n\r ]*a[\t\n\r ]*v[\t\n\r ]*a[\t\n\r ]*s[\t\n\r ]*c[\t\n\r ]*r[\t\n\r ]*i[\t\n\r ]*p[\t\n\r ]*t[\t\n\r ]*:/i
+  },
+  {
+    id: "html-vbscript-protocol",
+    description: "vbscript: URI scheme",
+    pattern: /vbscript[\t\n\r ]*:/i
+  },
+  {
+    id: "html-data-html",
+    description: "data:text/html URI \u2014 can execute scripts in browsers",
+    pattern: /data[\t\n\r ]*:[\t\n\r ]*text\/html/i
+  },
+  {
+    id: "html-data-xhtml",
+    description: "data:application/xhtml+xml URI",
+    pattern: /data[\t\n\r ]*:[\t\n\r ]*application\/xhtml/i
+  },
+  {
+    id: "html-data-svg",
+    description: "data:image/svg+xml URI \u2014 can execute scripts",
+    pattern: /data[\t\n\r ]*:[\t\n\r ]*image\/svg\+xml/i
+  },
+  {
+    id: "html-inline-event-handler",
+    description: "Inline event handler attributes: onclick=, onerror=, onload=, etc.",
+    // \bon ensures we match a word boundary so "phonetic=" is not caught
+    pattern: /\bon\w{1,30}\s*=/i
+  },
+  {
+    id: "html-entity-obfuscated-script",
+    description: "HTML-entity-encoded <script (e.g. &#x3C;script or &lt;script)",
+    // Entities include optional trailing semicolon: &#x3C; or &#x3C (both valid in HTML5)
+    pattern: /(?:&#x0*3[Cc];?|&#0*60;?|&lt;)\s*script/i
+  },
+  {
+    id: "html-entity-obfuscated-javascript",
+    description: 'HTML-entity-encoded javascript: (partial \u2014 catches common &#106; or &#x6a; for "j")',
+    pattern: /(?:&#x0*6[Aa];?|&#0*106;?)\s*(?:&#x0*61;?|a)[\s\S]{0,80}script\s*:/i
+  },
+  {
+    id: "html-style-expression",
+    description: "CSS expression() \u2014 IE-era code execution in style attributes",
+    pattern: /style[\s\S]{0,20}expression\s*\(/i
+  },
+  {
+    id: "html-object-embed",
+    description: "<object or <embed tags that can load active content",
+    pattern: /<(?:object|embed)[\s>/]/i
+  },
+  {
+    id: "html-base-tag",
+    description: "<base href= \u2014 can hijack all relative URLs on a page",
+    pattern: /<base[\s>]/i
+  },
+  {
+    id: "html-meta-refresh",
+    description: '<meta http-equiv="refresh" \u2014 can redirect users',
+    pattern: /<meta[\s\S]{0,40}http-equiv[\s\S]{0,20}refresh/i
+  },
+  {
+    id: "html-srcdoc",
+    description: "srcdoc= attribute on iframes \u2014 embeds HTML that can run scripts",
+    pattern: /srcdoc\s*=/i
+  },
+  {
+    id: "html-iframe",
+    description: "<iframe tag",
+    pattern: /<iframe[\s>/]/i
+  },
+  {
+    id: "html-form",
+    description: "<form tag \u2014 can be used for phishing / credential harvesting injection",
+    pattern: /<form[\s>/]/i
+  }
+];
+var html_default = HTML_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/xml.js
+var XML_PATTERNS = [
+  {
+    id: "xml-cdata-injection",
+    description: "CDATA section injection: <![CDATA[ breaks out of text node context",
+    pattern: /<!\[CDATA\[/i
+  },
+  {
+    id: "xml-cdata-close",
+    description: "CDATA close sequence: ]]> can terminate an enclosing CDATA section",
+    pattern: /\]\]>/
+  },
+  {
+    id: "xml-processing-instruction",
+    description: "XML processing instruction: <?xml-stylesheet or <?php etc.",
+    pattern: /<\?(?:xml[\- ]|php|asp)/i
+  },
+  {
+    id: "xml-doctype-injection",
+    description: "DOCTYPE declaration embedded in content \u2014 can define entities",
+    // Match <!DOCTYPE followed by end-of-string, whitespace, or [ (internal subset)
+    pattern: /<!DOCTYPE(?:[\s[]|$)/i
+  },
+  {
+    id: "xml-entity-system",
+    description: "SYSTEM keyword \u2014 used in external entity declarations (XXE)",
+    pattern: /\bSYSTEM\s+["']/i
+  },
+  {
+    id: "xml-entity-public",
+    description: "PUBLIC keyword \u2014 used in external entity declarations (XXE)",
+    pattern: /\bPUBLIC\s+["']/i
+  },
+  {
+    id: "xml-entity-declaration",
+    description: "<!ENTITY declaration \u2014 defines entities, potential XXE or entity expansion",
+    pattern: /<!ENTITY[\s%]/i
+  },
+  {
+    id: "xml-billion-laughs",
+    description: "Entity reference chaining / billion laughs: repeated &eX; style references",
+    // Heuristic: 3+ consecutive entity refs suggests expansion attack
+    pattern: /(?:&\w{1,20};){3,}/
+  },
+  {
+    id: "xml-namespace-confusion",
+    description: "xmlns: attribute injection \u2014 can redefine namespaces to confuse parsers",
+    // pattern: /\bxmlns\s*(?::\w{1,40})?\s*=/i,
+    pattern: /\bxmlns(?::\w{1,40})?\s*=/i
+  },
+  {
+    id: "xml-comment-injection",
+    description: "<!-- comment injection \u2014 can hide content from some parsers",
+    pattern: /<!--/
+  },
+  {
+    id: "xml-comment-close",
+    description: "--> closes an enclosing XML comment",
+    pattern: /-->/
+  },
+  {
+    id: "xml-pi-close",
+    description: "?> closes an enclosing processing instruction",
+    pattern: /\?>/
+  }
+];
+var xml_default = XML_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/svg.js
+var SVG_PATTERNS = [
+  {
+    id: "svg-script-element",
+    description: "<script element inside SVG executes JavaScript",
+    pattern: /<script[\s>/]/i
+  },
+  {
+    id: "svg-xlink-href-javascript",
+    description: "xlink:href with javascript: \u2014 classic SVG XSS via <a> or <use>",
+    pattern: /xlink\s*:\s*href\s*=\s*["']?\s*javascript\s*:/i
+  },
+  {
+    id: "svg-href-javascript",
+    description: "href= with javascript: in SVG context (<a>, <animate>, etc.)",
+    pattern: /href\s*=\s*["']?\s*javascript\s*:/i
+  },
+  {
+    id: "svg-foreignobject",
+    description: "<foreignObject embeds HTML inside SVG \u2014 can execute scripts",
+    pattern: /<foreignObject[\s>/]/i
+  },
+  {
+    id: "svg-use-external",
+    description: "<use xlink:href or href pointing to external resource (non-fragment URL)",
+    // Match <use with href= where the value starts with a non-# character (external URL)
+    // [\"'][^#] catches quoted values not starting with #; [^\"'#\s>] catches unquoted
+    pattern: /<use[\s\S]{0,60}(?:xlink\s*:\s*)?href\s*=\s*(?:["'][^#]|[^"'#\s>])/i
+  },
+  {
+    id: "svg-animate-href",
+    description: '<animate attributeName="href" \u2014 can dynamically change href to javascript:',
+    pattern: /<animate[\s\S]{0,80}attributeName\s*=\s*["'][\s]*href["']/i
+  },
+  {
+    id: "svg-animate-xlinkhref",
+    description: '<animate attributeName="xlink:href"',
+    pattern: /<animate[\s\S]{0,80}attributeName\s*=\s*["'][\s]*xlink\s*:\s*href["']/i
+  },
+  {
+    id: "svg-set-javascript",
+    description: '<set to="javascript:..." \u2014 sets an attribute to a javascript: URI',
+    pattern: /<set[\s\S]{0,80}to\s*=\s*["']?\s*javascript\s*:/i
+  },
+  {
+    id: "svg-event-handler",
+    description: "SVG-specific event handler attributes: onload=, onerror=, onactivate=, etc.",
+    pattern: /\bon(?:load|error|activate|begin|end|repeat|focus|blur|click|mouse\w{1,20}|key\w{1,20})\s*=/i
+  },
+  {
+    id: "svg-handler-generic",
+    description: "Generic on* handler catch-all for SVG attributes",
+    pattern: /\bon\w{1,30}\s*=/i
+  },
+  {
+    id: "svg-filter-feimage",
+    description: "<feImage href= \u2014 filter primitive that can load external resources",
+    pattern: /<feImage[\s\S]{0,80}(?:xlink\s*:\s*)?href\s*=/i
+  },
+  {
+    id: "svg-image-external",
+    description: "<image xlink:href with http/https or javascript protocol",
+    pattern: /<image[\s\S]{0,80}(?:xlink\s*:\s*)?href\s*=\s*["']?\s*(?:https?|javascript)\s*:/i
+  },
+  {
+    id: "svg-style-javascript",
+    description: "style= attribute containing javascript: (e.g. background:url(javascript:...))",
+    pattern: /style\s*=[\s\S]{0,60}javascript\s*:/i
+  }
+];
+var svg_default = SVG_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/sql.js
+var SQL_PATTERNS = [
+  {
+    id: "sql-block-comment-open",
+    description: "SQL block comment open: /* ... */ \u2014 unusual in legitimate user text",
+    pattern: /\/\*/
+  },
+  {
+    id: "sql-union-select",
+    description: "UNION SELECT \u2014 most common SQL injection aggregation attack",
+    pattern: /\bUNION\s{1,20}(?:ALL\s{1,20})?SELECT\b/i
+  },
+  {
+    id: "sql-drop-table",
+    description: "DROP TABLE \u2014 destructive DDL injection",
+    pattern: /\bDROP\s{1,20}TABLE\b/i
+  },
+  {
+    id: "sql-drop-database",
+    description: "DROP DATABASE \u2014 destructive DDL injection",
+    pattern: /\bDROP\s{1,20}DATABASE\b/i
+  },
+  {
+    id: "sql-insert-into",
+    description: "INSERT INTO \u2014 data injection",
+    pattern: /\bINSERT\s{1,20}INTO\b/i
+  },
+  {
+    id: "sql-delete-from",
+    description: "DELETE FROM \u2014 data deletion injection",
+    pattern: /\bDELETE\s{1,20}FROM\b/i
+  },
+  {
+    id: "sql-update-set",
+    description: "UPDATE ... SET \u2014 data modification injection",
+    // Allows arbitrary content between UPDATE and SET (table name, alias, etc.)
+    pattern: /\bUPDATE\b[\s\S]{1,60}\bSET\b/i
+  },
+  {
+    id: "sql-exec-xp",
+    description: "EXEC xp_ \u2014 MSSQL extended stored procedure execution",
+    pattern: /\bEXEC(?:UTE)?\s{1,20}xp_/i
+  },
+  {
+    id: "sql-tautology-string",
+    description: `Classic string tautology: ' OR '1'='1 or " OR "1"="1"`,
+    // Last quote is optional — injection may truncate it: ' OR '1'='1--
+    pattern: /'\s{0,10}OR\s{0,10}'[^']{0,20}'\s*=\s*'[^']{0,20}/i
+  },
+  {
+    id: "sql-tautology-numeric",
+    description: "Numeric tautology: OR 1=1",
+    pattern: /\bOR\s{1,10}1\s*=\s*1\b/i
+  },
+  {
+    id: "sql-always-true-zero",
+    description: "Numeric tautology: OR 0=0",
+    pattern: /\bOR\s{1,10}0\s*=\s*0\b/i
+  },
+  {
+    id: "sql-sleep-benchmark",
+    description: "Time-based blind injection: SLEEP() or BENCHMARK()",
+    pattern: /\b(?:SLEEP|BENCHMARK)\s*\(/i
+  },
+  {
+    id: "sql-waitfor-delay",
+    description: "MSSQL time-based blind injection: WAITFOR DELAY",
+    pattern: /\bWAITFOR\s{1,20}DELAY\b/i
+  },
+  {
+    id: "sql-char-function",
+    description: "CHAR() function \u2014 used to obfuscate injected strings",
+    pattern: /\bCHAR\s*\(\s*\d{1,3}/i
+  },
+  {
+    id: "sql-information-schema",
+    description: "INFORMATION_SCHEMA \u2014 reconnaissance query for table/column enumeration",
+    pattern: /\bINFORMATION_SCHEMA\b/i
+  }
+];
+var sql_default = SQL_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/shell.js
+var SHELL_PATTERNS = [
+  {
+    id: "shell-path-traversal-unix",
+    description: "Unix path traversal: ../  \u2014 climbing the directory tree",
+    pattern: /\.\.\//
+  },
+  {
+    id: "shell-path-traversal-windows",
+    description: "Windows path traversal: ..\\ \u2014 climbing the directory tree",
+    pattern: /\.\.\\/
+  },
+  {
+    id: "shell-path-traversal-encoded",
+    description: "URL-encoded path traversal: %2e%2e or %2f variants",
+    pattern: /%2e%2e|%2f\.\.|\.\.%2f/i
+  },
+  {
+    id: "shell-null-byte",
+    description: "Null byte injection: \\x00 or %00 \u2014 truncates strings in C-backed functions",
+    pattern: /\x00|%00/
+  },
+  {
+    id: "shell-semicolon",
+    description: "Semicolon command separator: cmd1; cmd2",
+    pattern: /;/
+  },
+  {
+    id: "shell-pipe",
+    description: "Pipe operator: cmd1 | cmd2",
+    pattern: /\|/
+  },
+  {
+    id: "shell-and-operator",
+    description: "AND operator: cmd1 && cmd2",
+    pattern: /&&/
+  },
+  {
+    id: "shell-or-operator",
+    description: "OR operator: cmd1 || cmd2",
+    pattern: /\|\|/
+  },
+  {
+    id: "shell-backtick",
+    description: "Backtick command substitution: `cmd`",
+    pattern: /`/
+  },
+  {
+    id: "shell-dollar-paren",
+    description: "Dollar-paren command substitution: $(cmd)",
+    pattern: /\$\(/
+  },
+  {
+    id: "shell-dollar-brace",
+    description: "Dollar-brace variable expansion: ${var} \u2014 can be abused for injection",
+    pattern: /\$\{/
+  },
+  {
+    id: "shell-redirect-out",
+    description: "Output redirection: cmd > file or cmd >> file",
+    pattern: />{1,2}/
+  },
+  {
+    id: "shell-redirect-in",
+    description: "Input redirection: cmd < file",
+    pattern: /</
+  },
+  {
+    id: "shell-newline-injection",
+    description: "Newline injection: \\n or \\r \u2014 can inject new shell commands",
+    pattern: /[\n\r]/
+  },
+  {
+    id: "shell-glob-star",
+    description: "Glob expansion: * or ? \u2014 can expand to unintended files",
+    // Only flag when combined with path separators to reduce false positives
+    pattern: /[/\\][*?]/
+  },
+  {
+    id: "shell-absolute-root",
+    description: "Absolute root path injection: string starting with / or \\ (Windows UNC)",
+    pattern: /^(?:\/|\\\\)/
+  },
+  {
+    id: "shell-windows-drive",
+    description: "Windows drive letter path injection: C:\\ or D:/",
+    pattern: /^[a-zA-Z]:[/\\]/
+  },
+  {
+    id: "shell-curl-wget",
+    description: "curl/wget with URL or flags \u2014 can exfiltrate data or download payloads",
+    // Require a URL scheme (http/https/ftp) or a flag (-) to reduce false positives
+    // "curl is a tool" won't match; "curl http://..." or "curl -s ..." will
+    pattern: /\b(?:curl|wget)\s+(?:https?:\/\/|ftp:\/\/|-)/i
+  }
+];
+var shell_default = SHELL_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/redos.js
+var REDOS_PATTERNS = [
+  {
+    id: "redos-nested-quantifier-plus",
+    description: "Nested + quantifier inside a group with outer quantifier: (a+)+, (.+b)*, etc.",
+    // Matches any group containing a + quantifier, with an outer * or + — catches (a+)+, (.+b)*, etc.
+    pattern: /\([^)]*\+[^)]*\)[+*]/
+  },
+  {
+    id: "redos-nested-quantifier-star",
+    description: "Nested * quantifier: (a*)* or (a*)+ \u2014 catastrophic backtracking",
+    pattern: /\([^)]*\*[^)]*\)[*+]/
+  },
+  {
+    id: "redos-nested-groups",
+    description: "Doubly nested quantified groups: ((a+)+) \u2014 guaranteed catastrophic",
+    pattern: /\(\([^)]{0,40}\)[+*]\)[+*]/
+  },
+  {
+    id: "redos-alternation-overlap",
+    description: "Overlapping alternation under quantifier: (a|a)+ \u2014 ambiguous NFA paths",
+    // Detect repeated identical alternatives under a quantifier
+    pattern: /\(([^|()]{1,20})\|(?:\1)(?:\|[^|()]{1,20}){0,5}\)[+*?]{1,2}/
+  },
+  {
+    id: "redos-star-plus-concat",
+    description: "(x*x)+ pattern \u2014 triggers super-linear backtracking",
+    pattern: /\([^)]{0,10}\*[^)]{0,10}\)[+*]/
+  },
+  {
+    id: "redos-dot-star-greedy",
+    description: "(.*){n,} or (.+){n,} \u2014 repeated greedy dot quantifiers",
+    pattern: /\(\.[*+]\)\{?\d/
+  },
+  {
+    id: "redos-large-repetition",
+    description: "Very large fixed or range repetition count {1000,} or {1000,n} \u2014 denial of service via backtracking",
+    // Matches { followed by 4+ digits (≥1000), then optional ,digits }
+    pattern: /\{\d{4,}(?:,\d*)?\}/
+  },
+  {
+    id: "redos-catastrophic-alternation",
+    description: "Long alternation with many similar branches \u2014 polynomial backtracking risk",
+    // Heuristic: 10+ pipe-separated alternatives in a single group
+    pattern: /\([^)]{0,200}(?:\|[^|)]{0,50}){9,}\)/
+  }
+];
+var redos_default = REDOS_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/nosql.js
+var sep7 = `["'\\s]*:`;
+var NOSQL_PATTERNS = [
+  // ─── MongoDB $ operator injection ────────────────────────────────────────
+  {
+    id: "nosql-where-operator",
+    description: "$where \u2014 executes arbitrary JavaScript server-side in MongoDB",
+    pattern: new RegExp(`\\$where${sep7}`, "i")
+  },
+  {
+    id: "nosql-ne-operator",
+    description: '$ne \u2014 "not equal" operator used to bypass equality checks',
+    pattern: new RegExp(`\\$ne${sep7}`, "i")
+  },
+  {
+    id: "nosql-gt-operator",
+    description: '$gt \u2014 "greater than" used to bypass password/value checks',
+    pattern: new RegExp(`\\$gte?${sep7}`, "i")
+  },
+  {
+    id: "nosql-lt-operator",
+    description: '$lt / $lte \u2014 "less than" bypass variants',
+    pattern: new RegExp(`\\$lte?${sep7}`, "i")
+  },
+  {
+    id: "nosql-regex-operator",
+    description: "$regex \u2014 can be used to extract data character by character (blind injection)",
+    pattern: new RegExp(`\\$regex${sep7}`, "i")
+  },
+  {
+    id: "nosql-or-operator",
+    description: "$or \u2014 logical OR; used to create always-true conditions",
+    pattern: new RegExp(`\\$or${sep7}\\s*\\[`, "i")
+  },
+  {
+    id: "nosql-and-operator",
+    description: "$and \u2014 logical AND operator injection",
+    pattern: new RegExp(`\\$and${sep7}\\s*\\[`, "i")
+  },
+  {
+    id: "nosql-nor-operator",
+    description: "$nor \u2014 logical NOR operator injection",
+    pattern: new RegExp(`\\$nor${sep7}\\s*\\[`, "i")
+  },
+  {
+    id: "nosql-exists-operator",
+    description: "$exists \u2014 can enumerate fields to determine schema",
+    pattern: new RegExp(`\\$exists${sep7}`, "i")
+  },
+  {
+    id: "nosql-in-operator",
+    description: "$in \u2014 matches any value in a list; can enumerate values",
+    pattern: new RegExp(`\\$in${sep7}\\s*\\[`, "i")
+  },
+  {
+    id: "nosql-expr-operator",
+    description: "$expr \u2014 allows aggregation expressions in queries (MongoDB 3.6+)",
+    pattern: new RegExp(`\\$expr${sep7}`, "i")
+  },
+  {
+    id: "nosql-function-operator",
+    description: "$function \u2014 executes arbitrary JavaScript in MongoDB 4.4+",
+    pattern: new RegExp(`\\$function${sep7}`, "i")
+  },
+  {
+    id: "nosql-accumulator-operator",
+    description: "$accumulator \u2014 custom aggregation with arbitrary JS execution",
+    pattern: new RegExp(`\\$accumulator${sep7}`, "i")
+  },
+  // ─── Prototype pollution ─────────────────────────────────────────────────
+  {
+    id: "nosql-proto-pollution",
+    description: "__proto__ \u2014 prototype pollution via object key injection",
+    pattern: /__proto__/
+  },
+  {
+    id: "nosql-constructor-prototype",
+    description: "constructor.prototype \u2014 alternative prototype pollution vector (dot notation or JSON key)",
+    // Matches dot-notation (obj.constructor.prototype) and JSON key adjacency
+    // ("constructor": {"prototype": ...})
+    pattern: /constructor[\s"':.,{\[]*prototype/i
+  },
+  {
+    id: "nosql-proto-bracket",
+    description: '["__proto__"] \u2014 bracket-notation prototype pollution',
+    pattern: /\[["']__proto__["']\]/
+  }
+];
+var nosql_default = NOSQL_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/log.js
+var LOG_PATTERNS = [
+  // ─── CRLF / newline injection ─────────────────────────────────────────────
+  {
+    id: "log-crlf-injection",
+    description: "CRLF injection: literal \\r or \\n embeds fake log lines",
+    pattern: /[\r\n]/
+  },
+  {
+    id: "log-url-encoded-crlf",
+    description: "URL-encoded CRLF: %0d, %0a, %0D, %0A \u2014 decoded by some log parsers",
+    pattern: /%0[dDaA]/
+  },
+  {
+    id: "log-unicode-newline",
+    description: "Unicode newline variants: U+2028 (line separator), U+2029 (paragraph separator)",
+    pattern: /[\u2028\u2029]/
+  },
+  // ─── Log4Shell / JNDI injection (CVE-2021-44228) ─────────────────────────
+  {
+    id: "log-log4shell-jndi",
+    description: "Log4Shell: ${jndi:...} triggers remote code execution in Apache Log4j",
+    pattern: /\$\{jndi\s*:/i
+  },
+  {
+    id: "log-log4shell-obfuscated",
+    description: "Obfuscated Log4Shell: ${::-j}... lookup-bypass prefix used to evade WAF detection",
+    // ${::- is the Log4j lookup-bypass escape sequence; presence alone is suspicious
+    pattern: /\$\{::-/
+  },
+  {
+    id: "log-log4j-lookup",
+    description: "Log4j lookup syntax: ${env:...}, ${sys:...}, ${ctx:...} \u2014 data exfiltration",
+    pattern: /\$\{(?:env|sys|ctx|main|map|sd|web|docker|k8s|spring)\s*:/i
+  },
+  // ─── Server-Side Template Injection (SSTI) in log messages ───────────────
+  {
+    id: "log-ssti-double-brace",
+    description: "SSTI double-brace: {{expression}} \u2014 Jinja2, Twig, Handlebars, etc.",
+    pattern: /\{\{[\s\S]{0,80}\}\}/
+  },
+  {
+    id: "log-ssti-hash-brace",
+    description: "SSTI hash-brace: #{expression} \u2014 Thymeleaf, Velocity, Ruby ERB",
+    pattern: /#\{[\s\S]{0,80}\}/
+  },
+  {
+    id: "log-ssti-dollar-brace",
+    description: "SSTI/EL injection: ${expression with operators or method calls} \u2014 JSP EL, Freemarker, SpEL",
+    // Require that the ${...} content looks like an expression, not a plain variable name.
+    // Flags if the content contains: . ( * + operators, or known SSTI keywords.
+    // This avoids flagging ${PATH}, ${HOME} etc. (plain shell variables).
+    pattern: /\$\{[^}]*(?:\.|\(|\*|\+|\bclass\b|\bruntime\b|\bprocess\b|\bexec\b)[^}]{0,80}\}/i
+  },
+  {
+    id: "log-ssti-percent-tag",
+    description: "SSTI ERB/ASP tag: <%= expression %> \u2014 Ruby ERB, ASP",
+    pattern: /<%=[\s\S]{0,80}%>/
+  },
+  // ─── Null byte ────────────────────────────────────────────────────────────
+  {
+    id: "log-null-byte",
+    description: "Null byte: \\x00 or %00 \u2014 can truncate log entries in C-backed loggers",
+    pattern: /\x00|%00/
+  },
+  // ─── ANSI escape injection ────────────────────────────────────────────────
+  {
+    id: "log-ansi-escape",
+    description: "ANSI escape sequence: ESC[ \u2014 can manipulate terminal output when logs are tailed",
+    pattern: /\x1b\[/
+  }
+];
+var log_default = LOG_PATTERNS;
+
+// node_modules/is-unsafe/src/contexts/sql-strict.js
+var SQL_STRICT_EXTRA = [
+  {
+    id: "sql-line-comment",
+    description: "SQL line comment: -- followed by whitespace or end of string",
+    pattern: /--(?:\s|$)/
+  },
+  {
+    id: "sql-stacked-query",
+    description: "Stacked queries: semicolon immediately followed by a SQL keyword",
+    pattern: /;\s{0,10}(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\b/i
+  },
+  {
+    id: "sql-hex-encoding",
+    description: "Hex-encoded string injection: 0x41414141 style (MySQL)",
+    pattern: /\b0x[0-9a-f]{4,}/i
+  }
+];
+var SQL_STRICT_PATTERNS = [...sql_default, ...SQL_STRICT_EXTRA];
+var sql_strict_default = SQL_STRICT_PATTERNS;
+
+// node_modules/is-unsafe/src/util/decode-entities.js
+var NAMED = Object.freeze({
+  colon: ":",
+  Tab: "	",
+  NewLine: "\n"
+});
+var ENTITY_RE = /&(?:#[xX]0*([0-9a-fA-F]{1,6});?|#0*([0-9]{1,7});?|([a-zA-Z][a-zA-Z0-9]{1,15});)/g;
+function decodeEntities(input) {
+  if (input.indexOf("&") === -1) return input;
+  return input.replace(ENTITY_RE, (match3, hex, dec, name) => {
+    if (name !== void 0) {
+      return Object.prototype.hasOwnProperty.call(NAMED, name) ? NAMED[name] : match3;
+    }
+    const cp2 = hex !== void 0 ? parseInt(hex, 16) : parseInt(dec, 10);
+    if (!Number.isFinite(cp2) || cp2 > 1114111) return match3;
+    return String.fromCodePoint(cp2);
+  });
+}
+__name(decodeEntities, "decodeEntities");
+
+// node_modules/is-unsafe/src/index.js
+html_default.label = "HTML";
+xml_default.label = "XML";
+svg_default.label = "SVG";
+html_default.decodeEntities = true;
+xml_default.decodeEntities = true;
+svg_default.decodeEntities = true;
+sql_default.label = "SQL";
+sql_strict_default.label = "SQL-STRICT";
+shell_default.label = "SHELL";
+redos_default.label = "REDOS";
+nosql_default.label = "NOSQL";
+log_default.label = "LOG";
+var VALID_CONTEXTS = Object.freeze({
+  HTML: html_default,
+  XML: xml_default,
+  SVG: svg_default,
+  SQL: sql_default,
+  "SQL-STRICT": sql_strict_default,
+  SHELL: shell_default,
+  REDOS: redos_default,
+  NOSQL: nosql_default,
+  LOG: log_default
+});
+function assertString(value) {
+  if (typeof value !== "string") {
+    throw new TypeError(
+      `is-unsafe: first argument must be a string, got ${typeof value}`
+    );
+  }
+}
+__name(assertString, "assertString");
+function assertContext(context3) {
+  if (context3 instanceof RegExp) return;
+  if (Array.isArray(context3)) {
+    if (context3.length === 0) {
+      throw new TypeError("is-unsafe: context must not be an empty array");
+    }
+    if (Array.isArray(context3[0])) {
+      for (const list of context3) {
+        if (!Array.isArray(list) || list.length === 0) {
+          throw new TypeError(
+            "is-unsafe: each context in the array must be a non-empty pattern array (PatternList)"
+          );
+        }
+      }
+    }
+    return;
+  }
+  throw new TypeError(
+    `is-unsafe: second argument must be a PatternList (e.g. HTML), an array of PatternLists (e.g. [HTML, XML]), or a Reg\
+Exp. Got: ${typeof context3}`
+  );
+}
+__name(assertContext, "assertContext");
+function normalise(context3) {
+  if (context3 instanceof RegExp) return { lists: null, regex: context3 };
+  if (Array.isArray(context3[0])) return { lists: context3, regex: null };
+  return { lists: [context3], regex: null };
+}
+__name(normalise, "normalise");
+function decodedCopy(value, list) {
+  if (!list.decodeEntities) return null;
+  const decoded = decodeEntities(value);
+  return decoded === value ? null : decoded;
+}
+__name(decodedCopy, "decodedCopy");
+function matchList(value, list) {
+  const label = list.label ?? "CUSTOM";
+  const decoded = decodedCopy(value, list);
+  for (const rule of list) {
+    if (rule.pattern.test(value) || decoded !== null && rule.pattern.test(decoded)) {
+      return { context: label, id: rule.id, description: rule.description, pattern: rule.pattern };
+    }
+  }
+  return null;
+}
+__name(matchList, "matchList");
+function isUnsafe(value, context3) {
+  assertString(value);
+  assertContext(context3);
+  const { lists, regex } = normalise(context3);
+  if (regex) return regex.test(value);
+  for (const list of lists) {
+    if (matchList(value, list) !== null) return true;
+  }
+  return false;
+}
+__name(isUnsafe, "isUnsafe");
 
 // node_modules/fast-xml-parser/src/xmlparser/OrderedObjParser.js
 function extractRawAttributes(prefixedAttrs, options) {
@@ -70490,6 +70720,7 @@ var OrderedObjParser = class {
     this.ignoreAttributesFn = getIgnoreAttributesFn(this.options.ignoreAttributes);
     this.entityExpansionCount = 0;
     this.currentExpandedLength = 0;
+    this.doctypefound = false;
     let namedEntities = { ...XML };
     if (this.options.entityDecoder) {
       this.entityDecoder = this.options.entityDecoder;
@@ -70503,7 +70734,12 @@ var OrderedObjParser = class {
           maxTotalExpansions: this.options.processEntities.maxTotalExpansions,
           maxExpandedLength: this.options.processEntities.maxExpandedLength,
           applyLimitsTo: this.options.processEntities.appliesTo
-        }
+        },
+        // onExternalEntity: (name, value) => isUnsafe(value) ? 'block' : 'allow',
+        onInputEntity: /* @__PURE__ */ __name((name, value) => (
+          //TODO: VALID_CONTEXTS.HTML should be set only if this.options.htmlEntities
+          isUnsafe(value, [html_default, xml_default]) ? ENTITY_ACTION.BLOCK : ENTITY_ACTION.ALLOW
+        ), "onInputEntity")
         //postCheck: resolved => resolved
       });
     }
@@ -70631,7 +70867,14 @@ function buildAttributesMap(attrStr, jPath, tagName, force = false) {
 }
 __name(buildAttributesMap, "buildAttributesMap");
 var parseXml = /* @__PURE__ */ __name(function(xmlData) {
-  xmlData = xmlData.replace(/\r\n?/g, "\n");
+  const options = this.options;
+  const crlfPositions = options.captureMetaData ? [] : void 0;
+  xmlData = xmlData.replace(/\r\n?/g, options.captureMetaData ? (newline, index) => {
+    if (newline.length === 2) {
+      crlfPositions.push(index - crlfPositions.length);
+    }
+    return "\n";
+  } : "\n");
   const xmlObj = new XmlNode("!xml");
   let currentNode = xmlObj;
   let textData = "";
@@ -70639,7 +70882,7 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
   this.entityDecoder.reset();
   this.entityExpansionCount = 0;
   this.currentExpandedLength = 0;
-  const options = this.options;
+  this.doctypefound = false;
   const docTypeReader = new DocTypeReader(options.processEntities);
   const xmlLen = xmlData.length;
   for (let i = 0; i < xmlLen; i++) {
@@ -70669,7 +70912,10 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
         }
         this.matcher.pop();
         this.isCurrentNodeStopNode = false;
-        currentNode = this.tagsNodeStack.pop();
+        currentNode = this.tagsNodeStack.pop() || xmlObj;
+        if (options.captureMetaData && currentNode) {
+          currentNode.addEndIndex(getOriginalIndex(closeIndex + 1, crlfPositions));
+        }
         textData = "";
         i = closeIndex;
       } else if (c1 === 63) {
@@ -70680,6 +70926,7 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
         if (attsMap) {
           const ver = attsMap[this.options.attributeNamePrefix + "version"];
           this.entityDecoder.setXmlVersion(Number(ver) || 1);
+          docTypeReader.setXmlVersion(Number(ver) || 1);
         }
         if (options.ignoreDeclaration && tagData.tagName === "?xml" || options.ignorePiTags) {
         } else {
@@ -70688,7 +70935,11 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
           if (tagData.tagName !== tagData.tagExp && tagData.attrExpPresent && options.ignoreAttributes !== true) {
             childNode[":@"] = attsMap;
           }
-          this.addChild(currentNode, childNode, this.readonlyMatcher, i);
+          const startIndex = options.captureMetaData ? getOriginalIndex(i, crlfPositions) : i;
+          this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+          if (options.captureMetaData) {
+            currentNode.addEndIndex(getOriginalIndex(tagData.closeIndex + 2, crlfPositions));
+          }
         }
         i = tagData.closeIndex + 1;
       } else if (c1 === 33 && xmlData.charCodeAt(i + 2) === 45 && xmlData.charCodeAt(i + 3) === 45) {
@@ -70700,6 +70951,8 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
         }
         i = endIndex;
       } else if (c1 === 33 && xmlData.charCodeAt(i + 2) === 68) {
+        if (this.doctypefound) throw new Error("Multiple DOCTYPE declarations found.");
+        this.doctypefound = true;
         const result = docTypeReader.readDocType(xmlData, i);
         this.entityDecoder.addInputEntities(result.entities);
         i = result.i;
@@ -70768,7 +71021,7 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
         if (tagName !== xmlObj.tagname) {
           this.isCurrentNodeStopNode = this.isItStopNode();
         }
-        const startIndex = i;
+        const startIndex = options.captureMetaData ? getOriginalIndex(i, crlfPositions) : i;
         if (this.isCurrentNodeStopNode) {
           let tagContent = "";
           if (isSelfClosing) {
@@ -70789,6 +71042,9 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
           this.matcher.pop();
           this.isCurrentNodeStopNode = false;
           this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+          if (options.captureMetaData) {
+            currentNode.addEndIndex(getOriginalIndex(i + 1, crlfPositions));
+          }
         } else {
           if (isSelfClosing) {
             ({ tagName, tagExp } = transformTagName(options.transformTagName, tagName, tagExp, options));
@@ -70797,6 +71053,9 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
               childNode[":@"] = prefixedAttrs;
             }
             this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+            if (options.captureMetaData) {
+              currentNode.addEndIndex(getOriginalIndex(closeIndex + 1, crlfPositions));
+            }
             this.matcher.pop();
             this.isCurrentNodeStopNode = false;
           } else if (options.unpairedTagsSet.has(tagName)) {
@@ -70805,6 +71064,9 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
               childNode[":@"] = prefixedAttrs;
             }
             this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+            if (options.captureMetaData) {
+              currentNode.addEndIndex(getOriginalIndex(result.closeIndex + 1, crlfPositions));
+            }
             this.matcher.pop();
             this.isCurrentNodeStopNode = false;
             i = result.closeIndex;
@@ -70831,6 +71093,17 @@ var parseXml = /* @__PURE__ */ __name(function(xmlData) {
   }
   return xmlObj.child;
 }, "parseXml");
+function getOriginalIndex(index, crlfPositions) {
+  let low = 0;
+  let high = crlfPositions.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (crlfPositions[middle] < index) low = middle + 1;
+    else high = middle;
+  }
+  return index + low;
+}
+__name(getOriginalIndex, "getOriginalIndex");
 function addChild(currentNode, childNode, matcher, startIndex) {
   if (!this.options.captureMetaData) startIndex = void 0;
   const jPathOrMatcher = this.options.jPath ? matcher.toString() : matcher;
@@ -70966,6 +71239,8 @@ __name(readTagExp, "readTagExp");
 function readStopNodeData(xmlData, tagName, i) {
   const startIndex = i;
   let openTagCount = 1;
+  let lenient = false;
+  let nextGt = -1;
   const xmllen = xmlData.length;
   for (; i < xmllen; i++) {
     if (xmlData[i] === "<") {
@@ -70993,13 +71268,27 @@ function readStopNodeData(xmlData, tagName, i) {
         const closeIndex = findClosingIndex(xmlData, "]]>", i, "StopNode is not closed.") - 2;
         i = closeIndex;
       } else {
-        const tagData = readTagExp(xmlData, i, false);
+        const tagData = lenient ? void 0 : readTagExp(xmlData, i, false);
         if (tagData) {
-          const openTagName = tagData && tagData.tagName;
+          const openTagName = tagData.tagName;
           if (openTagName === tagName && tagData.tagExp[tagData.tagExp.length - 1] !== "/") {
             openTagCount++;
           }
           i = tagData.closeIndex;
+        } else {
+          lenient = true;
+          if (nextGt < i) {
+            nextGt = xmlData.indexOf(">", i);
+            if (nextGt === -1) return;
+          }
+          const nextLt = xmlData.indexOf("<", i + 1);
+          if (nextLt === -1 || nextLt > nextGt) {
+            const exp = xmlData.substring(i + 1, nextGt);
+            const sep9 = exp.search(/\s/);
+            const name = sep9 === -1 ? exp : exp.substring(0, sep9);
+            if (name === tagName && exp[exp.length - 1] !== "/") openTagCount++;
+            i = nextGt;
+          }
         }
       }
     }
@@ -71179,7 +71468,11 @@ var XMLParser = class {
    */
   parse(xmlData, validationOption) {
     if (typeof xmlData !== "string" && xmlData.toString) {
-      xmlData = xmlData.toString();
+      if (xmlData instanceof Uint8Array && !(typeof Buffer !== "undefined" && Buffer.isBuffer(xmlData))) {
+        xmlData = new TextDecoder("utf-8", { ignoreBOM: true }).decode(xmlData);
+      } else {
+        xmlData = xmlData.toString();
+      }
     } else if (typeof xmlData !== "string") {
       throw new Error("XML data is accepted in String or Bytes[] form.");
     }
@@ -71227,21 +71520,45 @@ var XMLParser = class {
 };
 
 // node_modules/fast-xml-builder/src/util.js
+function valToStr(val) {
+  return typeof val === "number" && Object.is(val, -0) ? "-0" : String(val);
+}
+__name(valToStr, "valToStr");
 function safeComment(val) {
-  return String(val).replace(/--/g, "- -").replace(/--/g, "- -").replace(/-$/, "- ");
+  return valToStr(val).replace(/--/g, "- -").replace(/--/g, "- -").replace(/-$/, "- ");
 }
 __name(safeComment, "safeComment");
 function safeCdata(val) {
-  return String(val).replace(/\]\]>/g, "]]]]><![CDATA[>");
+  return valToStr(val).replace(/\]\]>/g, "]]]]><![CDATA[>");
 }
 __name(safeCdata, "safeCdata");
 function escapeAttribute(val) {
-  return String(val).replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  return valToStr(val).replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 __name(escapeAttribute, "escapeAttribute");
 
 // node_modules/fast-xml-builder/src/orderedJs2Xml.js
 var EOL7 = "\n";
+function detectXmlVersionFromArray(jArray, options) {
+  if (!Array.isArray(jArray) || jArray.length === 0) return "1.0";
+  const first = jArray[0];
+  const firstKey = propName2(first);
+  if (firstKey === "?xml") {
+    const attrs = first[":@"];
+    if (attrs) {
+      const versionKey = options.attributeNamePrefix + "version";
+      if (attrs[versionKey]) return attrs[versionKey];
+    }
+  }
+  return "1.0";
+}
+__name(detectXmlVersionFromArray, "detectXmlVersionFromArray");
+function resolveTagName(name, isAttribute2, options, matcher, qNameValidator) {
+  if (!options.sanitizeName) return name;
+  if (qNameValidator(name)) return name;
+  return options.sanitizeName(name, { isAttribute: isAttribute2, matcher: matcher.readOnly() });
+}
+__name(resolveTagName, "resolveTagName");
 function toXml(jArray, options) {
   let indentation = "";
   if (options.format) {
@@ -71258,11 +71575,13 @@ function toXml(jArray, options) {
       }
     }
   }
+  const xmlVersion = detectXmlVersionFromArray(jArray, options);
+  const qNameValidator = createValidator("qName", { xmlVersion });
   const matcher = new Matcher();
-  return arrToStr(jArray, options, indentation, matcher, stopNodeExpressions);
+  return arrToStr(jArray, options, indentation, matcher, stopNodeExpressions, qNameValidator);
 }
 __name(toXml, "toXml");
-function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
+function arrToStr(arr, options, indentation, matcher, stopNodeExpressions, qNameValidator) {
   let xmlStr = "";
   let isPreviousElementTag = false;
   if (options.maxNestedTags && matcher.getDepth() > options.maxNestedTags) {
@@ -71270,7 +71589,7 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
   }
   if (!Array.isArray(arr)) {
     if (arr !== void 0 && arr !== null) {
-      let text = arr.toString();
+      let text = valToStr(arr);
       text = replaceEntitiesValue2(text, options);
       return text;
     }
@@ -71278,17 +71597,21 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
   }
   for (let i = 0; i < arr.length; i++) {
     const tagObj = arr[i];
-    const tagName = propName2(tagObj);
-    if (tagName === void 0) continue;
+    const rawTagName = propName2(tagObj);
+    if (rawTagName === void 0) continue;
+    const isSpecialName = rawTagName === options.textNodeName || rawTagName === options.cdataPropName || rawTagName === options.
+    commentPropName || rawTagName[0] === "?";
+    const tagName = isSpecialName ? rawTagName : resolveTagName(rawTagName, false, options, matcher, qNameValidator);
     const attrValues = extractAttributeValues(tagObj[":@"], options);
     matcher.push(tagName, attrValues);
     const isStopNode = checkStopNode(matcher, stopNodeExpressions);
     if (tagName === options.textNodeName) {
-      let tagText = tagObj[tagName];
+      let tagText = tagObj[rawTagName];
       if (!isStopNode) {
         tagText = options.tagValueProcessor(tagName, tagText);
         tagText = replaceEntitiesValue2(tagText, options);
       }
+      tagText = valToStr(tagText);
       if (isPreviousElementTag) {
         xmlStr += indentation;
       }
@@ -71300,21 +71623,21 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
       if (isPreviousElementTag) {
         xmlStr += indentation;
       }
-      const val = tagObj[tagName][0][options.textNodeName];
+      const val = tagObj[rawTagName][0][options.textNodeName];
       const safeVal = safeCdata(val);
       xmlStr += `<![CDATA[${safeVal}]]>`;
       isPreviousElementTag = false;
       matcher.pop();
       continue;
     } else if (tagName === options.commentPropName) {
-      const val = tagObj[tagName][0][options.textNodeName];
+      const val = tagObj[rawTagName][0][options.textNodeName];
       const safeVal = safeComment(val);
       xmlStr += indentation + `<!--${safeVal}-->`;
       isPreviousElementTag = true;
       matcher.pop();
       continue;
     } else if (tagName[0] === "?") {
-      const attStr2 = attr_to_str(tagObj[":@"], options, isStopNode);
+      const attStr2 = attr_to_str(tagObj[":@"], options, isStopNode, matcher, qNameValidator);
       const tempInd = tagName === "?xml" ? "" : indentation;
       xmlStr += tempInd + `<${tagName}${attStr2}?>`;
       isPreviousElementTag = true;
@@ -71325,13 +71648,13 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
     if (newIdentation !== "") {
       newIdentation += options.indentBy;
     }
-    const attStr = attr_to_str(tagObj[":@"], options, isStopNode);
+    const attStr = attr_to_str(tagObj[":@"], options, isStopNode, matcher, qNameValidator);
     const tagStart = indentation + `<${tagName}${attStr}`;
     let tagValue;
     if (isStopNode) {
-      tagValue = getRawContent2(tagObj[tagName], options);
+      tagValue = getRawContent2(tagObj[rawTagName], options);
     } else {
-      tagValue = arrToStr(tagObj[tagName], options, newIdentation, matcher, stopNodeExpressions);
+      tagValue = arrToStr(tagObj[rawTagName], options, newIdentation, matcher, stopNodeExpressions, qNameValidator);
     }
     if (options.unpairedTags.indexOf(tagName) !== -1) {
       if (options.suppressUnpairedNode) xmlStr += tagStart + ">";
@@ -71372,7 +71695,7 @@ __name(extractAttributeValues, "extractAttributeValues");
 function getRawContent2(arr, options) {
   if (!Array.isArray(arr)) {
     if (arr !== void 0 && arr !== null) {
-      return arr.toString();
+      return valToStr(arr);
     }
     return "";
   }
@@ -71381,7 +71704,7 @@ function getRawContent2(arr, options) {
     const item = arr[i];
     const tagName = propName2(item);
     if (tagName === options.textNodeName) {
-      content += item[tagName];
+      content += valToStr(item[tagName]);
     } else if (tagName === options.cdataPropName) {
       content += item[tagName][0][options.textNodeName];
     } else if (tagName === options.commentPropName) {
@@ -71426,11 +71749,13 @@ function propName2(obj) {
   }
 }
 __name(propName2, "propName");
-function attr_to_str(attrMap, options, isStopNode) {
+function attr_to_str(attrMap, options, isStopNode, matcher, qNameValidator) {
   let attrStr = "";
   if (attrMap && !options.ignoreAttributes) {
     for (let attr in attrMap) {
       if (!Object.prototype.hasOwnProperty.call(attrMap, attr)) continue;
+      const cleanAttrName = attr.substr(options.attributeNamePrefix.length);
+      const resolvedAttrName = isStopNode ? cleanAttrName : resolveTagName(cleanAttrName, true, options, matcher, qNameValidator);
       let attrVal;
       if (isStopNode) {
         attrVal = attrMap[attr];
@@ -71439,9 +71764,9 @@ function attr_to_str(attrMap, options, isStopNode) {
         attrVal = replaceEntitiesValue2(attrVal, options);
       }
       if (attrVal === true && options.suppressBooleanAttributes) {
-        attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}`;
+        attrStr += ` ${resolvedAttrName}`;
       } else {
-        attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}="${escapeAttribute(attrVal)}"`;
+        attrStr += ` ${resolvedAttrName}="${escapeAttribute(attrVal)}"`;
       }
     }
   }
@@ -71525,8 +71850,13 @@ var defaultOptions3 = {
   // transformAttributeName: false,
   oneListGroup: false,
   maxNestedTags: 100,
-  jPath: true
+  jPath: true,
   // When true, callbacks receive string jPath; when false, receive Matcher instance
+  sanitizeName: false
+  // false = allow all names as-is (default, backward-compatible).
+  // Set to a function (name, { isAttribute, matcher }) => string to
+  // validate/sanitize tag and attribute names. Throw inside the function
+  // to reject an invalid name.
 };
 function Builder(options) {
   this.options = Object.assign({}, defaultOptions3, options);
@@ -71572,6 +71902,25 @@ function Builder(options) {
   }
 }
 __name(Builder, "Builder");
+function detectXmlVersionFromObj(jObj, options) {
+  const decl = jObj["?xml"];
+  if (decl && typeof decl === "object") {
+    if (options.attributesGroupName && decl[options.attributesGroupName]) {
+      const v3 = decl[options.attributesGroupName][options.attributeNamePrefix + "version"];
+      if (v3) return v3;
+    }
+    const v2 = decl[options.attributeNamePrefix + "version"];
+    if (v2) return v2;
+  }
+  return "1.0";
+}
+__name(detectXmlVersionFromObj, "detectXmlVersionFromObj");
+function resolveTagName2(name, isAttribute2, options, matcher, qNameValidator) {
+  if (!options.sanitizeName) return name;
+  if (qNameValidator(name)) return name;
+  return options.sanitizeName(name, { isAttribute: isAttribute2, matcher: matcher.readOnly() });
+}
+__name(resolveTagName2, "resolveTagName");
 Builder.prototype.build = function(jObj) {
   if (this.options.preserveOrder) {
     return toXml(jObj, this.options);
@@ -71582,10 +71931,12 @@ Builder.prototype.build = function(jObj) {
       };
     }
     const matcher = new Matcher();
-    return this.j2x(jObj, 0, matcher).val;
+    const xmlVersion = detectXmlVersionFromObj(jObj, this.options);
+    const qNameValidator = createValidator("qName", { xmlVersion });
+    return this.j2x(jObj, 0, matcher, qNameValidator).val;
   }
 };
-Builder.prototype.j2x = function(jObj, level, matcher) {
+Builder.prototype.j2x = function(jObj, level, matcher, qNameValidator) {
   let attrStr = "";
   let val = "";
   if (this.options.maxNestedTags && matcher.getDepth() >= this.options.maxNestedTags) {
@@ -71595,6 +71946,10 @@ Builder.prototype.j2x = function(jObj, level, matcher) {
   const isCurrentStopNode = this.checkStopNode(matcher);
   for (let key in jObj) {
     if (!Object.prototype.hasOwnProperty.call(jObj, key)) continue;
+    const isSpecialKey = key === this.options.textNodeName || key === this.options.cdataPropName || key === this.options.
+    commentPropName || this.options.attributesGroupName && key === this.options.attributesGroupName || this.isAttribute(
+    key) || key[0] === "?";
+    const resolvedKey = isSpecialKey ? key : resolveTagName2(key, false, this.options, matcher, qNameValidator);
     if (typeof jObj[key] === "undefined") {
       if (this.isAttribute(key)) {
         val += "";
@@ -71602,36 +71957,37 @@ Builder.prototype.j2x = function(jObj, level, matcher) {
     } else if (jObj[key] === null) {
       if (this.isAttribute(key)) {
         val += "";
-      } else if (key === this.options.cdataPropName || key === this.options.commentPropName) {
+      } else if (resolvedKey === this.options.cdataPropName || resolvedKey === this.options.commentPropName) {
         val += "";
-      } else if (key[0] === "?") {
-        val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
+      } else if (resolvedKey[0] === "?") {
+        val += this.indentate(level) + "<" + resolvedKey + "?" + this.tagEndChar;
       } else {
-        val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+        val += this.indentate(level) + "<" + resolvedKey + "/" + this.tagEndChar;
       }
     } else if (jObj[key] instanceof Date) {
-      val += this.buildTextValNode(jObj[key], key, "", level, matcher);
+      val += this.buildTextValNode(jObj[key], resolvedKey, "", level, matcher);
     } else if (typeof jObj[key] !== "object") {
       const attr = this.isAttribute(key);
       if (attr && !this.ignoreAttributesFn(attr, jPath)) {
-        attrStr += this.buildAttrPairStr(attr, "" + jObj[key], isCurrentStopNode);
+        const resolvedAttr = resolveTagName2(attr, true, this.options, matcher, qNameValidator);
+        attrStr += this.buildAttrPairStr(resolvedAttr, valToStr(jObj[key]), isCurrentStopNode);
       } else if (!attr) {
         if (key === this.options.textNodeName) {
-          let newval = this.options.tagValueProcessor(key, "" + jObj[key]);
+          let newval = this.options.tagValueProcessor(key, valToStr(jObj[key]));
           val += this.replaceEntitiesValue(newval);
         } else {
-          matcher.push(key);
+          matcher.push(resolvedKey);
           const isStopNode = this.checkStopNode(matcher);
           matcher.pop();
           if (isStopNode) {
-            const textValue = "" + jObj[key];
+            const textValue = valToStr(jObj[key]);
             if (textValue === "") {
-              val += this.indentate(level) + "<" + key + this.closeTag(key) + this.tagEndChar;
+              val += this.indentate(level) + "<" + resolvedKey + this.closeTag(resolvedKey) + this.tagEndChar;
             } else {
-              val += this.indentate(level) + "<" + key + ">" + textValue + "</" + key + this.tagEndChar;
+              val += this.indentate(level) + "<" + resolvedKey + ">" + textValue + "</" + resolvedKey + this.tagEndChar;
             }
           } else {
-            val += this.buildTextValNode(jObj[key], key, "", level, matcher);
+            val += this.buildTextValNode(jObj[key], resolvedKey, "", level, matcher);
           }
         }
       }
@@ -71643,44 +71999,45 @@ Builder.prototype.j2x = function(jObj, level, matcher) {
         const item = jObj[key][j2];
         if (typeof item === "undefined") {
         } else if (item === null) {
-          if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
-          else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+          if (resolvedKey[0] === "?") val += this.indentate(level) + "<" + resolvedKey + "?" + this.tagEndChar;
+          else val += this.indentate(level) + "<" + resolvedKey + "/" + this.tagEndChar;
         } else if (typeof item === "object") {
           if (this.options.oneListGroup) {
-            matcher.push(key);
-            const result = this.j2x(item, level + 1, matcher);
+            matcher.push(resolvedKey);
+            const result = this.j2x(item, level + 1, matcher, qNameValidator);
             matcher.pop();
             listTagVal += result.val;
             if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) {
               listTagAttr += result.attrStr;
             }
           } else {
-            listTagVal += this.processTextOrObjNode(item, key, level, matcher);
+            listTagVal += this.processTextOrObjNode(item, resolvedKey, level, matcher, qNameValidator);
           }
         } else {
           if (this.options.oneListGroup) {
-            let textValue = this.options.tagValueProcessor(key, item);
+            let textValue = this.options.tagValueProcessor(resolvedKey, item);
             textValue = this.replaceEntitiesValue(textValue);
+            textValue = valToStr(textValue);
             listTagVal += textValue;
           } else {
-            matcher.push(key);
+            matcher.push(resolvedKey);
             const isStopNode = this.checkStopNode(matcher);
             matcher.pop();
             if (isStopNode) {
-              const textValue = "" + item;
+              const textValue = valToStr(item);
               if (textValue === "") {
-                listTagVal += this.indentate(level) + "<" + key + this.closeTag(key) + this.tagEndChar;
+                listTagVal += this.indentate(level) + "<" + resolvedKey + this.closeTag(resolvedKey) + this.tagEndChar;
               } else {
-                listTagVal += this.indentate(level) + "<" + key + ">" + textValue + "</" + key + this.tagEndChar;
+                listTagVal += this.indentate(level) + "<" + resolvedKey + ">" + textValue + "</" + resolvedKey + this.tagEndChar;
               }
             } else {
-              listTagVal += this.buildTextValNode(item, key, "", level, matcher);
+              listTagVal += this.buildTextValNode(item, resolvedKey, "", level, matcher);
             }
           }
         }
       }
       if (this.options.oneListGroup) {
-        listTagVal = this.buildObjectNode(listTagVal, key, listTagAttr, level);
+        listTagVal = this.buildObjectNode(listTagVal, resolvedKey, listTagAttr, level);
       }
       val += listTagVal;
     } else {
@@ -71688,10 +72045,11 @@ Builder.prototype.j2x = function(jObj, level, matcher) {
         const Ks = Object.keys(jObj[key]);
         const L2 = Ks.length;
         for (let j2 = 0; j2 < L2; j2++) {
-          attrStr += this.buildAttrPairStr(Ks[j2], "" + jObj[key][Ks[j2]], isCurrentStopNode);
+          const resolvedAttr = resolveTagName2(Ks[j2], true, this.options, matcher, qNameValidator);
+          attrStr += this.buildAttrPairStr(resolvedAttr, valToStr(jObj[key][Ks[j2]]), isCurrentStopNode);
         }
       } else {
-        val += this.processTextOrObjNode(jObj[key], key, level, matcher);
+        val += this.processTextOrObjNode(jObj[key], resolvedKey, level, matcher, qNameValidator);
       }
     }
   }
@@ -71699,14 +72057,14 @@ Builder.prototype.j2x = function(jObj, level, matcher) {
 };
 Builder.prototype.buildAttrPairStr = function(attrName, val, isStopNode) {
   if (!isStopNode) {
-    val = this.options.attributeValueProcessor(attrName, "" + val);
+    val = this.options.attributeValueProcessor(attrName, valToStr(val));
     val = this.replaceEntitiesValue(val);
   }
   if (this.options.suppressBooleanAttributes && val === "true") {
     return " " + attrName;
   } else return " " + attrName + '="' + escapeAttribute(val) + '"';
 };
-function processTextOrObjNode(object, key, level, matcher) {
+function processTextOrObjNode(object, key, level, matcher, qNameValidator) {
   const attrValues = this.extractAttributes(object);
   matcher.push(key, attrValues);
   const isStopNode = this.checkStopNode(matcher);
@@ -71716,7 +72074,7 @@ function processTextOrObjNode(object, key, level, matcher) {
     matcher.pop();
     return this.buildObjectNode(rawContent2, key, attrStr, level);
   }
-  const result = this.j2x(object, level + 1, matcher);
+  const result = this.j2x(object, level + 1, matcher, qNameValidator);
   matcher.pop();
   if (key[0] === "?") {
     return this.buildTextValNode("", key, result.attrStr, level, matcher);
@@ -71811,7 +72169,7 @@ Builder.prototype.buildAttributesForStopNode = function(obj) {
       if (val === true && this.options.suppressBooleanAttributes) {
         attrStr += " " + cleanKey;
       } else {
-        attrStr += " " + cleanKey + '="' + val + '"';
+        attrStr += " " + cleanKey + '="' + escapeAttribute(val) + '"';
       }
     }
   } else {
@@ -71823,7 +72181,7 @@ Builder.prototype.buildAttributesForStopNode = function(obj) {
         if (val === true && this.options.suppressBooleanAttributes) {
           attrStr += " " + attr;
         } else {
-          attrStr += " " + attr + '="' + val + '"';
+          attrStr += " " + attr + '="' + escapeAttribute(val) + '"';
         }
       }
     }
@@ -71849,7 +72207,7 @@ Builder.prototype.buildObjectNode = function(val, key, attrStr, level) {
       return this.indentate(level) + "<" + key + attrStr + piClosingChar + ">" + val + tagEndExp;
     } else if (this.options.commentPropName !== false && key === this.options.commentPropName && piClosingChar.length ===
     0) {
-      return this.indentate(level) + `<!--${val}-->` + this.newLine;
+      return this.indentate(level) + `<!--${safeComment(val)}-->` + this.newLine;
     } else {
       return this.indentate(level) + "<" + key + attrStr + piClosingChar + this.tagEndChar + val + this.indentate(level) +
       tagEndExp;
@@ -71888,6 +72246,7 @@ Builder.prototype.buildTextValNode = function(val, key, attrStr, level, matcher)
   } else {
     let textValue = this.options.tagValueProcessor(key, val);
     textValue = this.replaceEntitiesValue(textValue);
+    textValue = valToStr(textValue);
     if (textValue === "") {
       return this.indentate(level) + "<" + key + attrStr + this.closeTag(key) + this.tagEndChar;
     } else {
@@ -95678,26 +96037,26 @@ __name(saveCache, "saveCache");
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
 var import_runtime_rpc = __toESM(require_commonjs2(), 1);
+var import_runtime350 = __toESM(require_commonjs(), 1);
+var import_runtime351 = __toESM(require_commonjs(), 1);
+var import_runtime352 = __toESM(require_commonjs(), 1);
+var import_runtime353 = __toESM(require_commonjs(), 1);
+var import_runtime354 = __toESM(require_commonjs(), 1);
+
+// node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
+var import_runtime344 = __toESM(require_commonjs(), 1);
+var import_runtime345 = __toESM(require_commonjs(), 1);
 var import_runtime346 = __toESM(require_commonjs(), 1);
 var import_runtime347 = __toESM(require_commonjs(), 1);
 var import_runtime348 = __toESM(require_commonjs(), 1);
-var import_runtime349 = __toESM(require_commonjs(), 1);
-var import_runtime350 = __toESM(require_commonjs(), 1);
 
-// node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
+// node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
+var import_runtime338 = __toESM(require_commonjs(), 1);
+var import_runtime339 = __toESM(require_commonjs(), 1);
 var import_runtime340 = __toESM(require_commonjs(), 1);
 var import_runtime341 = __toESM(require_commonjs(), 1);
 var import_runtime342 = __toESM(require_commonjs(), 1);
-var import_runtime343 = __toESM(require_commonjs(), 1);
-var import_runtime344 = __toESM(require_commonjs(), 1);
-
-// node_modules/@actions/cache/lib/generated/results/entities/v1/cachescope.js
-var import_runtime334 = __toESM(require_commonjs(), 1);
-var import_runtime335 = __toESM(require_commonjs(), 1);
-var import_runtime336 = __toESM(require_commonjs(), 1);
-var import_runtime337 = __toESM(require_commonjs(), 1);
-var import_runtime338 = __toESM(require_commonjs(), 1);
-var CacheScope$Type = class extends import_runtime338.MessageType {
+var CacheScope$Type = class extends import_runtime342.MessageType {
   static {
     __name(this, "CacheScope$Type");
   }
@@ -95721,9 +96080,9 @@ var CacheScope$Type = class extends import_runtime338.MessageType {
   }
   create(value) {
     const message = { scope: "", permission: "0" };
-    globalThis.Object.defineProperty(message, import_runtime337.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime341.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime336.reflectionMergePartial)(this, message, value);
+      (0, import_runtime340.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -95745,7 +96104,7 @@ var CacheScope$Type = class extends import_runtime338.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime335.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime339.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -95753,19 +96112,19 @@ var CacheScope$Type = class extends import_runtime338.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.scope !== "")
-      writer.tag(1, import_runtime334.WireType.LengthDelimited).string(message.scope);
+      writer.tag(1, import_runtime338.WireType.LengthDelimited).string(message.scope);
     if (message.permission !== "0")
-      writer.tag(2, import_runtime334.WireType.Varint).int64(message.permission);
+      writer.tag(2, import_runtime338.WireType.Varint).int64(message.permission);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime335.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime339.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheScope = new CacheScope$Type();
 
 // node_modules/@actions/cache/lib/generated/results/entities/v1/cachemetadata.js
-var CacheMetadata$Type = class extends import_runtime344.MessageType {
+var CacheMetadata$Type = class extends import_runtime348.MessageType {
   static {
     __name(this, "CacheMetadata$Type");
   }
@@ -95783,9 +96142,9 @@ var CacheMetadata$Type = class extends import_runtime344.MessageType {
   }
   create(value) {
     const message = { repositoryId: "0", scope: [] };
-    globalThis.Object.defineProperty(message, import_runtime343.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime347.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime342.reflectionMergePartial)(this, message, value);
+      (0, import_runtime346.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -95807,7 +96166,7 @@ var CacheMetadata$Type = class extends import_runtime344.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime341.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime345.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -95815,20 +96174,20 @@ var CacheMetadata$Type = class extends import_runtime344.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.repositoryId !== "0")
-      writer.tag(1, import_runtime340.WireType.Varint).int64(message.repositoryId);
+      writer.tag(1, import_runtime344.WireType.Varint).int64(message.repositoryId);
     for (let i = 0; i < message.scope.length; i++)
-      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime340.WireType.LengthDelimited).fork(),
+      CacheScope.internalBinaryWrite(message.scope[i], writer.tag(2, import_runtime344.WireType.LengthDelimited).fork(),
       options).join();
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime341.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime345.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CacheMetadata = new CacheMetadata$Type();
 
 // node_modules/@actions/cache/lib/generated/results/api/v1/cache.js
-var CreateCacheEntryRequest$Type = class extends import_runtime350.MessageType {
+var CreateCacheEntryRequest$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "CreateCacheEntryRequest$Type");
   }
@@ -95853,9 +96212,9 @@ var CreateCacheEntryRequest$Type = class extends import_runtime350.MessageType {
   }
   create(value) {
     const message = { key: "", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -95881,7 +96240,7 @@ var CreateCacheEntryRequest$Type = class extends import_runtime350.MessageType {
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -95889,20 +96248,20 @@ var CreateCacheEntryRequest$Type = class extends import_runtime350.MessageType {
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime346.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime350.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime346.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime350.WireType.LengthDelimited).string(message.key);
     if (message.version !== "")
-      writer.tag(3, import_runtime346.WireType.LengthDelimited).string(message.version);
+      writer.tag(3, import_runtime350.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryRequest = new CreateCacheEntryRequest$Type();
-var CreateCacheEntryResponse$Type = class extends import_runtime350.MessageType {
+var CreateCacheEntryResponse$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "CreateCacheEntryResponse$Type");
   }
@@ -95933,9 +96292,9 @@ var CreateCacheEntryResponse$Type = class extends import_runtime350.MessageType 
   }
   create(value) {
     const message = { ok: false, signedUploadUrl: "", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -95961,7 +96320,7 @@ var CreateCacheEntryResponse$Type = class extends import_runtime350.MessageType 
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -95969,19 +96328,19 @@ var CreateCacheEntryResponse$Type = class extends import_runtime350.MessageType 
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime346.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime350.WireType.Varint).bool(message.ok);
     if (message.signedUploadUrl !== "")
-      writer.tag(2, import_runtime346.WireType.LengthDelimited).string(message.signedUploadUrl);
+      writer.tag(2, import_runtime350.WireType.LengthDelimited).string(message.signedUploadUrl);
     if (message.message !== "")
-      writer.tag(3, import_runtime346.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime350.WireType.LengthDelimited).string(message.message);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var CreateCacheEntryResponse = new CreateCacheEntryResponse$Type();
-var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime350.MessageType {
+var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadRequest$Type");
   }
@@ -96013,9 +96372,9 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime350.Messa
   }
   create(value) {
     const message = { key: "", sizeBytes: "0", version: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96045,7 +96404,7 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime350.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96053,22 +96412,22 @@ var FinalizeCacheEntryUploadRequest$Type = class extends import_runtime350.Messa
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime346.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime350.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime346.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime350.WireType.LengthDelimited).string(message.key);
     if (message.sizeBytes !== "0")
-      writer.tag(3, import_runtime346.WireType.Varint).int64(message.sizeBytes);
+      writer.tag(3, import_runtime350.WireType.Varint).int64(message.sizeBytes);
     if (message.version !== "")
-      writer.tag(4, import_runtime346.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime350.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadRequest = new FinalizeCacheEntryUploadRequest$Type();
-var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime350.MessageType {
+var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "FinalizeCacheEntryUploadResponse$Type");
   }
@@ -96099,9 +96458,9 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime350.Mess
   }
   create(value) {
     const message = { ok: false, entryId: "0", message: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96127,7 +96486,7 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime350.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96135,19 +96494,19 @@ var FinalizeCacheEntryUploadResponse$Type = class extends import_runtime350.Mess
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime346.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime350.WireType.Varint).bool(message.ok);
     if (message.entryId !== "0")
-      writer.tag(2, import_runtime346.WireType.Varint).int64(message.entryId);
+      writer.tag(2, import_runtime350.WireType.Varint).int64(message.entryId);
     if (message.message !== "")
-      writer.tag(3, import_runtime346.WireType.LengthDelimited).string(message.message);
+      writer.tag(3, import_runtime350.WireType.LengthDelimited).string(message.message);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var FinalizeCacheEntryUploadResponse = new FinalizeCacheEntryUploadResponse$Type();
-var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime350.MessageType {
+var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLRequest$Type");
   }
@@ -96180,9 +96539,9 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime350.Messa
   }
   create(value) {
     const message = { key: "", restoreKeys: [], version: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96212,7 +96571,7 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime350.Messa
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96220,22 +96579,22 @@ var GetCacheEntryDownloadURLRequest$Type = class extends import_runtime350.Messa
   }
   internalBinaryWrite(message, writer, options) {
     if (message.metadata)
-      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime346.WireType.LengthDelimited).fork(),
+      CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, import_runtime350.WireType.LengthDelimited).fork(),
       options).join();
     if (message.key !== "")
-      writer.tag(2, import_runtime346.WireType.LengthDelimited).string(message.key);
+      writer.tag(2, import_runtime350.WireType.LengthDelimited).string(message.key);
     for (let i = 0; i < message.restoreKeys.length; i++)
-      writer.tag(3, import_runtime346.WireType.LengthDelimited).string(message.restoreKeys[i]);
+      writer.tag(3, import_runtime350.WireType.LengthDelimited).string(message.restoreKeys[i]);
     if (message.version !== "")
-      writer.tag(4, import_runtime346.WireType.LengthDelimited).string(message.version);
+      writer.tag(4, import_runtime350.WireType.LengthDelimited).string(message.version);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
 var GetCacheEntryDownloadURLRequest = new GetCacheEntryDownloadURLRequest$Type();
-var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime350.MessageType {
+var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime354.MessageType {
   static {
     __name(this, "GetCacheEntryDownloadURLResponse$Type");
   }
@@ -96266,9 +96625,9 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime350.Mess
   }
   create(value) {
     const message = { ok: false, signedDownloadUrl: "", matchedKey: "" };
-    globalThis.Object.defineProperty(message, import_runtime349.MESSAGE_TYPE, { enumerable: false, value: this });
+    globalThis.Object.defineProperty(message, import_runtime353.MESSAGE_TYPE, { enumerable: false, value: this });
     if (value !== void 0)
-      (0, import_runtime348.reflectionMergePartial)(this, message, value);
+      (0, import_runtime352.reflectionMergePartial)(this, message, value);
     return message;
   }
   internalBinaryRead(reader, length, options, target) {
@@ -96294,7 +96653,7 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime350.Mess
             throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
           let d2 = reader.skip(wireType);
           if (u2 !== false)
-            (u2 === true ? import_runtime347.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
+            (u2 === true ? import_runtime351.UnknownFieldHandler.onRead : u2)(this.typeName, message, fieldNo, wireType,
             d2);
       }
     }
@@ -96302,14 +96661,14 @@ var GetCacheEntryDownloadURLResponse$Type = class extends import_runtime350.Mess
   }
   internalBinaryWrite(message, writer, options) {
     if (message.ok !== false)
-      writer.tag(1, import_runtime346.WireType.Varint).bool(message.ok);
+      writer.tag(1, import_runtime350.WireType.Varint).bool(message.ok);
     if (message.signedDownloadUrl !== "")
-      writer.tag(2, import_runtime346.WireType.LengthDelimited).string(message.signedDownloadUrl);
+      writer.tag(2, import_runtime350.WireType.LengthDelimited).string(message.signedDownloadUrl);
     if (message.matchedKey !== "")
-      writer.tag(3, import_runtime346.WireType.LengthDelimited).string(message.matchedKey);
+      writer.tag(3, import_runtime350.WireType.LengthDelimited).string(message.matchedKey);
     let u2 = options.writeUnknownFields;
     if (u2 !== false)
-      (u2 == true ? import_runtime347.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
+      (u2 == true ? import_runtime351.UnknownFieldHandler.onWrite : u2)(this.typeName, message, writer);
     return writer;
   }
 };
