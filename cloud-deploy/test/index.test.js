@@ -116,6 +116,7 @@ describe('Action', () => {
       'internal-key',
       'clan-service-account',
       true,
+      false,
     );
   });
   test('It can fail the action', async () => {
@@ -155,6 +156,7 @@ describe('Action', () => {
       'internal-key',
       'clan-service-account',
       true,
+      false,
     );
   });
 
@@ -355,6 +357,8 @@ describe('Action', () => {
 
     await action();
 
+    // Traffic is withheld and the service uses automatic canary.
+    expect(buildManifest.mock.calls[0].slice(10)).toEqual([false, true]);
     expect(getPreviousRevision).toHaveBeenCalledWith('service-name', 'project-id', 'europe-west1');
     expect(getNewRevision).toHaveBeenCalledWith('service-name', 'project-id', 'europe-west1');
     expect(registerAutomaticCanary).toHaveBeenCalledWith({
@@ -454,6 +458,8 @@ describe('Action', () => {
 
     await action();
 
+    // Traffic is served and the service does not use automatic canary.
+    expect(buildManifest.mock.calls[0].slice(10)).toEqual([true, false]);
     expect(getPreviousRevision).not.toHaveBeenCalled();
     expect(registerAutomaticCanary).not.toHaveBeenCalled();
   });

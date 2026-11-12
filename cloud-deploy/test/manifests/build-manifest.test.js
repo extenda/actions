@@ -11,7 +11,12 @@ import getImageWithSha256 from '../../src/manifests/image-sha256.js';
 import { securitySpec } from '../../src/manifests/security-sidecar.js';
 import handleStatefulset from '../../src/manifests/statefulset-workaround.js';
 import { addNamespace } from '../../src/utils/add-namespace.js';
+import { getPreviousRevision } from '../../src/utils/canary-revisions.js';
 import readSecret from '../../src/utils/load-credentials.js';
+import {
+  getAutomaticCanary,
+  setRevisionTraffic,
+} from '../../src/utils/send-request.js';
 
 vi.mock('../../src/manifests/check-system.js');
 vi.mock('../../src/utils/add-namespace.js');
@@ -21,6 +26,8 @@ vi.mock('../../src/manifests/statefulset-workaround.js');
 vi.mock('../../src/cloudrun/get-revisions.js');
 vi.mock('../../src/utils/cluster-connection.js');
 vi.mock('../../src/manifests/image-sha256.js');
+vi.mock('../../src/utils/canary-revisions.js');
+vi.mock('../../src/utils/send-request.js');
 
 const readFileSync = (file) => fs.readFileSync(file, { encoding: 'utf-8' });
 
@@ -47,6 +54,8 @@ describe('buildManifest', () => {
   beforeEach(() => {
     mockFs({});
     addNamespace.mockResolvedValueOnce('');
+    // The service has no automatic canary.
+    getAutomaticCanary.mockResolvedValue(null);
     getImageWithSha256.mockImplementation((name) =>
       Promise.resolve(`${name.split(':')[0]}@sha256:123`),
     );
@@ -1034,7 +1043,7 @@ metadata:
     ).rejects.toThrow('Bundle not found with the name tst.example-service-dev');
   });
 
-  test('It should set traffic to 0 of new revision if serve traffic is false', async () => {
+  test('It should give the new revision no traffic target if serve traffic is false', async () => {
     const image = 'example-image:latest';
     const service = {
       'cloud-run': {
@@ -1186,6 +1195,149 @@ metadata:
     ).rejects.toThrow(
       '2 active revisions found, set revision to 100% traffic before deploying',
     );
+    expect(setRevisionTraffic).not.toHaveBeenCalled();
+  });
+
+  describe('traffic of a Cloud Run service', () => {
+    const servingRevision = 'example-service-lsp6cqoi';
+    const idleRevision = 'example-service-lsublujx';
+    const latestRevisionOnly = [{ percent: 100, latestRevision: true }];
+    const servingRevisionOnly = [
+      { percent: 100, revisionName: servingRevision },
+    ];
+
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        traffic: {
+          'serve-traffic': false,
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {},
+        },
+        staging: {
+          'min-instances': 0,
+          env: {},
+        },
+      },
+    };
+
+    const revisions = (idleRevisionActive) => [
+      {
+        name: idleRevision,
+        creationTimestamp: '2000-01-20T12:07:33.625666Z',
+        active: idleRevisionActive,
+      },
+      {
+        name: servingRevision,
+        creationTimestamp: '2000-01-16T21:41:40.238306Z',
+        active: true,
+      },
+    ];
+
+    const buildTraffic = async (env, serveTraffic, automaticCanary) => {
+      await buildManifest(
+        'example-image:latest',
+        structuredClone(service),
+        'example-project',
+        'example-clan',
+        env,
+        '',
+        '',
+        '',
+        '',
+        '',
+        serveTraffic,
+        automaticCanary,
+      );
+      const manifest = yaml.load(readFileSync('cloudrun-service.yaml'));
+      return manifest.spec.traffic;
+    };
+
+    test('It should give all traffic to the active revision if serve traffic is false', async () => {
+      getRevisions.mockResolvedValueOnce(revisions(false));
+
+      await expect(buildTraffic('prod', false, true)).resolves.toEqual(
+        servingRevisionOnly,
+      );
+      expect(getAutomaticCanary).toHaveBeenCalledWith(
+        'example-service',
+        'example-project',
+        'europe-west1',
+      );
+      expect(setRevisionTraffic).not.toHaveBeenCalled();
+    });
+
+    test('It should serve the latest revision if no revision is active', async () => {
+      getRevisions.mockResolvedValueOnce([]);
+
+      await expect(buildTraffic('prod', false, true)).resolves.toEqual(
+        latestRevisionOnly,
+      );
+    });
+
+    test('It should fail deploy if a canary is in progress', async () => {
+      getAutomaticCanary.mockResolvedValueOnce({
+        revision: idleRevision,
+        previous_revision: servingRevision,
+        steps: '[10,50,100]',
+        step_index: -1,
+        status: 'in_progress',
+      });
+
+      await expect(buildTraffic('prod', false, true)).rejects.toThrow(
+        `A canary is in progress for revision ${idleRevision}, waiting for its first step.`,
+      );
+      expect(getRevisions).not.toHaveBeenCalled();
+    });
+
+    test('It should drop an active revision without traffic if automatic canary is on', async () => {
+      getRevisions.mockResolvedValueOnce(revisions(true));
+      getPreviousRevision.mockResolvedValueOnce(servingRevision);
+      setRevisionTraffic.mockResolvedValueOnce();
+
+      await expect(buildTraffic('prod', false, true)).resolves.toEqual(
+        servingRevisionOnly,
+      );
+      expect(setRevisionTraffic).toHaveBeenCalledWith(
+        'example-service',
+        'example-project',
+        'europe-west1',
+        [{ name: servingRevision, trafficPercent: 100 }],
+      );
+    });
+
+    test('It should serve the latest revision in staging', async () => {
+      await expect(buildTraffic('staging', false, true)).resolves.toEqual(
+        latestRevisionOnly,
+      );
+      expect(getRevisions).not.toHaveBeenCalled();
+      expect(getAutomaticCanary).not.toHaveBeenCalled();
+    });
+
+    test('It should serve the latest revision if serve traffic is true', async () => {
+      await expect(buildTraffic('prod', true, false)).resolves.toEqual(
+        latestRevisionOnly,
+      );
+      expect(getRevisions).not.toHaveBeenCalled();
+      expect(getAutomaticCanary).not.toHaveBeenCalled();
+    });
   });
 
   test('It should deploy with iam bindings and audiences', async () => {

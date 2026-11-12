@@ -110122,6 +110122,172 @@ var execGcloud2 = /* @__PURE__ */ __name(async (args, executable = "gcloud", sil
 }, "execGcloud");
 var gcloud_output_default = execGcloud2;
 
+// cloud-deploy/src/utils/canary-revisions.js
+var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  const output = await gcloud_output_default([
+    "run",
+    "services",
+    "describe",
+    service,
+    `--project=${projectID}`,
+    `--region=${region}`,
+    "--format=json(status.traffic)"
+  ]);
+  const { status } = JSON.parse(output);
+  const serving = status.traffic.find((t2) => t2.percent === 100);
+  return serving?.revisionName ?? null;
+}, "getPreviousRevision");
+var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  return gcloud_output_default([
+    "run",
+    "revisions",
+    "list",
+    `--service=${service}`,
+    `--project=${projectID}`,
+    `--region=${region}`,
+    "--sort-by=~creationTimestamp",
+    "--limit=1",
+    "--format=value(metadata.name)"
+  ]);
+}, "getNewRevision");
+
+// cloud-deploy/src/utils/identity-token.js
+var getToken = /* @__PURE__ */ __name(async (audience = "platform") => getIdToken(audience), "getToken");
+var identity_token_default = getToken;
+
+// cloud-deploy/src/utils/send-request.js
+axios_default.defaults.baseURL = "https://platform-api.retailsvc.com";
+var CANARY_STATUS_TIMEOUT_MS = 1e4;
+var CANARY_STATUS_RETRIES = 2;
+var CANARY_STATUS_RETRY_DELAY_MS = 500;
+var SET_TRAFFIC_TIMEOUT_MS = 6e4;
+var sendRequest2 = /* @__PURE__ */ __name(async (url3, data) => {
+  return axios_default.post(url3, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${await identity_token_default()}`
+    }
+  }).then((response) => {
+    const statuscode = response.status;
+    info(`response from ${url3} with response code ${statuscode}`);
+    return true;
+  }).catch((error2) => {
+    error(`${error2}`);
+    return false;
+  });
+}, "sendRequest");
+var sendDeployRequest = /* @__PURE__ */ __name(async (data) => {
+  const url3 = "/loadbalancer/deploy";
+  const result = await sendRequest2(url3, data);
+  if (!result) {
+    throw new Error(
+      "Deployment rolled out successfully! loadbalancer setup failed!"
+    );
+  }
+  return result;
+}, "sendDeployRequest");
+var refreshCanaryStatus = /* @__PURE__ */ __name(async (data) => {
+  const url3 = `/services/revisions/canary`;
+  return sendRequest2(url3, data);
+}, "refreshCanaryStatus");
+var registerAutomaticCanary = /* @__PURE__ */ __name(async (data) => {
+  const url3 = "/canary/automatic";
+  const result = await sendRequest2(url3, data);
+  if (!result) {
+    warning(
+      "Failed to register automatic canary \u2014 deploy succeeded but canary tracking is unavailable"
+    );
+  }
+  return result;
+}, "registerAutomaticCanary");
+var isCanaryRecord = /* @__PURE__ */ __name((data) => typeof data?.status === "string" && typeof data?.revision === "str\
+ing", "isCanaryRecord");
+var getAutomaticCanary = /* @__PURE__ */ __name(async (service, project, region) => {
+  const url3 = `/canary/automatic/${encodeURIComponent(service)}`;
+  const { status, data } = await axios_default.get(url3, {
+    params: { project, region },
+    headers: {
+      Authorization: `Bearer ${await identity_token_default()}`
+    },
+    timeout: CANARY_STATUS_TIMEOUT_MS,
+    validateStatus: /* @__PURE__ */ __name((code) => code === 200 || code === 404, "validateStatus"),
+    "axios-retry": {
+      retries: CANARY_STATUS_RETRIES,
+      retryDelay: /* @__PURE__ */ __name((retryCount) => retryCount * CANARY_STATUS_RETRY_DELAY_MS, "retryDelay"),
+      onRetry: /* @__PURE__ */ __name((retryCount) => {
+        info(
+          `Request to platform-api for the canary status failed, retrying (${retryCount})`
+        );
+      }, "onRetry")
+    }
+  });
+  if (status === 200 && isCanaryRecord(data)) {
+    return data;
+  }
+  if (status === 404 && data?.statusCode === 404) {
+    return null;
+  }
+  throw new Error(`Unexpected answer from platform-api (status ${status})`);
+}, "getAutomaticCanary");
+var setRevisionTraffic = /* @__PURE__ */ __name(async (service, project, region, revisions) => {
+  const url3 = "/services/revisions";
+  const response = await axios_default.post(url3, revisions, {
+    params: { project, service, region },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${await identity_token_default()}`
+    },
+    timeout: SET_TRAFFIC_TIMEOUT_MS
+  });
+  info(`response from ${url3} with response code ${response.status}`);
+}, "setRevisionTraffic");
+var sendScaleSetup = /* @__PURE__ */ __name(async (service, projectid, region, platform2, mininstances, scaleup, scaledown) => {
+  const url3 = "/scaling/setup";
+  const data = {
+    service,
+    projectid,
+    region,
+    platform: platform2,
+    mininstances,
+    scaleup,
+    scaledown,
+    scaled: true
+  };
+  return sendRequest2(url3, data);
+}, "sendScaleSetup");
+var sendDeployInfo = /* @__PURE__ */ __name(async (service, timestamp, version3, projectid, githubrepository, githubsha, slackchannel) => {
+  const url3 = "/deployinfo/add";
+  const data = {
+    service,
+    timestamp,
+    version: version3,
+    projectid,
+    githubrepository,
+    githubsha,
+    slackchannel
+  };
+  return sendRequest2(url3, data);
+}, "sendDeployInfo");
+var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, labels, githubRepository) => {
+  const url3 = "/security/vulnerabilities";
+  const data = {
+    service,
+    labels,
+    reportJson,
+    githubRepository
+  };
+  return sendRequest2(url3, data);
+}, "saveVulnerabilities");
+var isProjectWhitelisted = /* @__PURE__ */ __name(async (projectId) => {
+  const url3 = `/security/whitelist/${encodeURIComponent(projectId)}`;
+  const response = await axios_default.get(url3, {
+    headers: {
+      Authorization: `Bearer ${await identity_token_default()}`
+    }
+  });
+  return response.data.whitelisted === true;
+}, "isProjectWhitelisted");
+
 // cloud-deploy/src/cloudrun/get-revisions.js
 var isActive = /* @__PURE__ */ __name((conditions) => {
   const activeStatus = conditions.find(
@@ -110153,6 +110319,73 @@ var getRevisions = /* @__PURE__ */ __name(async (service, project, region) => {
   );
 }, "getRevisions");
 var get_revisions_default = getRevisions;
+
+// cloud-deploy/src/cloudrun/active-revision.js
+var MULTIPLE_ACTIVE_REVISIONS = "2 active revisions found, set revision to 100% traffic before deploying";
+var readAutomaticCanary = /* @__PURE__ */ __name(async (service, project, region) => getAutomaticCanary(service, project,
+region).catch((err) => {
+  warning(
+    `Unable to read the canary status from platform-api: ${err.message}. Checking active revisions only.`
+  );
+  return void 0;
+}), "readAutomaticCanary");
+var describeStep = /* @__PURE__ */ __name(({ steps, step_index: stepIndex }) => {
+  if (stepIndex < 0) {
+    return "waiting for its first step";
+  }
+  try {
+    const percentages = JSON.parse(steps);
+    return `at step ${stepIndex + 1} of ${percentages.length} (${percentages[stepIndex]}% traffic)`;
+  } catch {
+    return `at step ${stepIndex + 1}`;
+  }
+}, "describeStep");
+var dropIdleRevision = /* @__PURE__ */ __name(async (service, project, region, activeRevisions) => {
+  const servingRevision = await getPreviousRevision(
+    service,
+    project,
+    region
+  ).catch((err) => {
+    throw new Error(
+      `${MULTIPLE_ACTIVE_REVISIONS}. Unable to read the traffic of the service: ${err.message}`
+    );
+  });
+  if (!activeRevisions.includes(servingRevision)) {
+    throw new Error(MULTIPLE_ACTIVE_REVISIONS);
+  }
+  notice(
+    `Found an active revision without traffic and no canary in progress. Set 100% traffic to ${servingRevision}`
+  );
+  await setRevisionTraffic(service, project, region, [
+    { name: servingRevision, trafficPercent: 100 }
+  ]).catch((err) => {
+    throw new Error(
+      `${MULTIPLE_ACTIVE_REVISIONS}. Unable to set 100% traffic to ${servingRevision}: ${err.message}`
+    );
+  });
+  return servingRevision;
+}, "dropIdleRevision");
+var ensureSingleActiveRevision = /* @__PURE__ */ __name(async (service, project, region, automaticCanary = false) => {
+  const canary = await readAutomaticCanary(service, project, region);
+  if (canary?.status === "in_progress") {
+    throw new Error(
+      `A canary is in progress for revision ${canary.revision}, ${describeStep(canary)}. Deploy again when it has finish\
+ed. If it never ends, set the traffic of the service in the platform UI (POST /services/revisions): this cancels the can\
+ary.`
+    );
+  }
+  const activeRevisions = await get_revisions_default(service, project, region).then(
+    (revisions) => revisions.filter((revision) => revision.active === true).map((revision) => revision.name)
+  );
+  if (activeRevisions.length > 1) {
+    if (automaticCanary && canary !== void 0 && activeRevisions.length === 2) {
+      return dropIdleRevision(service, project, region, activeRevisions);
+    }
+    throw new Error(MULTIPLE_ACTIVE_REVISIONS);
+  }
+  return activeRevisions[0] ?? "";
+}, "ensureSingleActiveRevision");
+var active_revision_default = ensureSingleActiveRevision;
 
 // cloud-deploy/src/utils/add-namespace.js
 var addNamespace = /* @__PURE__ */ __name(async (content, namespace2) => {
@@ -111589,6 +111822,8 @@ var setContainerDependencies = /* @__PURE__ */ __name((annotations, containers) 
     });
   }
 }, "setContainerDependencies");
+var trafficTarget = /* @__PURE__ */ __name((activeRevisionName) => activeRevisionName ? { percent: 100, revisionName: activeRevisionName } :
+{ percent: 100, latestRevision: true }, "trafficTarget");
 var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, labels, protocol, environment, minInstances, maxInstances, scaling, cpu, memory, opaCpu, opaMemory, timeoutSeconds, serviceAccountName, SQLInstance, cpuThrottling, cpuBoost, sessionAffinity, activeRevisionName, audiences, monitoring, deployEnv, baseAnnotations, enableCloudNAT, enableDirectVPC, cors, securityPreviewTag, evaluationSidecar, projectId) => {
   labels.push({ "cloud.googleapis.com/location": "europe-west1" });
   const ports = opa ? void 0 : [
@@ -111620,19 +111855,7 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
   if (SQLInstance) {
     annotations["run.googleapis.com/cloudsql-instances"] = SQLInstance;
   }
-  const traffic = [
-    {
-      percent: 100,
-      latestRevision: true
-    }
-  ];
-  if (activeRevisionName !== "") {
-    traffic[0].percent = 0;
-    traffic.push({
-      percent: 100,
-      revisionName: activeRevisionName
-    });
-  }
+  const traffic = [trafficTarget(activeRevisionName)];
   const containers = [
     {
       image,
@@ -111975,7 +112198,7 @@ var prepareGcloudDeploy = /* @__PURE__ */ __name(async (name, projectID, clanNam
     await createCloudDeployPipe(name, projectID, clanName, env2, target)
   );
 }, "prepareGcloudDeploy");
-var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount, serveTraffic = true) => {
+var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, clanName, deployEnv, timeout, http2Certificate, internalCert, internalCertKey, cicdServiceAccount, serveTraffic = true, automaticCanary = false) => {
   let opa = false;
   let SQLInstanceName;
   const {
@@ -112171,24 +112394,12 @@ var buildManifest = /* @__PURE__ */ __name(async (image, deployYaml, projectId, 
     let activeRevisionName = "";
     if (!serveTraffic && deployEnv !== "staging") {
       info("Checking active revisions");
-      activeRevisionName = await get_revisions_default(
+      activeRevisionName = await active_revision_default(
         name,
         projectId,
-        "europe-west1"
-      ).then((revisions) => {
-        const checkMultipleActive = [];
-        for (const revision of revisions) {
-          if (revision.active === true) {
-            checkMultipleActive.push(revision.name);
-          }
-        }
-        if (checkMultipleActive.length > 1) {
-          throw new Error(
-            "2 active revisions found, set revision to 100% traffic before deploying"
-          );
-        }
-        return checkMultipleActive[0];
-      });
+        "europe-west1",
+        automaticCanary
+      );
     }
     const cloudrunManifest = await cloudrunManifestTemplate(
       name,
@@ -112753,127 +112964,6 @@ var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
   });
 }, "checkPolicyExists");
 var cloud_armor_default = checkPolicyExists;
-
-// cloud-deploy/src/utils/canary-revisions.js
-var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
-  const output = await gcloud_output_default([
-    "run",
-    "services",
-    "describe",
-    service,
-    `--project=${projectID}`,
-    `--region=${region}`,
-    "--format=json(status.traffic)"
-  ]);
-  const { status } = JSON.parse(output);
-  const serving = status.traffic.find((t2) => t2.percent === 100);
-  return serving?.revisionName ?? null;
-}, "getPreviousRevision");
-var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
-  return gcloud_output_default([
-    "run",
-    "revisions",
-    "list",
-    `--service=${service}`,
-    `--project=${projectID}`,
-    `--region=${region}`,
-    "--sort-by=~creationTimestamp",
-    "--limit=1",
-    "--format=value(metadata.name)"
-  ]);
-}, "getNewRevision");
-
-// cloud-deploy/src/utils/identity-token.js
-var getToken = /* @__PURE__ */ __name(async (audience = "platform") => getIdToken(audience), "getToken");
-var identity_token_default = getToken;
-
-// cloud-deploy/src/utils/send-request.js
-axios_default.defaults.baseURL = "https://platform-api.retailsvc.com";
-var sendRequest2 = /* @__PURE__ */ __name(async (url3, data) => {
-  return axios_default.post(url3, data, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${await identity_token_default()}`
-    }
-  }).then((response) => {
-    const statuscode = response.status;
-    info(`response from ${url3} with response code ${statuscode}`);
-    return true;
-  }).catch((error2) => {
-    error(`${error2}`);
-    return false;
-  });
-}, "sendRequest");
-var sendDeployRequest = /* @__PURE__ */ __name(async (data) => {
-  const url3 = "/loadbalancer/deploy";
-  const result = await sendRequest2(url3, data);
-  if (!result) {
-    throw new Error(
-      "Deployment rolled out successfully! loadbalancer setup failed!"
-    );
-  }
-  return result;
-}, "sendDeployRequest");
-var refreshCanaryStatus = /* @__PURE__ */ __name(async (data) => {
-  const url3 = `/services/revisions/canary`;
-  return sendRequest2(url3, data);
-}, "refreshCanaryStatus");
-var registerAutomaticCanary = /* @__PURE__ */ __name(async (data) => {
-  const url3 = "/canary/automatic";
-  const result = await sendRequest2(url3, data);
-  if (!result) {
-    warning(
-      "Failed to register automatic canary \u2014 deploy succeeded but canary tracking is unavailable"
-    );
-  }
-  return result;
-}, "registerAutomaticCanary");
-var sendScaleSetup = /* @__PURE__ */ __name(async (service, projectid, region, platform2, mininstances, scaleup, scaledown) => {
-  const url3 = "/scaling/setup";
-  const data = {
-    service,
-    projectid,
-    region,
-    platform: platform2,
-    mininstances,
-    scaleup,
-    scaledown,
-    scaled: true
-  };
-  return sendRequest2(url3, data);
-}, "sendScaleSetup");
-var sendDeployInfo = /* @__PURE__ */ __name(async (service, timestamp, version3, projectid, githubrepository, githubsha, slackchannel) => {
-  const url3 = "/deployinfo/add";
-  const data = {
-    service,
-    timestamp,
-    version: version3,
-    projectid,
-    githubrepository,
-    githubsha,
-    slackchannel
-  };
-  return sendRequest2(url3, data);
-}, "sendDeployInfo");
-var saveVulnerabilities = /* @__PURE__ */ __name(async (service, reportJson, labels, githubRepository) => {
-  const url3 = "/security/vulnerabilities";
-  const data = {
-    service,
-    labels,
-    reportJson,
-    githubRepository
-  };
-  return sendRequest2(url3, data);
-}, "saveVulnerabilities");
-var isProjectWhitelisted = /* @__PURE__ */ __name(async (projectId) => {
-  const url3 = `/security/whitelist/${encodeURIComponent(projectId)}`;
-  const response = await axios_default.get(url3, {
-    headers: {
-      Authorization: `Bearer ${await identity_token_default()}`
-    }
-  });
-  return response.data.whitelisted === true;
-}, "isProjectWhitelisted");
 
 // cloud-deploy/src/utils/service-definition.js
 var import_node_fs14 = __toESM(require("node:fs"), 1);
@@ -114034,7 +114124,8 @@ var action5 = /* @__PURE__ */ __name(async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
-    serveTraffic
+    serveTraffic,
+    isNewCanary
   );
   await publish_policies_default(
     serviceName,

@@ -1717,7 +1717,7 @@ spec:
 "
 `;
 
-exports[`buildManifest > It should set traffic to 0 of new revision if serve traffic is false 1`] = `
+exports[`buildManifest > It should give the new revision no traffic target if serve traffic is false 1`] = `
 "apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
@@ -1787,8 +1787,6 @@ spec:
             failureThreshold: 1
             timeoutSeconds: 240
   traffic:
-    - percent: 0
-      latestRevision: true
     - percent: 100
       revisionName: example-service-lsublujx
 "

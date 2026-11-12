@@ -11,6 +11,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "node ../.scripts/build-workspace.js"
+    "build": "node ../.scripts/build-workspace.js",
+    "test:e2e": "node --test --test-timeout=180000 test/e2e/emulated-deploy.e2e.js"
   }
 }

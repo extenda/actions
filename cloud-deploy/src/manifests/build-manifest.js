@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import * as core from '@actions/core';
 import * as yaml from 'js-yaml';
 
-import getRevisions from '../cloudrun/get-revisions.js';
+import ensureSingleActiveRevision from '../cloudrun/active-revision.js';
 import { addNamespace } from '../utils/add-namespace.js';
 import connectToCluster from '../utils/cluster-connection.js';
 import readSecret from '../utils/load-credentials.js';
@@ -114,6 +114,7 @@ const buildManifest = async (
   internalCertKey,
   cicdServiceAccount,
   serveTraffic = true,
+  automaticCanary = false,
 ) => {
   let opa = false;
   let SQLInstanceName;
@@ -347,24 +348,12 @@ const buildManifest = async (
     let activeRevisionName = '';
     if (!serveTraffic && deployEnv !== 'staging') {
       core.info('Checking active revisions');
-      activeRevisionName = await getRevisions(
+      activeRevisionName = await ensureSingleActiveRevision(
         name,
         projectId,
         'europe-west1',
-      ).then((revisions) => {
-        const checkMultipleActive = [];
-        for (const revision of revisions) {
-          if (revision.active === true) {
-            checkMultipleActive.push(revision.name);
-          }
-        }
-        if (checkMultipleActive.length > 1) {
-          throw new Error(
-            '2 active revisions found, set revision to 100% traffic before deploying',
-          );
-        }
-        return checkMultipleActive[0];
-      });
+        automaticCanary,
+      );
     }
 
     const cloudrunManifest = await cloudrunManifestTemplate(
