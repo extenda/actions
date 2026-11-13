@@ -102898,7 +102898,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     (0, import_node_fs8.unlinkSync)(zipPath);
   }
   const revisionPrefix = `skills/${namespacedId}/${revisionId}`;
-  await uploadMany(
+  const prefixUrl = await uploadMany(
     [
       { localPath: skillFilePath, relPath: "SKILL.md" },
       ...referenceFiles.map((rel) => ({
@@ -102908,7 +102908,7 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
     ],
     revisionPrefix
   );
-  const gcsPath = `gs://extenda-agent-artifacts/${revisionPrefix}/SKILL.md`;
+  const gcsPath = `${prefixUrl}/SKILL.md`;
   await activate(registryId, revisionId);
   const refSuffix = referenceFiles.length ? ` (+${referenceFiles.length} reference file(s))` : "";
   info(

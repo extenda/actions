@@ -438,7 +438,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   // Each revision has its own GCS prefix, so files removed from the skill do not linger.
   const revisionPrefix = `skills/${namespacedId}/${revisionId}`;
   // One batched upload (parallel transfers) instead of one gcloud process per file.
-  await uploadMany(
+  const prefixUrl = await uploadMany(
     [
       { localPath: skillFilePath, relPath: 'SKILL.md' },
       ...referenceFiles.map((rel) => ({
@@ -448,7 +448,7 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
     ],
     revisionPrefix,
   );
-  const gcsPath = `gs://extenda-agent-artifacts/${revisionPrefix}/SKILL.md`;
+  const gcsPath = `${prefixUrl}/SKILL.md`;
   await activate(registryId, revisionId);
   const refSuffix = referenceFiles.length
     ? ` (+${referenceFiles.length} reference file(s))`

@@ -501,6 +501,24 @@ describe('registerSkill', () => {
       );
     });
 
+    test('logs the SKILL.md URL under the prefix returned by uploadMany', async () => {
+      uploadMany.mockResolvedValue('gs://bucket/skills/clan-my-skill/v0-01');
+      execGcloud.mockRejectedValueOnce(new Error('not found'));
+      execGcloud.mockResolvedValue('');
+      await registerSkill(
+        'my-skill',
+        '/skills/my-skill/SKILL.md',
+        false,
+        'clan',
+      );
+
+      expect(core.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '→ gs://bucket/skills/clan-my-skill/v0-01/SKILL.md',
+        ),
+      );
+    });
+
     test('dry-run lists reference files without uploading', async () => {
       fg.sync.mockReturnValue(['references/usage.md']);
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', true);
