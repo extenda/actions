@@ -8,7 +8,7 @@ import { strToU8, zipSync } from 'fflate';
 import { load as yamlLoad } from 'js-yaml';
 
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
-import { upload } from './upload-gcs.js';
+import { uploadMany } from './upload-gcs.js';
 
 const PROJECT = 'extenda';
 const LOCATION = 'eu';
@@ -437,10 +437,18 @@ const registerSkill = async (skillId, skillFilePath, dryRun, clan) => {
   // Upload every GCS artifact before activating so a failed upload never leaves an incomplete active revision.
   // Each revision has its own GCS prefix, so files removed from the skill do not linger.
   const revisionPrefix = `skills/${namespacedId}/${revisionId}`;
-  const gcsPath = await upload(skillFilePath, `${revisionPrefix}/SKILL.md`);
-  for (const rel of referenceFiles) {
-    await upload(path.join(skillDir, rel), `${revisionPrefix}/${rel}`);
-  }
+  // One batched upload (parallel transfers) instead of one gcloud process per file.
+  await uploadMany(
+    [
+      { localPath: skillFilePath, relPath: 'SKILL.md' },
+      ...referenceFiles.map((rel) => ({
+        localPath: path.join(skillDir, rel),
+        relPath: rel,
+      })),
+    ],
+    revisionPrefix,
+  );
+  const gcsPath = `gs://extenda-agent-artifacts/${revisionPrefix}/SKILL.md`;
   await activate(registryId, revisionId);
   const refSuffix = referenceFiles.length
     ? ` (+${referenceFiles.length} reference file(s))`

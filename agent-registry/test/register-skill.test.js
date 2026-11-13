@@ -33,7 +33,7 @@ import {
   parseSkillMeta,
   registerSkill,
 } from '../src/register-skill.js';
-import { upload } from '../src/upload-gcs.js';
+import { uploadMany } from '../src/upload-gcs.js';
 
 const SKILL_MD = `---
 name: Fix Dependabot PR
@@ -51,7 +51,7 @@ const expectNoWrites = () => {
   for (const [args] of execGcloud.mock.calls) {
     expect(args.some((a) => verbs.includes(a))).toBe(false);
   }
-  expect(upload).not.toHaveBeenCalled();
+  expect(uploadMany).not.toHaveBeenCalled();
 };
 
 // Index of execGcloud call by position
@@ -102,7 +102,7 @@ describe('registerSkill', () => {
   beforeEach(() => {
     readFileSync.mockReturnValue(SKILL_MD);
     fg.sync.mockReturnValue([]);
-    upload.mockResolvedValue('gs://dest');
+    uploadMany.mockResolvedValue('gs://dest');
     delete process.env.GITHUB_HEAD_REF;
     delete process.env.GITHUB_REF_NAME;
   });
@@ -405,8 +405,8 @@ describe('registerSkill', () => {
       expect(call(ACTIVATE + 2)).toEqual(call(ACTIVATE));
       expect(execGcloud).toHaveBeenCalledTimes(ACTIVATE + 3);
       // Artifacts are uploaded once, before the first activation attempt.
-      expect(upload).toHaveBeenCalledTimes(1);
-      expect(upload.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(uploadMany).toHaveBeenCalledTimes(1);
+      expect(uploadMany.mock.invocationCallOrder[0]).toBeLessThan(
         execGcloud.mock.invocationCallOrder[ACTIVATE],
       );
     });
@@ -484,17 +484,20 @@ describe('registerSkill', () => {
         'clan',
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        '/skills/my-skill/SKILL.md',
-        'skills/clan-my-skill/v0-01/SKILL.md',
-      );
-      expect(upload).toHaveBeenCalledWith(
-        '/skills/my-skill/references/usage.md',
-        'skills/clan-my-skill/v0-01/references/usage.md',
-      );
-      expect(upload).toHaveBeenCalledWith(
-        '/skills/my-skill/references/templates/a/B.java',
-        'skills/clan-my-skill/v0-01/references/templates/a/B.java',
+      expect(uploadMany).toHaveBeenCalledTimes(1);
+      expect(uploadMany).toHaveBeenCalledWith(
+        [
+          { localPath: '/skills/my-skill/SKILL.md', relPath: 'SKILL.md' },
+          {
+            localPath: '/skills/my-skill/references/templates/a/B.java',
+            relPath: 'references/templates/a/B.java',
+          },
+          {
+            localPath: '/skills/my-skill/references/usage.md',
+            relPath: 'references/usage.md',
+          },
+        ],
+        'skills/clan-my-skill/v0-01',
       );
     });
 
@@ -505,7 +508,7 @@ describe('registerSkill', () => {
       expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining('references/usage.md'),
       );
-      expect(upload).not.toHaveBeenCalled();
+      expect(uploadMany).not.toHaveBeenCalled();
     });
 
     test('uploads only SKILL.md when there are no reference files', async () => {
@@ -513,7 +516,10 @@ describe('registerSkill', () => {
       execGcloud.mockResolvedValue('');
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
 
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(uploadMany).toHaveBeenCalledWith(
+        [{ localPath: '/skills/my-skill/SKILL.md', relPath: 'SKILL.md' }],
+        'skills/my-skill/v0-01',
+      );
     });
   });
 
@@ -525,12 +531,13 @@ describe('registerSkill', () => {
 
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
 
-      expect(upload).toHaveBeenCalledTimes(3);
+      expect(uploadMany).toHaveBeenCalledTimes(1);
+      expect(uploadMany.mock.calls[0][0]).toHaveLength(3);
       const activateIdx = execGcloud.mock.calls.findIndex(([args]) =>
         args.includes('--target-state=active'),
       );
       const activateOrder = execGcloud.mock.invocationCallOrder[activateIdx];
-      for (const order of upload.mock.invocationCallOrder) {
+      for (const order of uploadMany.mock.invocationCallOrder) {
         expect(order).toBeLessThan(activateOrder);
       }
     });
@@ -539,9 +546,7 @@ describe('registerSkill', () => {
       fg.sync.mockReturnValue(['references/a.md']);
       execGcloud.mockRejectedValueOnce(new Error('not found'));
       execGcloud.mockResolvedValue('');
-      upload
-        .mockResolvedValueOnce('gs://dest')
-        .mockRejectedValueOnce(new Error('gcs down'));
+      uploadMany.mockRejectedValueOnce(new Error('gcs down'));
 
       await expect(
         registerSkill('my-skill', '/skills/my-skill/SKILL.md', false),
@@ -567,7 +572,7 @@ describe('registerSkill', () => {
         registerSkill('my-skill', '/skills/my-skill/SKILL.md', false),
       ).rejects.toThrow(/references\/huge\.md is 65537 bytes/);
       expect(execGcloud).not.toHaveBeenCalled();
-      expect(upload).not.toHaveBeenCalled();
+      expect(uploadMany).not.toHaveBeenCalled();
     });
 
     test('allows a non-Markdown reference over 64 KB', async () => {
@@ -581,7 +586,7 @@ describe('registerSkill', () => {
       execGcloud.mockResolvedValue('');
 
       await registerSkill('my-skill', '/skills/my-skill/SKILL.md', false);
-      expect(upload).toHaveBeenCalled();
+      expect(uploadMany).toHaveBeenCalled();
     });
 
     test('fails when SKILL.md is over 64 KB', async () => {
@@ -617,7 +622,7 @@ describe('registerSkill', () => {
         registerSkill('my-skill', '/skills/my-skill/SKILL.md', false),
       ).rejects.toThrow(`payload zip is ${MAX_ZIP_BYTES + 1} bytes`);
       expect(execGcloud).not.toHaveBeenCalled();
-      expect(upload).not.toHaveBeenCalled();
+      expect(uploadMany).not.toHaveBeenCalled();
     });
 
     test('accepts a zip of exactly 400 KB', async () => {

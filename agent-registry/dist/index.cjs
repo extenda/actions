@@ -728,10 +728,10 @@ var require_src2 = __commonJS({
     var fs_1 = require("fs");
     var debug_1 = __importDefault(require_src());
     var log2 = debug_1.default("@kwsites/file-exists");
-    function check(path21, isFile2, isDirectory2) {
-      log2(`checking %s`, path21);
+    function check(path22, isFile2, isDirectory2) {
+      log2(`checking %s`, path22);
       try {
-        const stat2 = fs_1.statSync(path21);
+        const stat2 = fs_1.statSync(path22);
         if (stat2.isFile() && isFile2) {
           log2(`[OK] path represents a file`);
           return true;
@@ -752,8 +752,8 @@ var require_src2 = __commonJS({
       }
     }
     __name(check, "check");
-    function exists2(path21, type = exports2.READABLE) {
-      return check(path21, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
+    function exists2(path22, type = exports2.READABLE) {
+      return check(path22, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
     }
     __name(exists2, "exists");
     exports2.exists = exists2;
@@ -1965,14 +1965,14 @@ eger.");
         }
         const port = url3.port != null ? url3.port : url3.protocol === "https:" ? 443 : 80;
         let origin2 = url3.origin != null ? url3.origin : `${url3.protocol || ""}//${url3.hostname || ""}:${port}`;
-        let path21 = url3.path != null ? url3.path : `${url3.pathname || ""}${url3.search || ""}`;
+        let path22 = url3.path != null ? url3.path : `${url3.pathname || ""}${url3.search || ""}`;
         if (origin2[origin2.length - 1] === "/") {
           origin2 = origin2.slice(0, origin2.length - 1);
         }
-        if (path21 && path21[0] !== "/") {
-          path21 = `/${path21}`;
+        if (path22 && path22[0] !== "/") {
+          path22 = `/${path22}`;
         }
-        return new URL(`${origin2}${path21}`);
+        return new URL(`${origin2}${path22}`);
       }
       if (!isHttpOrHttpsPrefixed(url3.origin || url3.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -2463,39 +2463,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path21, origin: origin2 }
+          request: { method, path: path22, origin: origin2 }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin2, path21);
+        debuglog("sending request to %s %s/%s", method, origin2, path22);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path21, origin: origin2 },
+          request: { method, path: path22, origin: origin2 },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin2,
-          path21,
+          path22,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path21, origin: origin2 }
+          request: { method, path: path22, origin: origin2 }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin2, path21);
+        debuglog("trailers received from %s %s/%s", method, origin2, path22);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path21, origin: origin2 },
+          request: { method, path: path22, origin: origin2 },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin2,
-          path21,
+          path22,
           error2.message
         );
       });
@@ -2544,9 +2544,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path21, origin: origin2 }
+            request: { method, path: path22, origin: origin2 }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin2, path21);
+          debuglog("sending request to %s %s/%s", method, origin2, path22);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -2612,7 +2612,7 @@ var require_request = __commonJS({
         __name(this, "Request");
       }
       constructor(origin2, {
-        path: path21,
+        path: path22,
         method,
         body: body2,
         headers,
@@ -2627,12 +2627,12 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler) {
-        if (typeof path21 !== "string") {
+        if (typeof path22 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path21[0] !== "/" && !(path21.startsWith("http://") || path21.startsWith("https://")) && method !== "\
+        } else if (path22[0] !== "/" && !(path22.startsWith("http://") || path22.startsWith("https://")) && method !== "\
 CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path21)) {
+        } else if (invalidPathRegex.test(path22)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2699,7 +2699,7 @@ terable");
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL2(path21, query) : path21;
+        this.path = query ? buildURL2(path22, query) : path22;
         this.origin = origin2;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -8649,7 +8649,7 @@ var require_client_h1 = __commonJS({
     }
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH1(client, request) {
-      const { method, path: path21, host, upgrade, blocking, reset } = request;
+      const { method, path: path22, host, upgrade, blocking, reset } = request;
       let { body: body2, headers, contentLength: contentLength2 } = request;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method ===
       "PROPFIND" || method === "PROPPATCH";
@@ -8732,7 +8732,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path21} HTTP/1.1\r
+      let header = `${method} ${path22} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -9280,7 +9280,7 @@ var require_client_h2 = __commonJS({
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH2(client, request) {
       const session = client[kHTTP2Session];
-      const { method, path: path21, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      const { method, path: path22, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
       let { body: body2 } = request;
       if (upgrade) {
         util9.errorRequest(client, request, new Error("Upgrade not supported for H2"));
@@ -9377,7 +9377,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path21;
+      headers[HTTP2_HEADER_PATH] = path22;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body2 && typeof body2.read === "function") {
@@ -9748,9 +9748,9 @@ var require_redirect_handler = __commonJS({
         }
         const { origin: origin2, pathname, search } = util9.parseURL(new URL(this.location, this.opts.origin && new URL(
         this.opts.path, this.opts.origin)));
-        const path21 = search ? `${pathname}${search}` : pathname;
+        const path22 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin2);
-        this.opts.path = path21;
+        this.opts.path = path22;
         this.opts.origin = origin2;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -11045,10 +11045,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin: origin2,
-          path: path21 = "/",
+          path: path22 = "/",
           headers = {}
         } = opts;
-        opts.path = origin2 + path21;
+        opts.path = origin2 + path22;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL3(origin2);
           headers.host = host;
@@ -13097,21 +13097,21 @@ var require_mock_utils = __commonJS({
       return true;
     }
     __name(matchHeaders, "matchHeaders");
-    function safeUrl(path21) {
-      if (typeof path21 !== "string") {
-        return path21;
+    function safeUrl(path22) {
+      if (typeof path22 !== "string") {
+        return path22;
       }
-      const pathSegments = path21.split("?");
+      const pathSegments = path22.split("?");
       if (pathSegments.length !== 2) {
-        return path21;
+        return path22;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
     __name(safeUrl, "safeUrl");
-    function matchKey(mockDispatch2, { path: path21, method, body: body2, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path21);
+    function matchKey(mockDispatch2, { path: path22, method, body: body2, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path22);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body2) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -13135,8 +13135,8 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL2(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path21 }) => matchValue(
-      safeUrl(path21), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path22 }) => matchValue(
+      safeUrl(path22), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -13178,9 +13178,9 @@ var require_mock_utils = __commonJS({
     }
     __name(deleteMockDispatch, "deleteMockDispatch");
     function buildKey(opts) {
-      const { path: path21, method, body: body2, headers, query } = opts;
+      const { path: path22, method, body: body2, headers, query } = opts;
       return {
-        path: path21,
+        path: path22,
         method,
         body: body2,
         headers,
@@ -13673,10 +13673,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path21, data: { statusCode }, persist, times, timesInvoked, origin: origin2 }) => ({
+          ({ method, path: path22, data: { statusCode }, persist, times, timesInvoked, origin: origin2 }) => ({
             Method: method,
             Origin: origin2,
-            Path: path21,
+            Path: path22,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -18670,9 +18670,9 @@ var require_util6 = __commonJS({
       }
     }
     __name(validateCookieValue, "validateCookieValue");
-    function validateCookiePath(path21) {
-      for (let i2 = 0; i2 < path21.length; ++i2) {
-        const code = path21.charCodeAt(i2);
+    function validateCookiePath(path22) {
+      for (let i2 = 0; i2 < path22.length; ++i2) {
+        const code = path22.charCodeAt(i2);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -21675,11 +21675,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path21 = opts.path;
+          let path22 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path21 = `/${path21}`;
+            path22 = `/${path22}`;
           }
-          url3 = new URL(util9.parseOrigin(url3).origin + path21);
+          url3 = new URL(util9.parseOrigin(url3).origin + path22);
         } else {
           if (!opts) {
             opts = typeof url3 === "object" ? url3 : {};
@@ -32852,11 +32852,11 @@ var require_mime_types = __commonJS({
       return exts[0];
     }
     __name(extension, "extension");
-    function lookup(path21) {
-      if (!path21 || typeof path21 !== "string") {
+    function lookup(path22) {
+      if (!path22 || typeof path22 !== "string") {
         return false;
       }
-      var extension2 = extname2("x." + path21).toLowerCase().substr(1);
+      var extension2 = extname2("x." + path22).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -33984,7 +33984,7 @@ var require_form_data = __commonJS({
     "use strict";
     var CombinedStream = require_combined_stream();
     var util9 = require("util");
-    var path21 = require("path");
+    var path22 = require("path");
     var http5 = require("http");
     var https4 = require("https");
     var parseUrl2 = require("url").parse;
@@ -34117,11 +34117,11 @@ var require_form_data = __commonJS({
     FormData3.prototype._getContentDisposition = function(value, options) {
       var filename2;
       if (typeof options.filepath === "string") {
-        filename2 = path21.normalize(options.filepath).replace(/\\/g, "/");
+        filename2 = path22.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value && (value.name || value.path)) {
-        filename2 = path21.basename(options.filename || value && (value.name || value.path));
+        filename2 = path22.basename(options.filename || value && (value.name || value.path));
       } else if (value && value.readable && hasOwn(value, "httpVersion")) {
-        filename2 = path21.basename(value.client._httpMessage.path || "");
+        filename2 = path22.basename(value.client._httpMessage.path || "");
       }
       if (filename2) {
         return 'filename="' + escapeHeaderParam(filename2) + '"';
@@ -35418,7 +35418,7 @@ var require_path = __commonJS({
     escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute =
     exports2.unixify = void 0;
     var os13 = require("os");
-    var path21 = require("path");
+    var path22 = require("path");
     var IS_WINDOWS_PLATFORM = os13.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -35431,7 +35431,7 @@ var require_path = __commonJS({
     __name(unixify, "unixify");
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path21.resolve(cwd, filepath);
+      return path22.resolve(cwd, filepath);
     }
     __name(makeAbsolute, "makeAbsolute");
     exports2.makeAbsolute = makeAbsolute;
@@ -36751,7 +36751,7 @@ var require_braces = __commonJS({
 var require_constants8 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path21 = require("path");
+    var path22 = require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -36925,7 +36925,7 @@ var require_constants8 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path21.sep,
+      SEP: path22.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -36952,7 +36952,7 @@ var require_constants8 = __commonJS({
 var require_utils3 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path21 = require("path");
+    var path22 = require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -36981,7 +36981,7 @@ var require_utils3 = __commonJS({
       if (options && typeof options.windows === "boolean") {
         return options.windows;
       }
-      return win32 === true || path21.sep === "\\";
+      return win32 === true || path22.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -38349,7 +38349,7 @@ var require_parse4 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path21 = require("path");
+    var path22 = require("path");
     var scan = require_scan();
     var parse2 = require_parse4();
     var utils = require_utils3();
@@ -38434,7 +38434,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob2, options, posix = utils.isWindows(options)) => {
       const regex = glob2 instanceof RegExp ? glob2 : picomatch.makeRe(glob2, options);
-      return regex.test(path21.basename(input));
+      return regex.test(path22.basename(input));
     };
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
@@ -38667,7 +38667,7 @@ var require_pattern = __commonJS({
     exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern =
     exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern =
     void 0;
-    var path21 = require("path");
+    var path22 = require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR2 = "**";
@@ -38778,7 +38778,7 @@ var require_pattern = __commonJS({
     __name(endsWithSlashGlobStar, "endsWithSlashGlobStar");
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename5 = path21.basename(pattern);
+      const basename5 = path22.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename5);
     }
     __name(isAffectDepthOfReadingPattern, "isAffectDepthOfReadingPattern");
@@ -38845,7 +38845,7 @@ var require_pattern = __commonJS({
     __name(partitionAbsoluteAndRelative, "partitionAbsoluteAndRelative");
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path21.isAbsolute(pattern);
+      return path22.isAbsolute(pattern);
     }
     __name(isAbsolute, "isAbsolute");
     exports2.isAbsolute = isAbsolute;
@@ -39037,8 +39037,8 @@ var require_utils4 = __commonJS({
     exports2.errno = errno;
     var fs15 = require_fs();
     exports2.fs = fs15;
-    var path21 = require_path();
-    exports2.path = path21;
+    var path22 = require_path();
+    exports2.path = path22;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream6 = require_stream();
@@ -39160,8 +39160,8 @@ var require_async2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path21, settings, callback) {
-      settings.fs.lstat(path21, (lstatError, lstat2) => {
+    function read(path22, settings, callback) {
+      settings.fs.lstat(path22, (lstatError, lstat2) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -39170,7 +39170,7 @@ var require_async2 = __commonJS({
           callSuccessCallback(callback, lstat2);
           return;
         }
-        settings.fs.stat(path21, (statError, stat2) => {
+        settings.fs.stat(path22, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -39205,13 +39205,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path21, settings) {
-      const lstat2 = settings.fs.lstatSync(path21);
+    function read(path22, settings) {
+      const lstat2 = settings.fs.lstatSync(path22);
       if (!lstat2.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat2;
       }
       try {
-        const stat2 = settings.fs.statSync(path21);
+        const stat2 = settings.fs.statSync(path22);
         if (settings.markSymbolicLink) {
           stat2.isSymbolicLink = () => true;
         }
@@ -39287,18 +39287,18 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat2(path21, optionsOrSettingsOrCallback, callback) {
+    function stat2(path22, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path21, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path21, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
     }
     __name(stat2, "stat");
     exports2.stat = stat2;
-    function statSync3(path21, optionsOrSettings) {
+    function statSync3(path22, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path21, settings);
+      return sync.read(path22, settings);
     }
     __name(statSync3, "statSync");
     exports2.statSync = statSync3;
@@ -39529,16 +39529,16 @@ var require_async3 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path21 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path22 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat2.stat(path21, settings.fsStatSettings, (error2, stats) => {
+            fsStat2.stat(path22, settings.fsStatSettings, (error2, stats) => {
               if (error2 !== null) {
                 done(error2);
                 return;
               }
               const entry = {
                 name,
-                path: path21,
+                path: path22,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -39663,7 +39663,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path21 = require("path");
+    var path22 = require("path");
     var fsStat2 = require_out();
     var fs15 = require_fs4();
     var Settings = class {
@@ -39674,7 +39674,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs15.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path21.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat2.Settings({
@@ -39701,18 +39701,18 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path21, optionsOrSettingsOrCallback, callback) {
+    function scandir(path22, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path21, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path21, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
     }
     __name(scandir, "scandir");
     exports2.scandir = scandir;
-    function scandirSync(path21, optionsOrSettings) {
+    function scandirSync(path22, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path21, settings);
+      return sync.read(path22, settings);
     }
     __name(scandirSync, "scandirSync");
     exports2.scandirSync = scandirSync;
@@ -40410,7 +40410,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path21 = require("path");
+    var path22 = require("path");
     var fsScandir = require_out2();
     var Settings = class {
       static {
@@ -40423,7 +40423,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path21.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -40489,7 +40489,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path21 = require("path");
+    var path22 = require("path");
     var fsStat2 = require_out();
     var utils = require_utils4();
     var Reader = class {
@@ -40505,7 +40505,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path21.resolve(this._settings.cwd, filepath);
+        return path22.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -40947,7 +40947,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path21 = require("path");
+    var path22 = require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -40964,7 +40964,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path21.resolve(this._settings.cwd, task.base);
+        return path22.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -46501,14 +46501,14 @@ var require_commonjs2 = __commonJS({
 var require_helpers2 = __commonJS({
   "node_modules/jsonschema/lib/helpers.js"(exports2, module2) {
     "use strict";
-    var ValidationError2 = exports2.ValidationError = /* @__PURE__ */ __name(function ValidationError3(message, instance, schema, path21, name, argument) {
-      if (Array.isArray(path21)) {
-        this.path = path21;
-        this.property = path21.reduce(function(sum, item) {
+    var ValidationError2 = exports2.ValidationError = /* @__PURE__ */ __name(function ValidationError3(message, instance, schema, path22, name, argument) {
+      if (Array.isArray(path22)) {
+        this.path = path22;
+        this.property = path22.reduce(function(sum, item) {
           return sum + makeSuffix(item);
         }, "instance");
-      } else if (path21 !== void 0) {
-        this.property = path21;
+      } else if (path22 !== void 0) {
+        this.property = path22;
       }
       if (message) {
         this.message = message;
@@ -46603,16 +46603,16 @@ var require_helpers2 = __commonJS({
         name: { value: "SchemaError", enumerable: false }
       }
     );
-    var SchemaContext = exports2.SchemaContext = /* @__PURE__ */ __name(function SchemaContext2(schema, options, path21, base, schemas) {
+    var SchemaContext = exports2.SchemaContext = /* @__PURE__ */ __name(function SchemaContext2(schema, options, path22, base, schemas) {
       this.schema = schema;
       this.options = options;
-      if (Array.isArray(path21)) {
-        this.path = path21;
-        this.propertyPath = path21.reduce(function(sum, item) {
+      if (Array.isArray(path22)) {
+        this.path = path22;
+        this.propertyPath = path22.reduce(function(sum, item) {
           return sum + makeSuffix(item);
         }, "instance");
       } else {
-        this.propertyPath = path21;
+        this.propertyPath = path22;
       }
       this.base = base;
       this.schemas = schemas;
@@ -46621,10 +46621,10 @@ var require_helpers2 = __commonJS({
       return (() => resolveUrl(this.base, target))();
     }, "resolve");
     SchemaContext.prototype.makeChild = /* @__PURE__ */ __name(function makeChild(schema, propertyName) {
-      var path21 = propertyName === void 0 ? this.path : this.path.concat([propertyName]);
+      var path22 = propertyName === void 0 ? this.path : this.path.concat([propertyName]);
       var id = schema.$id || schema.id;
       let base = (() => resolveUrl(this.base, id || ""))();
-      var ctx = new SchemaContext(schema, this.options, path21, base, Object.create(this.schemas));
+      var ctx = new SchemaContext(schema, this.options, path22, base, Object.create(this.schemas));
       if (id && !ctx.schemas[base]) {
         ctx.schemas[base] = schema;
       }
@@ -54907,9 +54907,9 @@ function removeBrackets(key) {
   return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
 }
 __name(removeBrackets, "removeBrackets");
-function renderKey(path21, key, dots) {
-  if (!path21) return key;
-  return path21.concat(key).map(/* @__PURE__ */ __name(function each(token, i2) {
+function renderKey(path22, key, dots) {
+  if (!path22) return key;
+  return path22.concat(key).map(/* @__PURE__ */ __name(function each(token, i2) {
     token = removeBrackets(token);
     return !dots && i2 ? "[" + token + "]" : token;
   }, "each")).join(dots ? "." : "");
@@ -54995,13 +54995,13 @@ function toFormData(obj, formData, options) {
     }, "limitDepth"));
   }
   __name(stringifyWithDepthLimit, "stringifyWithDepthLimit");
-  function defaultVisitor(value, key, path21) {
+  function defaultVisitor(value, key, path22) {
     let arr = value;
     if (utils_default.isReactNative(formData) && utils_default.isReactNativeBlob(value)) {
-      formData.append(renderKey(path21, key, dots), convertValue(value));
+      formData.append(renderKey(path22, key, dots), convertValue(value));
       return false;
     }
-    if (value && !path21 && typeof value === "object") {
+    if (value && !path22 && typeof value === "object") {
       if (utils_default.endsWith(key, "{}")) {
         key = metaTokens ? key : key.slice(0, -2);
         value = stringifyWithDepthLimit(value, 1);
@@ -55021,7 +55021,7 @@ function toFormData(obj, formData, options) {
     if (isVisitable(value)) {
       return true;
     }
-    formData.append(renderKey(path21, key, dots), convertValue(value));
+    formData.append(renderKey(path22, key, dots), convertValue(value));
     return false;
   }
   __name(defaultVisitor, "defaultVisitor");
@@ -55030,18 +55030,18 @@ function toFormData(obj, formData, options) {
     convertValue,
     isVisitable
   });
-  function build(value, path21, depth = 0) {
+  function build(value, path22, depth = 0) {
     if (utils_default.isUndefined(value)) return;
     throwIfMaxDepthExceeded(depth);
     if (stack.indexOf(value) !== -1) {
-      throw new Error("Circular reference detected in " + path21.join("."));
+      throw new Error("Circular reference detected in " + path22.join("."));
     }
     stack.push(value);
     utils_default.forEach(value, /* @__PURE__ */ __name(function each(el, key) {
       const result = !(utils_default.isUndefined(el) || el === null) && visitor.call(formData, el, utils_default.isString(
-      key) ? key.trim() : key, path21, exposedHelpers);
+      key) ? key.trim() : key, path22, exposedHelpers);
       if (result === true) {
-        build(el, path21 ? path21.concat(key) : [key], depth + 1);
+        build(el, path22 ? path22.concat(key) : [key], depth + 1);
       }
     }, "each"));
     stack.pop();
@@ -55349,7 +55349,7 @@ var platform_default = {
 // node_modules/axios/lib/helpers/toURLEncodedForm.js
 function toURLEncodedForm(data, options) {
   return toFormData_default(data, new platform_default.classes.URLSearchParams(), {
-    visitor: /* @__PURE__ */ __name(function(value, key, path21, helpers) {
+    visitor: /* @__PURE__ */ __name(function(value, key, path22, helpers) {
       if (platform_default.isNode && utils_default.isBuffer(value)) {
         this.append(key, value.toString("base64"));
         return false;
@@ -55373,14 +55373,14 @@ function throwIfDepthExceeded(index) {
 }
 __name(throwIfDepthExceeded, "throwIfDepthExceeded");
 function parsePropPath(name) {
-  const path21 = [];
+  const path22 = [];
   const pattern = /[^.[\]]+|\[([^.[\]]*)]/g;
   let match3;
   while ((match3 = pattern.exec(name)) !== null) {
-    throwIfDepthExceeded(path21.length);
-    path21.push(match3[0] === "[]" ? "" : match3[1] || match3[0]);
+    throwIfDepthExceeded(path22.length);
+    path22.push(match3[0] === "[]" ? "" : match3[1] || match3[0]);
   }
-  return path21;
+  return path22;
 }
 __name(parsePropPath, "parsePropPath");
 function arrayToObject(arr) {
@@ -55417,12 +55417,12 @@ function normalizeArrays(obj) {
 }
 __name(normalizeArrays, "normalizeArrays");
 function formDataToJSON(formData) {
-  function buildPath(path21, value, target, index) {
+  function buildPath(path22, value, target, index) {
     throwIfDepthExceeded(index);
-    let name = path21[index++];
+    let name = path22[index++];
     if (name === "__proto__") return true;
     const isNumericKey = Number.isFinite(+name);
-    const isLast = index >= path21.length;
+    const isLast = index >= path22.length;
     name = !name && utils_default.isArray(target) ? target.length : name;
     if (isLast) {
       if (utils_default.hasOwnProp(target, name)) {
@@ -55436,7 +55436,7 @@ function formDataToJSON(formData) {
     if (!utils_default.hasOwnProp(target, name) || !utils_default.isObject(target[name])) {
       target[name] = [];
     }
-    const result = buildPath(path21, value, target[name], index);
+    const result = buildPath(path22, value, target[name], index);
     if (result && utils_default.isArray(target[name])) {
       target[name] = arrayToObject(target[name]);
     }
@@ -57533,9 +57533,9 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       auth = urlUsername + ":" + urlPassword;
     }
     auth && headers.delete("authorization");
-    let path21;
+    let path22;
     try {
-      path21 = buildURL(
+      path22 = buildURL(
         parsed.pathname + parsed.search,
         own2("params"),
         own2("paramsSerializer")
@@ -57558,7 +57558,7 @@ var http_default = isHttpAdapterSupported && /* @__PURE__ */ __name(function htt
       http2Options = Object.assign(/* @__PURE__ */ Object.create(null), http2Options, { lookup });
     }
     const options = Object.assign(/* @__PURE__ */ Object.create(null), {
-      path: path21,
+      path: path22,
       method,
       headers: toByteStringHeaderObject(headers),
       agents: { http: httpAgent, https: httpsAgent },
@@ -57976,14 +57976,14 @@ var decodeCookieValue = /* @__PURE__ */ __name((value) => {
 var cookies_default = platform_default.hasStandardBrowserEnv ? (
   // Standard browser envs support document.cookie
   {
-    write(name, value, expires, path21, domain, secure, sameSite) {
+    write(name, value, expires, path22, domain, secure, sameSite) {
       if (typeof document === "undefined") return;
       const cookie = [`${name}=${encodeURIComponent(value)}`];
       if (utils_default.isNumber(expires)) {
         cookie.push(`expires=${new Date(expires).toUTCString()}`);
       }
-      if (utils_default.isString(path21)) {
-        cookie.push(`path=${path21}`);
+      if (utils_default.isString(path22)) {
+        cookie.push(`path=${path22}`);
       }
       if (utils_default.isString(domain)) {
         cookie.push(`domain=${domain}`);
@@ -60178,8 +60178,8 @@ var loadTool = /* @__PURE__ */ __name(async ({ tool, binary, version: version3, 
 
 // agent-registry/src/index.js
 var import_node_child_process2 = require("node:child_process");
-var import_node_fs9 = require("node:fs");
-var import_node_path8 = __toESM(require("node:path"), 1);
+var import_node_fs10 = require("node:fs");
+var import_node_path9 = __toESM(require("node:path"), 1);
 var import_fast_glob4 = __toESM(require_out4(), 1);
 
 // cloud-run/src/project-info.js
@@ -62866,8 +62866,8 @@ var SearchState = class {
   static {
     __name(this, "SearchState");
   }
-  constructor(path21, level) {
-    this.path = path21;
+  constructor(path22, level) {
+    this.path = path22;
     this.level = level;
   }
 };
@@ -67718,15 +67718,15 @@ function getRequestUrl(baseUri, operationSpec, operationArguments, fallbackObjec
   let isAbsolutePath = false;
   let requestUrl = replaceAll(baseUri, urlReplacements);
   if (operationSpec.path) {
-    let path21 = replaceAll(operationSpec.path, urlReplacements);
-    if (operationSpec.path === "/{nextLink}" && path21.startsWith("/")) {
-      path21 = path21.substring(1);
+    let path22 = replaceAll(operationSpec.path, urlReplacements);
+    if (operationSpec.path === "/{nextLink}" && path22.startsWith("/")) {
+      path22 = path22.substring(1);
     }
-    if (isAbsoluteUrl(path21)) {
-      requestUrl = path21;
+    if (isAbsoluteUrl(path22)) {
+      requestUrl = path22;
       isAbsolutePath = true;
     } else {
-      requestUrl = appendPath(requestUrl, path21);
+      requestUrl = appendPath(requestUrl, path22);
     }
   }
   const { queryParams, sequenceParams } = calculateQueryParameters(operationSpec, operationArguments, fallbackObject);
@@ -67776,9 +67776,9 @@ function appendPath(url3, pathToAppend) {
   }
   const searchStart = pathToAppend.indexOf("?");
   if (searchStart !== -1) {
-    const path21 = pathToAppend.substring(0, searchStart);
+    const path22 = pathToAppend.substring(0, searchStart);
     const search = pathToAppend.substring(searchStart + 1);
-    newPath = newPath + path21;
+    newPath = newPath + path22;
     if (search) {
       parsedUrl.search = parsedUrl.search ? `${parsedUrl.search}&${search}` : search;
     }
@@ -71364,16 +71364,16 @@ var MatcherView = class {
    * @returns {string|undefined}
    */
   getCurrentTag() {
-    const path21 = this._matcher.path;
-    return path21.length > 0 ? path21[path21.length - 1].tag : void 0;
+    const path22 = this._matcher.path;
+    return path22.length > 0 ? path22[path22.length - 1].tag : void 0;
   }
   /**
    * Get current namespace.
    * @returns {string|undefined}
    */
   getCurrentNamespace() {
-    const path21 = this._matcher.path;
-    return path21.length > 0 ? path21[path21.length - 1].namespace : void 0;
+    const path22 = this._matcher.path;
+    return path22.length > 0 ? path22[path22.length - 1].namespace : void 0;
   }
   /**
    * Get current node's attribute value.
@@ -71381,9 +71381,9 @@ var MatcherView = class {
    * @returns {*}
    */
   getAttrValue(attrName) {
-    const path21 = this._matcher.path;
-    if (path21.length === 0) return void 0;
-    return path21[path21.length - 1].values?.[attrName];
+    const path22 = this._matcher.path;
+    if (path22.length === 0) return void 0;
+    return path22[path22.length - 1].values?.[attrName];
   }
   /**
    * Check if current node has an attribute.
@@ -71391,9 +71391,9 @@ var MatcherView = class {
    * @returns {boolean}
    */
   hasAttr(attrName) {
-    const path21 = this._matcher.path;
-    if (path21.length === 0) return false;
-    const current = path21[path21.length - 1];
+    const path22 = this._matcher.path;
+    if (path22.length === 0) return false;
+    const current = path22[path22.length - 1];
     return current.values !== void 0 && attrName in current.values;
   }
   /**
@@ -71401,18 +71401,18 @@ var MatcherView = class {
    * @returns {number}
    */
   getPosition() {
-    const path21 = this._matcher.path;
-    if (path21.length === 0) return -1;
-    return path21[path21.length - 1].position ?? 0;
+    const path22 = this._matcher.path;
+    if (path22.length === 0) return -1;
+    return path22[path22.length - 1].position ?? 0;
   }
   /**
    * Get current node's repeat counter (occurrence count of this tag name).
    * @returns {number}
    */
   getCounter() {
-    const path21 = this._matcher.path;
-    if (path21.length === 0) return -1;
-    return path21[path21.length - 1].counter ?? 0;
+    const path22 = this._matcher.path;
+    if (path22.length === 0) return -1;
+    return path22[path22.length - 1].counter ?? 0;
   }
   /**
    * Get current node's sibling index (alias for getPosition).
@@ -74582,9 +74582,9 @@ var StorageSharedKeyCredentialPolicy = class extends CredentialPolicy {
    * @param request -
    */
   getCanonicalizedResourceString(request) {
-    const path21 = getURLPath(request.url) || "/";
+    const path22 = getURLPath(request.url) || "/";
     let canonicalizedResourceString = "";
-    canonicalizedResourceString += `/${this.factory.accountName}${path21}`;
+    canonicalizedResourceString += `/${this.factory.accountName}${path22}`;
     const queries = getURLQueries(request.url);
     const lowercaseQueries = {};
     if (queries) {
@@ -75105,9 +75105,9 @@ function storageSharedKeyCredentialPolicy(options) {
   }
   __name(getCanonicalizedHeadersString, "getCanonicalizedHeadersString");
   function getCanonicalizedResourceString(request) {
-    const path21 = getURLPath(request.url) || "/";
+    const path22 = getURLPath(request.url) || "/";
     let canonicalizedResourceString = "";
-    canonicalizedResourceString += `/${options.accountName}${path21}`;
+    canonicalizedResourceString += `/${options.accountName}${path22}`;
     const queries = getURLQueries(request.url);
     const lowercaseQueries = {};
     if (queries) {
@@ -89107,10 +89107,10 @@ var StorageContextClient = class extends StorageClient {
 // node_modules/@azure/storage-blob/dist/esm/utils/utils.common.js
 function escapeURLPath(url3) {
   const urlParsed = new URL(url3);
-  let path21 = urlParsed.pathname;
-  path21 = path21 || "/";
-  path21 = escape2(path21);
-  urlParsed.pathname = path21;
+  let path22 = urlParsed.pathname;
+  path22 = path22 || "/";
+  path22 = escape2(path22);
+  urlParsed.pathname = path22;
   return urlParsed.toString();
 }
 __name(escapeURLPath, "escapeURLPath");
@@ -89200,9 +89200,9 @@ function escape2(text) {
 __name(escape2, "escape");
 function appendToURLPath(url3, name) {
   const urlParsed = new URL(url3);
-  let path21 = urlParsed.pathname;
-  path21 = path21 ? path21.endsWith("/") ? `${path21}${name}` : `${path21}/${name}` : name;
-  urlParsed.pathname = path21;
+  let path22 = urlParsed.pathname;
+  path22 = path22 ? path22.endsWith("/") ? `${path22}${name}` : `${path22}/${name}` : name;
+  urlParsed.pathname = path22;
   return urlParsed.toString();
 }
 __name(appendToURLPath, "appendToURLPath");
@@ -101783,9 +101783,9 @@ var registerMcp = /* @__PURE__ */ __name(async (mcpId, mcpYaml, dryRun) => {
 }, "registerMcp");
 
 // agent-registry/src/register-skill.js
-var import_node_fs7 = require("node:fs");
-var import_node_os4 = require("node:os");
-var import_node_path6 = __toESM(require("node:path"), 1);
+var import_node_fs8 = require("node:fs");
+var import_node_os5 = require("node:os");
+var import_node_path7 = __toESM(require("node:path"), 1);
 var import_fast_glob2 = __toESM(require_out4(), 1);
 
 // node_modules/fflate/esm/index.mjs
@@ -102512,12 +102512,31 @@ function zipSync(data, opts) {
 __name(zipSync, "zipSync");
 
 // agent-registry/src/upload-gcs.js
+var import_node_fs7 = require("node:fs");
+var import_node_os4 = require("node:os");
+var import_node_path6 = __toESM(require("node:path"), 1);
 var GCS_BUCKET = "extenda-agent-artifacts";
 var upload = /* @__PURE__ */ __name(async (localPath, gcsPath) => {
   const dest = `gs://${GCS_BUCKET}/${gcsPath}`;
   await execGcloud(["storage", "cp", localPath, dest], "gcloud", true);
   return dest;
 }, "upload");
+var uploadMany = /* @__PURE__ */ __name(async (files, gcsPrefix) => {
+  const dest = `gs://${GCS_BUCKET}/${gcsPrefix}`;
+  const stage = (0, import_node_fs7.mkdtempSync)(import_node_path6.default.join((0, import_node_os4.tmpdir)(), "gcs-stag\
+e-"));
+  try {
+    for (const { localPath, relPath } of files) {
+      const target = import_node_path6.default.join(stage, ...relPath.split("/"));
+      (0, import_node_fs7.mkdirSync)(import_node_path6.default.dirname(target), { recursive: true });
+      (0, import_node_fs7.copyFileSync)(localPath, target);
+    }
+    await execGcloud(["storage", "rsync", "-r", stage, dest], "gcloud", true);
+  } finally {
+    (0, import_node_fs7.rmSync)(stage, { recursive: true, force: true });
+  }
+  return dest;
+}, "uploadMany");
 
 // agent-registry/src/register-skill.js
 var PROJECT4 = "extenda";
@@ -102548,20 +102567,20 @@ var listReferenceFiles = /* @__PURE__ */ __name((skillDir) => (import_fast_glob2
   ignore: ["SKILL.md", "**/.DS_Store"]
 }) ?? []).sort((a, b2) => a.localeCompare(b2)), "listReferenceFiles");
 var buildZip = /* @__PURE__ */ __name((skillFilePath, referenceFiles = []) => {
-  const skillDir = import_node_path6.default.dirname(skillFilePath);
-  const content = (0, import_node_fs7.readFileSync)(skillFilePath);
+  const skillDir = import_node_path7.default.dirname(skillFilePath);
+  const content = (0, import_node_fs8.readFileSync)(skillFilePath);
   const entries = { "SKILL.md": [strToU8(content.toString()), { level: 6 }] };
   for (const rel of referenceFiles) {
     entries[rel] = [
-      new Uint8Array((0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, rel))),
+      new Uint8Array((0, import_node_fs8.readFileSync)(import_node_path7.default.join(skillDir, rel))),
       { level: 6 }
     ];
   }
   return zipSync(entries);
 }, "buildZip");
 var writeZipFile = /* @__PURE__ */ __name((zipped) => {
-  const tmpPath = import_node_path6.default.join((0, import_node_os4.tmpdir)(), `skill-${process.pid}.zip`);
-  (0, import_node_fs7.writeFileSync)(tmpPath, Buffer.from(zipped));
+  const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `skill-${process.pid}.zip`);
+  (0, import_node_fs8.writeFileSync)(tmpPath, Buffer.from(zipped));
   return tmpPath;
 }, "writeZipFile");
 var checkFileLimits = /* @__PURE__ */ __name((skillId, skillContent, skillDir, referenceFiles) => {
@@ -102578,7 +102597,7 @@ var checkFileLimits = /* @__PURE__ */ __name((skillId, skillContent, skillDir, r
     );
   }
   for (const rel of referenceFiles.filter((f3) => /\.md$/i.test(f3))) {
-    const bytes = Buffer.byteLength((0, import_node_fs7.readFileSync)(import_node_path6.default.join(skillDir, rel)));
+    const bytes = Buffer.byteLength((0, import_node_fs8.readFileSync)(import_node_path7.default.join(skillDir, rel)));
     if (bytes > MAX_MARKDOWN_BYTES) {
       throw new Error(
         `Skill '${skillId}': ${rel} is ${bytes} bytes, max for a Markdown file is ${MAX_MARKDOWN_BYTES}`
@@ -102797,12 +102816,12 @@ var validateSkillContent = /* @__PURE__ */ __name((skillId, skillContent) => {
   return { displayName, description };
 }, "validateSkillContent");
 var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun, clan) => {
-  const skillContent = (0, import_node_fs7.readFileSync)(skillFilePath, "utf8");
+  const skillContent = (0, import_node_fs8.readFileSync)(skillFilePath, "utf8");
   const { displayName, description } = validateSkillContent(
     skillId,
     skillContent
   );
-  const skillDir = import_node_path6.default.dirname(skillFilePath);
+  const skillDir = import_node_path7.default.dirname(skillFilePath);
   const referenceFiles = listReferenceFiles(skillDir);
   const namespacedId = clan ? `${clan}-${skillId}` : skillId;
   const registryId = `private-${namespacedId}`;
@@ -102876,13 +102895,20 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
       true
     );
   } finally {
-    (0, import_node_fs7.unlinkSync)(zipPath);
+    (0, import_node_fs8.unlinkSync)(zipPath);
   }
   const revisionPrefix = `skills/${namespacedId}/${revisionId}`;
-  const gcsPath = await upload(skillFilePath, `${revisionPrefix}/SKILL.md`);
-  for (const rel of referenceFiles) {
-    await upload(import_node_path6.default.join(skillDir, rel), `${revisionPrefix}/${rel}`);
-  }
+  await uploadMany(
+    [
+      { localPath: skillFilePath, relPath: "SKILL.md" },
+      ...referenceFiles.map((rel) => ({
+        localPath: import_node_path7.default.join(skillDir, rel),
+        relPath: rel
+      }))
+    ],
+    revisionPrefix
+  );
+  const gcsPath = `gs://extenda-agent-artifacts/${revisionPrefix}/SKILL.md`;
   await activate(registryId, revisionId);
   const refSuffix = referenceFiles.length ? ` (+${referenceFiles.length} reference file(s))` : "";
   info(
@@ -102891,9 +102917,9 @@ var registerSkill = /* @__PURE__ */ __name(async (skillId, skillFilePath, dryRun
 }, "registerSkill");
 
 // agent-registry/src/sync-clan-settings.js
-var import_node_fs8 = require("node:fs");
-var import_node_os5 = require("node:os");
-var import_node_path7 = __toESM(require("node:path"), 1);
+var import_node_fs9 = require("node:fs");
+var import_node_os6 = require("node:os");
+var import_node_path8 = __toESM(require("node:path"), 1);
 var import_jsonschema = __toESM(require_lib(), 1);
 var import_fast_glob3 = __toESM(require_out4(), 1);
 
@@ -103134,22 +103160,22 @@ var GCS_BUCKET2 = "extenda-agent-artifacts";
 var GCS2 = `gs://${GCS_BUCKET2}`;
 var CD = "${CLAUDE_PROJECT_DIR}";
 var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
-  const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `global-settings-${process.pid}.yaml`);
+  const tmpPath = import_node_path8.default.join((0, import_node_os6.tmpdir)(), `global-settings-${process.pid}.yaml`);
   try {
     await execGcloud(
       ["storage", "cp", `${GCS2}/config/settings.yaml`, tmpPath],
       "gcloud",
       true
     );
-    return load((0, import_node_fs8.readFileSync)(tmpPath, "utf8"));
+    return load((0, import_node_fs9.readFileSync)(tmpPath, "utf8"));
   } finally {
     try {
-      (0, import_node_fs8.unlinkSync)(tmpPath);
+      (0, import_node_fs9.unlinkSync)(tmpPath);
     } catch {
     }
   }
 }, "fetchGlobalBaseline");
-var filename = /* @__PURE__ */ __name((scriptPath) => import_node_path7.default.basename(scriptPath), "filename");
+var filename = /* @__PURE__ */ __name((scriptPath) => import_node_path8.default.basename(scriptPath), "filename");
 var SHELL_SAFE_ARG = /^[A-Za-z0-9_@%+=:,./-]+$/;
 var shellQuote = /* @__PURE__ */ __name((arg) => {
   const str = String(arg);
@@ -103321,10 +103347,10 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
   };
 }, "buildSettingsJson");
 var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
-  const localFiles = (0, import_node_fs8.existsSync)(localDir) ? import_fast_glob3.default.sync("**/*", { cwd: localDir,
+  const localFiles = (0, import_node_fs9.existsSync)(localDir) ? import_fast_glob3.default.sync("**/*", { cwd: localDir,
   onlyFiles: true }) : [];
   for (const file of localFiles) {
-    const localPath = import_node_path7.default.join(localDir, file);
+    const localPath = import_node_path8.default.join(localDir, file);
     const gcsPath = `${gcsPrefix}/${file}`;
     if (dryRun) {
       info(`[dry-run] Would upload ${file} \u2192 gs://${GCS_BUCKET2}/${gcsPath}`);
@@ -103355,30 +103381,30 @@ var syncFiles = /* @__PURE__ */ __name(async (localDir, gcsPrefix, dryRun) => {
   }
 }, "syncFiles");
 var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
-  const tmpPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `${suffix}-${process.pid}`);
-  (0, import_node_fs8.writeFileSync)(tmpPath, content, "utf8");
+  const tmpPath = import_node_path8.default.join((0, import_node_os6.tmpdir)(), `${suffix}-${process.pid}`);
+  (0, import_node_fs9.writeFileSync)(tmpPath, content, "utf8");
   return tmpPath;
 }, "writeTempFile");
 var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
-  const globalYamlPath = import_node_path7.default.join(registryRoot, "global", "settings.yaml");
-  const clanYamlPath = import_node_path7.default.join(registryRoot, "config", "settings.yaml");
-  const hasGlobal = (0, import_node_fs8.existsSync)(globalYamlPath);
-  const hasClan = (0, import_node_fs8.existsSync)(clanYamlPath);
+  const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
+  const clanYamlPath = import_node_path8.default.join(registryRoot, "config", "settings.yaml");
+  const hasGlobal = (0, import_node_fs9.existsSync)(globalYamlPath);
+  const hasClan = (0, import_node_fs9.existsSync)(clanYamlPath);
   if (!hasGlobal && !hasClan && !clan) return;
   const affected = /* @__PURE__ */ __name((prefix2) => !changedPaths.length || changedPaths.some((p2) => p2.startsWith(`\
 agent-registry/${prefix2}`)), "affected");
   if (hasGlobal && affected("global/")) {
     startGroup("Global baseline");
-    const globalConfig = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
+    const globalConfig = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
     const { bootstrap } = globalConfig;
-    if (bootstrap && !(0, import_node_fs8.existsSync)(import_node_path7.default.join(registryRoot, "global", bootstrap))) {
+    if (bootstrap && !(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, "global", bootstrap))) {
       throw new Error(
         `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`
       );
     }
-    await syncFiles(import_node_path7.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
-    await syncFiles(import_node_path7.default.join(registryRoot, "global", "commands"), "commands", dryRun);
+    await syncFiles(import_node_path8.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
+    await syncFiles(import_node_path8.default.join(registryRoot, "global", "commands"), "commands", dryRun);
     if (dryRun) {
       info(`[dry-run] Would upload global/settings.yaml \u2192 gs://${GCS_BUCKET2}/config/settings.yaml`);
     } else {
@@ -103395,7 +103421,7 @@ agent-registry/${prefix2}`)), "affected");
         await upload(tmpPath, "config/settings.json");
         info(`Global settings.json uploaded: gs://${GCS_BUCKET2}/config/settings.json`);
       } finally {
-        (0, import_node_fs8.unlinkSync)(tmpPath);
+        (0, import_node_fs9.unlinkSync)(tmpPath);
       }
     }
     try {
@@ -103407,7 +103433,7 @@ agent-registry/${prefix2}`)), "affected");
       const clanNames = (lsOutput || "").split("\n").map((l3) => l3.trim()).filter((l3) => l3.endsWith("/") && l3.includes(
       "/config/")).map((l3) => l3.replace(/.*\/config\/([^/]+)\/$/, "$1")).filter(Boolean);
       for (const clanName2 of clanNames) {
-        const tmpYamlPath = import_node_path7.default.join((0, import_node_os5.tmpdir)(), `clan-yaml-${clanName2}-${process.
+        const tmpYamlPath = import_node_path8.default.join((0, import_node_os6.tmpdir)(), `clan-yaml-${clanName2}-${process.
         pid}`);
         try {
           await execGcloud(
@@ -103415,7 +103441,7 @@ agent-registry/${prefix2}`)), "affected");
             "gcloud",
             true
           );
-          const clanConfig2 = load((0, import_node_fs8.readFileSync)(tmpYamlPath, "utf8"));
+          const clanConfig2 = load((0, import_node_fs9.readFileSync)(tmpYamlPath, "utf8"));
           const merged2 = buildSettingsJson(globalConfig, clanConfig2, clanName2);
           if (dryRun) {
             info(`[dry-run] Would rebuild config/${clanName2}/settings.json`);
@@ -103425,14 +103451,14 @@ agent-registry/${prefix2}`)), "affected");
               await upload(tmpJsonPath, `config/${clanName2}/settings.json`);
               info(`Rebuilt: gs://${GCS_BUCKET2}/config/${clanName2}/settings.json`);
             } finally {
-              (0, import_node_fs8.unlinkSync)(tmpJsonPath);
+              (0, import_node_fs9.unlinkSync)(tmpJsonPath);
             }
           }
         } catch (e) {
           warning(`Skipped rebuilding ${clanName2}: ${e.message}`);
         } finally {
           try {
-            (0, import_node_fs8.unlinkSync)(tmpYamlPath);
+            (0, import_node_fs9.unlinkSync)(tmpYamlPath);
           } catch {
           }
         }
@@ -103446,7 +103472,7 @@ agent-registry/${prefix2}`)), "affected");
   if (hasClan && !affected("config/")) return;
   let clanYamlContent, clanConfig, clanName;
   if (hasClan) {
-    clanYamlContent = (0, import_node_fs8.readFileSync)(clanYamlPath, "utf8");
+    clanYamlContent = (0, import_node_fs9.readFileSync)(clanYamlPath, "utf8");
     clanConfig = load(clanYamlContent);
     validateSettings("config/settings.yaml", clanConfig, clan_settings_schema_default);
     clanName = clan;
@@ -103458,7 +103484,7 @@ agent-registry/${prefix2}`)), "affected");
   startGroup(`Clan settings: ${clanName}`);
   let baseline;
   if (hasGlobal) {
-    baseline = load((0, import_node_fs8.readFileSync)(globalYamlPath, "utf8"));
+    baseline = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8"));
     info("Using local global/settings.yaml as baseline");
   } else {
     try {
@@ -103478,7 +103504,7 @@ agent-registry/${prefix2}`)), "affected");
       await upload(jsonTmp, `config/${clanName}/settings.json`);
       info(`Clan settings.json uploaded: gs://${GCS_BUCKET2}/config/${clanName}/settings.json`);
     } finally {
-      (0, import_node_fs8.unlinkSync)(jsonTmp);
+      (0, import_node_fs9.unlinkSync)(jsonTmp);
     }
     const yamlContent = hasClan ? clanYamlContent : "";
     const yamlTmp = writeTempFile(yamlContent, "settings.yaml");
@@ -103486,13 +103512,13 @@ agent-registry/${prefix2}`)), "affected");
       await upload(yamlTmp, `config/${clanName}/settings.yaml`);
       info(`Clan settings.yaml stored: gs://${GCS_BUCKET2}/config/${clanName}/settings.yaml`);
     } finally {
-      (0, import_node_fs8.unlinkSync)(yamlTmp);
+      (0, import_node_fs9.unlinkSync)(yamlTmp);
     }
   }
-  await syncFiles(import_node_path7.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
-  await syncFiles(import_node_path7.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
-  const conventionsPath = import_node_path7.default.join(registryRoot, "config", "conventions.md");
-  if ((0, import_node_fs8.existsSync)(conventionsPath)) {
+  await syncFiles(import_node_path8.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
+  await syncFiles(import_node_path8.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
+  const conventionsPath = import_node_path8.default.join(registryRoot, "config", "conventions.md");
+  if ((0, import_node_fs9.existsSync)(conventionsPath)) {
     if (dryRun) {
       info(`[dry-run] Would upload conventions.md \u2192 gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
     } else {
@@ -103535,7 +103561,7 @@ var getDeletedSkillIds = /* @__PURE__ */ __name((registryRoot, deletedPaths) => 
     `^${AGENT_REGISTRY_PATH}/skills/([^/]+)/SKILL\\.md$`
   );
   const ids = deletedPaths.map((p2) => p2.match(pattern)?.[1]).filter((id) => id && !id.startsWith("example-")).filter(
-    (id) => !(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, "skills", id, "SKILL.md"))
+    (id) => !(0, import_node_fs10.existsSync)(import_node_path9.default.join(registryRoot, "skills", id, "SKILL.md"))
   );
   return [...new Set(ids)];
 }, "getDeletedSkillIds");
@@ -103563,19 +103589,19 @@ var processAgents = /* @__PURE__ */ __name(async (registryRoot, changedPaths, gi
     onlyFiles: true
   });
   for (const agentFile of agentFiles) {
-    const agentId = import_node_path8.default.basename(import_node_path8.default.dirname(agentFile));
+    const agentId = import_node_path9.default.basename(import_node_path9.default.dirname(agentFile));
     if (agentId.startsWith("example-")) continue;
     if (!isAffected(`agents/${agentId}/`, changedPaths)) continue;
-    const agentYaml = (0, import_node_fs9.readFileSync)(import_node_path8.default.join(registryRoot, agentFile), "utf8");
+    const agentYaml = (0, import_node_fs10.readFileSync)(import_node_path9.default.join(registryRoot, agentFile), "utf8");
     startGroup(`Agent: ${agentId}`);
     await registerAgent(agentId, agentYaml, dryRun);
-    const instructionsPath = import_node_path8.default.join(
+    const instructionsPath = import_node_path9.default.join(
       registryRoot,
       "agents",
       agentId,
       "instructions.md"
     );
-    if ((0, import_node_fs9.existsSync)(instructionsPath)) {
+    if ((0, import_node_fs10.existsSync)(instructionsPath)) {
       await uploadInstructions(instructionsPath, agentId, gitSha, dryRun);
     }
     endGroup();
@@ -103587,10 +103613,10 @@ var processMcps = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryR
     onlyFiles: true
   });
   for (const mcpFile of mcpFiles) {
-    const mcpId = import_node_path8.default.dirname(mcpFile).replace(/^mcp\//, "");
+    const mcpId = import_node_path9.default.dirname(mcpFile).replace(/^mcp\//, "");
     if (mcpId.startsWith("example-")) continue;
     if (!isAffected(`mcp/${mcpId}/`, changedPaths)) continue;
-    const mcpYaml = (0, import_node_fs9.readFileSync)(import_node_path8.default.join(registryRoot, mcpFile), "utf8");
+    const mcpYaml = (0, import_node_fs10.readFileSync)(import_node_path9.default.join(registryRoot, mcpFile), "utf8");
     startGroup(`MCP: ${mcpId}`);
     await registerMcp(mcpId, mcpYaml, dryRun);
     endGroup();
@@ -103611,14 +103637,14 @@ var processSkills = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dr
     onlyFiles: true
   });
   for (const skillFile of skillFiles) {
-    const skillId = import_node_path8.default.basename(import_node_path8.default.dirname(skillFile));
+    const skillId = import_node_path9.default.basename(import_node_path9.default.dirname(skillFile));
     if (skillId.startsWith("example-")) continue;
     if (!isAffected(`skills/${skillId}/`, changedPaths)) continue;
     startGroup(`Skill: ${skillId}`);
     try {
       await registerSkill(
         skillId,
-        import_node_path8.default.join(registryRoot, skillFile),
+        import_node_path9.default.join(registryRoot, skillFile),
         dryRun,
         clan
       );
@@ -103657,7 +103683,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
   } else if (!changedPaths.length) {
     info("No changed paths detected \u2014 processing all items");
   }
-  const registryRoot = import_node_path8.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  const registryRoot = import_node_path9.default.join(process.cwd(), AGENT_REGISTRY_PATH);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(
