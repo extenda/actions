@@ -14,8 +14,13 @@ const getPreviousRevision = async (
     `--region=${region}`,
     '--format=json(status.traffic)',
   ]);
+  // gcloudOutput logs a failed describe (for example a service that does not
+  // exist yet on its first deploy) and returns an empty string.
+  if (!output) {
+    return null;
+  }
   const { status } = JSON.parse(output);
-  const serving = status.traffic.find((t) => t.percent === 100);
+  const serving = (status?.traffic ?? []).find((t) => t.percent === 100);
   return serving?.revisionName ?? null;
 };
 
