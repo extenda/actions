@@ -1,23 +1,36 @@
 const CHANGES = 'openspec/changes/';
-const CONCURRENCY = 10;
+const CONCURRENCY = 6;
 
-// Runs fn on the items in batches of limit; the results keep the order of the items.
-const mapLimit = async (items, limit, fn) => {
-  const batches = [];
-  for (let i = 0; i < items.length; i += limit) {
-    batches.push(items.slice(i, i + limit));
-  }
-  const results = [];
-  let previous = Promise.resolve();
-  const runs = batches.map((batch) => {
-    previous = previous.then(() => Promise.all(batch.map(fn)));
-    return previous;
+// Runs fn on the items with at most limit calls in flight; the results keep the order of the items.
+const mapLimit = (items, limit, fn) =>
+  new Promise((resolve, reject) => {
+    const results = new Array(items.length);
+    let next = 0;
+    let active = 0;
+    let finished = 0;
+    const launch = () => {
+      while (active < limit && next < items.length) {
+        const i = next;
+        next += 1;
+        active += 1;
+        fn(items[i]).then((result) => {
+          results[i] = result;
+          active -= 1;
+          finished += 1;
+          if (finished === items.length) {
+            resolve(results);
+          } else {
+            launch();
+          }
+        }, reject);
+      }
+    };
+    if (items.length === 0) {
+      resolve(results);
+    } else {
+      launch();
+    }
   });
-  for (const run of runs) {
-    results.push(...(await run));
-  }
-  return results;
-};
 
 /**
  * Reads every tasks.md under openspec/changes/ (archived changes included) of a store repo through the GitHub

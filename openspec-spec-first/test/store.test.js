@@ -82,6 +82,38 @@ describe('loadTasksFiles', () => {
     );
   });
 
+  test('fetches at most 6 blobs at once and keeps the order', async () => {
+    const tree = Array.from({ length: 20 }, (_, i) => ({
+      path: `openspec/changes/c${i}/tasks.md`,
+      type: 'blob',
+      sha: `s${i}`,
+    }));
+    const octokit = octokitWith({ tree });
+    let active = 0;
+    let peak = 0;
+    octokit.rest.git.getBlob = vi.fn(async ({ file_sha }) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      await new Promise((r) => setTimeout(r, 5));
+      active -= 1;
+      return { data: { content: b64(file_sha), encoding: 'base64' } };
+    });
+    const files = await loadTasksFiles(octokit, 'extenda/store');
+    expect(files.map((f) => f.content)).toEqual(tree.map((e) => e.sha));
+    expect(peak).toBeLessThanOrEqual(6);
+    expect(peak).toBeGreaterThan(1);
+  });
+
+  test('a failing blob fails the load', async () => {
+    const octokit = octokitWith({
+      tree: [{ path: 'openspec/changes/a/tasks.md', type: 'blob', sha: 's1' }],
+    });
+    octokit.rest.git.getBlob = vi.fn().mockRejectedValue(new Error('boom'));
+    await expect(loadTasksFiles(octokit, 'extenda/store')).rejects.toThrow(
+      'boom',
+    );
+  });
+
   test('a truncated tree cannot pass', async () => {
     const octokit = octokitWith({ tree: [], truncated: true });
     await expect(loadTasksFiles(octokit, 'extenda/store')).rejects.toThrow(

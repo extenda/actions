@@ -32377,7 +32377,7 @@ var import_node_path2 = __toESM(require("node:path"), 1);
 // openspec-guard/src/tasks-md.js
 var BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 var TASK_RE = new RegExp(
-  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`
+  String.raw`${BULLET}(?:\[\s*(?:[^\]\s]\s*)?\](?:[^(\[]|$)|\[\s+\])`
 );
 var UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
@@ -32410,8 +32410,11 @@ var ticksOnly = /* @__PURE__ */ __name((oldText, newText) => {
     return isUnticked(o2[i]) && ticked === normalized;
   });
 }, "ticksOnly");
-var headingKey = /* @__PURE__ */ __name((heading) => heading.replace(/\s*$/, "").replace(/^.*\(/, "").replace(/\)$/, ""),
-"headingKey");
+var headingKey = /* @__PURE__ */ __name((heading) => {
+  const text = heading.trimEnd();
+  const rest = text.slice(text.lastIndexOf("(") + 1);
+  return rest.endsWith(")") ? rest.slice(0, -1) : rest;
+}, "headingKey");
 var checkTasks = /* @__PURE__ */ __name((text, { draft = false, maxTasks = DEFAULT_MAX_TASKS } = {}) => {
   const problems = [];
   let groups = 0;

@@ -5,7 +5,7 @@
 // then [ ], [x] or [], not followed by ( or [ (a link), except that [ ] followed by ( or [ still counts.
 const BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 const TASK_RE = new RegExp(
-  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`,
+  String.raw`${BULLET}(?:\[\s*(?:[^\]\s]\s*)?\](?:[^(\[]|$)|\[\s+\])`,
 );
 const UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`,
@@ -50,8 +50,12 @@ const ticksOnly = (oldText, newText) => {
 };
 
 // The text of the last parentheses of a group heading, e.g. `HICC-123` or `TBD`.
-const headingKey = (heading) =>
-  heading.replace(/\s*$/, '').replace(/^.*\(/, '').replace(/\)$/, '');
+// Plain string steps only: this parses text from pull requests, so no regex that can backtrack.
+const headingKey = (heading) => {
+  const text = heading.trimEnd();
+  const rest = text.slice(text.lastIndexOf('(') + 1);
+  return rest.endsWith(')') ? rest.slice(0, -1) : rest;
+};
 
 // The repo a group heading names: `## 1. my-repo: Title (HICC-1)` is `my-repo`.
 const headingRepo = (heading) => heading.replace(/^## \S+ /, '').split(':')[0];

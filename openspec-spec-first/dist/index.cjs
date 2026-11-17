@@ -32188,15 +32188,18 @@ __name(getOctokit, "getOctokit");
 // openspec-guard/src/tasks-md.js
 var BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 var TASK_RE = new RegExp(
-  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`
+  String.raw`${BULLET}(?:\[\s*(?:[^\]\s]\s*)?\](?:[^(\[]|$)|\[\s+\])`
 );
 var UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
 var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
 var isGroupHeading = /* @__PURE__ */ __name((line) => GROUP_HEADING_RE.test(line), "isGroupHeading");
-var headingKey = /* @__PURE__ */ __name((heading) => heading.replace(/\s*$/, "").replace(/^.*\(/, "").replace(/\)$/, ""),
-"headingKey");
+var headingKey = /* @__PURE__ */ __name((heading) => {
+  const text = heading.trimEnd();
+  const rest = text.slice(text.lastIndexOf("(") + 1);
+  return rest.endsWith(")") ? rest.slice(0, -1) : rest;
+}, "headingKey");
 var headingRepo = /* @__PURE__ */ __name((heading) => heading.replace(/^## \S+ /, "").split(":")[0], "headingRepo");
 var keyFromTitle = /* @__PURE__ */ __name((title) => {
   const match = /^feat(\(([^)]*)\))?!?:/.exec(
@@ -32263,23 +32266,35 @@ var checkKey = /* @__PURE__ */ __name((files, key, repo) => {
 
 // openspec-spec-first/src/store.js
 var CHANGES = "openspec/changes/";
-var CONCURRENCY = 10;
-var mapLimit = /* @__PURE__ */ __name(async (items, limit, fn2) => {
-  const batches = [];
-  for (let i = 0; i < items.length; i += limit) {
-    batches.push(items.slice(i, i + limit));
+var CONCURRENCY = 6;
+var mapLimit = /* @__PURE__ */ __name((items, limit, fn2) => new Promise((resolve, reject) => {
+  const results = new Array(items.length);
+  let next = 0;
+  let active = 0;
+  let finished = 0;
+  const launch = /* @__PURE__ */ __name(() => {
+    while (active < limit && next < items.length) {
+      const i = next;
+      next += 1;
+      active += 1;
+      fn2(items[i]).then((result) => {
+        results[i] = result;
+        active -= 1;
+        finished += 1;
+        if (finished === items.length) {
+          resolve(results);
+        } else {
+          launch();
+        }
+      }, reject);
+    }
+  }, "launch");
+  if (items.length === 0) {
+    resolve(results);
+  } else {
+    launch();
   }
-  const results = [];
-  let previous = Promise.resolve();
-  const runs = batches.map((batch) => {
-    previous = previous.then(() => Promise.all(batch.map(fn2)));
-    return previous;
-  });
-  for (const run2 of runs) {
-    results.push(...await run2);
-  }
-  return results;
-}, "mapLimit");
+}), "mapLimit");
 var loadTasksFiles = /* @__PURE__ */ __name(async (octokit, storeRepo, ref) => {
   const [owner, repo, ...rest] = String(storeRepo ?? "").split("/");
   if (!owner || !repo || rest.length > 0) {

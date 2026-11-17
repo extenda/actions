@@ -71,6 +71,27 @@ describe('headingKey', () => {
   });
 });
 
+describe('linear time on adversarial lines', () => {
+  const long = 'a('.repeat(50000);
+  test.each([
+    ['headingKey', () => headingKey(`## 1. r: t ${long}   `)],
+    [
+      'checkTasks',
+      () => checkTasks(`## 1. r: ${long}\n- [ ${' '.repeat(50000)}x\n`),
+    ],
+    [
+      'ticksOnly',
+      () =>
+        ticksOnly(`- [${' '.repeat(50000)}]\n`, `- [${' '.repeat(50000)}]x\n`),
+    ],
+    ['keyFromTitle', () => keyFromTitle(`feat(${long}`)],
+  ])('%s finishes fast', (_, fn) => {
+    const start = Date.now();
+    fn();
+    expect(Date.now() - start).toBeLessThan(1000);
+  });
+});
+
 describe('checkTasks', () => {
   test('reports every problem with its line', () => {
     const problems = checkTasks(
