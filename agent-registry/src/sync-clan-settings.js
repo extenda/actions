@@ -21,6 +21,8 @@ const validateSettings = (filePath, data, schema) => {
 const GCS_BUCKET = 'extenda-agent-artifacts';
 const GCS = `gs://${GCS_BUCKET}`;
 const CD = '${CLAUDE_PROJECT_DIR}';
+// Clan files in agent-registry/config/ that land in .agent/ of every clan repo.
+const CLAN_AGENT_FILES = ['conventions.md', 'review.md'];
 
 const fetchGlobalBaseline = async () => {
   const tmpPath = path.join(tmpdir(), `global-settings-${process.pid}.yaml`);
@@ -212,9 +214,11 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     }
   }
 
-  // Download clan conventions (clan-specific settings.json only)
+  // Download clan conventions and review policy (clan-specific settings.json only)
   if (clanName) {
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/null || true`));
+    for (const f of CLAN_AGENT_FILES) {
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/${f} "${CD}/.agent/${f}" 2>/dev/null || true`));
+    }
   }
 
   // Run global SessionStart scripts, then clan SessionStart scripts
@@ -314,6 +318,32 @@ const syncFiles = async (localDir, gcsPrefix, dryRun) => {
         core.info(`Deleted: gs://${GCS_BUCKET}/${gcsPath}`);
       }
     }
+  }
+};
+
+// Uploads config/<file> to config/<clan>/<file>, or deletes the published copy when the clan removed the file,
+// so a removed conventions or review policy stops reaching new sessions.
+const syncAgentFile = async (registryRoot, clanName, f, dryRun) => {
+  const localPath = path.join(registryRoot, 'config', f);
+  const gcsPath = `config/${clanName}/${f}`;
+  if (existsSync(localPath)) {
+    if (dryRun) {
+      core.info(`[dry-run] Would upload ${f} → gs://${GCS_BUCKET}/${gcsPath}`);
+    } else {
+      await upload(localPath, gcsPath);
+      core.info(`Uploaded: gs://${GCS_BUCKET}/${gcsPath}`);
+    }
+    return;
+  }
+  if (dryRun) {
+    core.info(`[dry-run] Would delete gs://${GCS_BUCKET}/${gcsPath} if it exists`);
+    return;
+  }
+  try {
+    await execGcloud(['storage', 'rm', `${GCS}/${gcsPath}`], 'gcloud', true);
+    core.info(`Deleted: gs://${GCS_BUCKET}/${gcsPath}`);
+  } catch {
+    // Not published — nothing to delete.
   }
 };
 
@@ -487,15 +517,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   await syncFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
   await syncFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
 
-  const conventionsPath = path.join(registryRoot, 'config', 'conventions.md');
-  if (existsSync(conventionsPath)) {
-    if (dryRun) {
-      core.info(`[dry-run] Would upload conventions.md → gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
-    } else {
-      await upload(conventionsPath, `config/${clanName}/conventions.md`);
-      core.info(`Conventions uploaded: gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
-    }
-  }
+  await Promise.all(CLAN_AGENT_FILES.map((f) => syncAgentFile(registryRoot, clanName, f, dryRun)));
 
   core.endGroup();
 };
