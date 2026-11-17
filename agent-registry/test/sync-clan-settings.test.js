@@ -248,6 +248,16 @@ describe('buildSettingsJson', () => {
     expect(cmds.some((c) => c.includes('config/retail/conventions.md') && c.includes('.agent/conventions.md'))).toBe(true);
   });
 
+  test('downloads clan review policy to .agent/review.md', () => {
+    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
+    expect(cmds.some((c) => c.includes('config/retail/review.md') && c.includes('.agent/review.md'))).toBe(true);
+  });
+
+  test('does not download review policy in global template mode (clanName=null)', () => {
+    const cmds = sessionCommands(buildSettingsJson(baseline, {}, null));
+    expect(cmds.every((c) => !c.includes('review.md'))).toBe(true);
+  });
+
   test('does not download conventions in global template mode (clanName=null)', () => {
     const cmds = sessionCommands(buildSettingsJson(baseline, {}, null));
     expect(cmds.every((c) => !c.includes('conventions.md'))).toBe(true);
@@ -513,6 +523,22 @@ describe('syncClanSettings', () => {
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
       expect(calls.every((p) => !p.includes('conventions.md'))).toBe(true);
+    });
+
+    test('uploads review.md to config/<clan>/review.md when it exists', async () => {
+      existsSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('review.md'),
+      );
+      await syncClanSettings('/root/agent-registry', [], false, 'platform');
+      const calls = upload.mock.calls.map((c) => c[1]);
+      expect(calls).toContain('config/platform/review.md');
+      expect(calls.every((p) => !p.includes('conventions.md'))).toBe(true);
+    });
+
+    test('skips review upload when review.md does not exist', async () => {
+      await syncClanSettings('/root/agent-registry', [], false, 'platform');
+      const calls = upload.mock.calls.map((c) => c[1]);
+      expect(calls.every((p) => !p.includes('review.md'))).toBe(true);
     });
 
     test('stores raw clan yaml at config/<clan>/settings.yaml', async () => {

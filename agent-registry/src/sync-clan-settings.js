@@ -21,6 +21,8 @@ const validateSettings = (filePath, data, schema) => {
 const GCS_BUCKET = 'extenda-agent-artifacts';
 const GCS = `gs://${GCS_BUCKET}`;
 const CD = '${CLAUDE_PROJECT_DIR}';
+// Clan files in agent-registry/config/ that land in .agent/ of every clan repo.
+const CLAN_AGENT_FILES = ['conventions.md', 'review.md'];
 
 const fetchGlobalBaseline = async () => {
   const tmpPath = path.join(tmpdir(), `global-settings-${process.pid}.yaml`);
@@ -212,9 +214,11 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     }
   }
 
-  // Download clan conventions (clan-specific settings.json only)
+  // Download clan conventions and review policy (clan-specific settings.json only)
   if (clanName) {
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/null || true`));
+    for (const f of CLAN_AGENT_FILES) {
+      cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/${f} "${CD}/.agent/${f}" 2>/dev/null || true`));
+    }
   }
 
   // Run global SessionStart scripts, then clan SessionStart scripts
@@ -487,13 +491,14 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   await syncFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
   await syncFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
 
-  const conventionsPath = path.join(registryRoot, 'config', 'conventions.md');
-  if (existsSync(conventionsPath)) {
+  for (const f of CLAN_AGENT_FILES) {
+    const localPath = path.join(registryRoot, 'config', f);
+    if (!existsSync(localPath)) continue;
     if (dryRun) {
-      core.info(`[dry-run] Would upload conventions.md → gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
+      core.info(`[dry-run] Would upload ${f} → gs://${GCS_BUCKET}/config/${clanName}/${f}`);
     } else {
-      await upload(conventionsPath, `config/${clanName}/conventions.md`);
-      core.info(`Conventions uploaded: gs://${GCS_BUCKET}/config/${clanName}/conventions.md`);
+      await upload(localPath, `config/${clanName}/${f}`);
+      core.info(`Uploaded: gs://${GCS_BUCKET}/config/${clanName}/${f}`);
     }
   }
 

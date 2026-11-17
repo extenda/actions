@@ -1,6 +1,6 @@
 # agent-registry
 
-Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://docs.cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, and conventions to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
+Registers A2A agents, MCP servers, and skills into the [GCP Agent Registry](https://docs.cloud.google.com/agent-registry), and syncs Claude Code settings, hooks, commands, conventions, and review policy to GCS — all on every push to main. Only items whose files changed in the commit are processed; unchanged items are skipped.
 
 ## Workflow setup
 
@@ -63,6 +63,7 @@ agent-registry/
     commands/
       *.md                # slash commands available to clan developers
     conventions.md        # clan coding conventions — downloaded to .agent/conventions.md
+    review.md             # clan review policy — downloaded to .agent/review.md
 ```
 
 Any directory prefixed with `example-` is ignored.
@@ -275,6 +276,10 @@ Hook `script` paths must be direct children of `hooks/` (for example `hooks/my-g
 
 `agent-registry/config/conventions.md` contains clan-specific coding conventions. It is uploaded to GCS and downloaded to `.agent/conventions.md` on every session start, making it available to the Orchestrator as context.
 
+### Clan review policy
+
+`agent-registry/config/review.md` contains the clan's review policy: extra review passes, what counts as Important, what not to report, the Nit cap. It is uploaded to GCS and downloaded to `.agent/review.md` on every session start, where the `review-pr` skill reads it next to the repository's own `REVIEW.md`, which wins where the two differ.
+
 ### GCS layout
 
 All artifacts land in `gs://extenda-agent-artifacts/`. The clan's portion of the bucket looks like:
@@ -284,6 +289,7 @@ config/
   <clan>/
     settings.json                # merged settings.json downloaded by developers on session start
     conventions.md               # clan conventions
+    review.md                    # clan review policy
 hooks/
   <clan>/
     <clan-hook>.sh               # clan hook scripts
