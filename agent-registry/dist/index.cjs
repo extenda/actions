@@ -103159,6 +103159,7 @@ ${result.toString()}`);
 var GCS_BUCKET2 = "extenda-agent-artifacts";
 var GCS2 = `gs://${GCS_BUCKET2}`;
 var CD = "${CLAUDE_PROJECT_DIR}";
+var CLAN_AGENT_FILES = ["conventions.md", "review.md"];
 var fetchGlobalBaseline = /* @__PURE__ */ __name(async () => {
   const tmpPath = import_node_path8.default.join((0, import_node_os6.tmpdir)(), `global-settings-${process.pid}.yaml`);
   try {
@@ -103292,8 +103293,9 @@ se rm -f "$tmp"; fi`
     }
   }
   if (clanName) {
-    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/config/${clanName}/conventions.md "${CD}/.agent/conventions.md" 2>/dev/\
-null || true`));
+    for (const f3 of CLAN_AGENT_FILES) {
+      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/config/${clanName}/${f3} "${CD}/.agent/${f3}" 2>/dev/null || true`));
+    }
   }
   for (const entry of baseline?.hooks?.SessionStart ?? []) {
     const s = filename(entry.script);
@@ -103517,13 +103519,14 @@ agent-registry/${prefix2}`)), "affected");
   }
   await syncFiles(import_node_path8.default.join(registryRoot, "config", "hooks"), `hooks/${clanName}`, dryRun);
   await syncFiles(import_node_path8.default.join(registryRoot, "config", "commands"), `commands/${clanName}`, dryRun);
-  const conventionsPath = import_node_path8.default.join(registryRoot, "config", "conventions.md");
-  if ((0, import_node_fs9.existsSync)(conventionsPath)) {
+  for (const f3 of CLAN_AGENT_FILES) {
+    const localPath = import_node_path8.default.join(registryRoot, "config", f3);
+    if (!(0, import_node_fs9.existsSync)(localPath)) continue;
     if (dryRun) {
-      info(`[dry-run] Would upload conventions.md \u2192 gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
+      info(`[dry-run] Would upload ${f3} \u2192 gs://${GCS_BUCKET2}/config/${clanName}/${f3}`);
     } else {
-      await upload(conventionsPath, `config/${clanName}/conventions.md`);
-      info(`Conventions uploaded: gs://${GCS_BUCKET2}/config/${clanName}/conventions.md`);
+      await upload(localPath, `config/${clanName}/${f3}`);
+      info(`Uploaded: gs://${GCS_BUCKET2}/config/${clanName}/${f3}`);
     }
   }
   endGroup();
