@@ -321,6 +321,32 @@ const syncFiles = async (localDir, gcsPrefix, dryRun) => {
   }
 };
 
+// Uploads config/<file> to config/<clan>/<file>, or deletes the published copy when the clan removed the file,
+// so a removed conventions or review policy stops reaching new sessions.
+const syncAgentFile = async (registryRoot, clanName, f, dryRun) => {
+  const localPath = path.join(registryRoot, 'config', f);
+  const gcsPath = `config/${clanName}/${f}`;
+  if (existsSync(localPath)) {
+    if (dryRun) {
+      core.info(`[dry-run] Would upload ${f} → gs://${GCS_BUCKET}/${gcsPath}`);
+    } else {
+      await upload(localPath, gcsPath);
+      core.info(`Uploaded: gs://${GCS_BUCKET}/${gcsPath}`);
+    }
+    return;
+  }
+  if (dryRun) {
+    core.info(`[dry-run] Would delete gs://${GCS_BUCKET}/${gcsPath} if it exists`);
+    return;
+  }
+  try {
+    await execGcloud(['storage', 'rm', `${GCS}/${gcsPath}`], 'gcloud', true);
+    core.info(`Deleted: gs://${GCS_BUCKET}/${gcsPath}`);
+  } catch {
+    // Not published — nothing to delete.
+  }
+};
+
 const writeTempFile = (content, suffix) => {
   const tmpPath = path.join(tmpdir(), `${suffix}-${process.pid}`);
   writeFileSync(tmpPath, content, 'utf8');
@@ -491,16 +517,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
   await syncFiles(path.join(registryRoot, 'config', 'hooks'), `hooks/${clanName}`, dryRun);
   await syncFiles(path.join(registryRoot, 'config', 'commands'), `commands/${clanName}`, dryRun);
 
-  for (const f of CLAN_AGENT_FILES) {
-    const localPath = path.join(registryRoot, 'config', f);
-    if (!existsSync(localPath)) continue;
-    if (dryRun) {
-      core.info(`[dry-run] Would upload ${f} → gs://${GCS_BUCKET}/config/${clanName}/${f}`);
-    } else {
-      await upload(localPath, `config/${clanName}/${f}`);
-      core.info(`Uploaded: gs://${GCS_BUCKET}/config/${clanName}/${f}`);
-    }
-  }
+  await Promise.all(CLAN_AGENT_FILES.map((f) => syncAgentFile(registryRoot, clanName, f, dryRun)));
 
   core.endGroup();
 };
