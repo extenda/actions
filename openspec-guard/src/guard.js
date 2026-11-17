@@ -7,6 +7,8 @@ import {
   checkTasks,
   DEFAULT_MAX_TASKS,
   hasUnticked,
+  headingKey,
+  isGroupHeading,
   ticksOnly,
 } from './tasks-md.js';
 
@@ -112,8 +114,16 @@ const runGuard = ({
   };
 
   // True when change $1 is on the base branch, i.e. its proposal was approved.
-  const approved = (change) =>
-    gitOk(['cat-file', '-e', `${base}:openspec/changes/${change}`]);
+  const approvedCache = new Map();
+  const approved = (change) => {
+    if (!approvedCache.has(change)) {
+      approvedCache.set(
+        change,
+        gitOk(['cat-file', '-e', `${base}:openspec/changes/${change}`]),
+      );
+    }
+    return approvedCache.get(change);
+  };
 
   const archiving = (branchName) => {
     const prefix = 'chore/archive-';
@@ -212,16 +222,18 @@ const runGuard = ({
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
       .sort((a, b) => a.localeCompare(b));
-    // The store id is never a prefix of its own, even when the clan prefix or the service list says so.
-    const prefixes = [
-      ...(clanPrefix && clanPrefix !== `${id}-` ? [clanPrefix] : []),
-      ...list.filter((s) => s !== id).map((s) => `${s}-`),
-    ];
+    const servicePrefixes = list.filter((s) => s !== id).map((s) => `${s}-`);
+    const startsWith = (name, prefixes) =>
+      prefixes.some((x) => name.startsWith(x) && name.length > x.length);
     for (const name of names) {
       const bare = list.includes(name); // a bare service name is not a capability name
+      // The store id is never a prefix of its own, whatever the clan prefix says; only a service of the clan
+      // that starts with it (hiiconnect-router) admits a name.
+      const idName = id !== '' && (name === id || name.startsWith(`${id}-`));
       const ok =
         !bare &&
-        prefixes.some((x) => name.startsWith(x) && name.length > x.length);
+        (startsWith(name, servicePrefixes) ||
+          (!idName && clanPrefix !== '' && startsWith(name, [clanPrefix])));
       if (!ok) {
         const orPrefix = clanPrefix ? ` or ${clanPrefix}` : '';
         const notId = id ? ` (never the store id ${id})` : '';
@@ -233,6 +245,45 @@ const runGuard = ({
     }
   };
 
+  let storeKeys = null;
+  // The Jira keys of the group headings of every tasks.md on the base, open and archived changes, as
+  // upper-case key -> the tasks.md that uses it.
+  const loadStoreKeys = () => {
+    if (storeKeys) {
+      return storeKeys;
+    }
+    storeKeys = new Map();
+    let out = '';
+    try {
+      out = git([
+        'grep',
+        '-z',
+        '-I',
+        '-e',
+        '^## ',
+        base,
+        '--',
+        ':(glob)openspec/changes/**/tasks.md',
+      ]);
+    } catch (err) {
+      if (err.status !== 1) {
+        die('git grep failed.');
+      }
+    }
+    for (const entry of out.split('\n')) {
+      const nul = entry.indexOf('\0');
+      const file = entry.slice(0, nul);
+      const heading = entry.slice(nul + 1).trimEnd();
+      if (nul > 0 && file.startsWith(`${base}:`) && isGroupHeading(heading)) {
+        const key = headingKey(heading).toUpperCase();
+        if (key !== 'TBD' && !storeKeys.has(key)) {
+          storeKeys.set(key, file.slice(base.length + 1));
+        }
+      }
+    }
+    return storeKeys;
+  };
+
   // tasks.md and spec names of a change that is not on the base yet.
   const checkNewChange = (change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
@@ -240,6 +291,7 @@ const runGuard = ({
       for (const { line, message } of checkTasks(readWork(tasksFile), {
         draft,
         maxTasks,
+        usedKeys: loadStoreKeys(),
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
       }
@@ -311,18 +363,34 @@ const runGuard = ({
     checkChanges(entries);
   };
 
-  const archivedFolder = (root, change) => {
+  // The folders openspec/changes/archive/<date>-<change> of a work tree that the base does not have yet.
+  const newArchivedFolders = (root, change) => {
     const dir = path.join(root, 'openspec/changes/archive');
     if (!fs.existsSync(dir)) {
-      return '';
+      return [];
     }
     const re = new RegExp(`^${ARCHIVE_DATE}-${escapeRegExp(change)}$`);
-    const found = fs
+    return fs
       .readdirSync(dir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && re.test(e.name))
-      .map((e) => e.name)
-      .sort((a, b) => a.localeCompare(b));
-    return found.length > 0 ? `openspec/changes/archive/${found[0]}` : '';
+      .map((e) => `openspec/changes/archive/${e.name}`)
+      .filter((folder) => !gitOk(['cat-file', '-e', `${base}:${folder}`]))
+      .sort((x, y) => x.localeCompare(y));
+  };
+
+  // Exactly one new archived folder, or a failure.
+  const oneArchivedFolder = (root, change, none, side) => {
+    const found = newArchivedFolders(root, change);
+    if (found.length === 1) {
+      return found[0];
+    }
+    fail(
+      branch,
+      found.length === 0
+        ? none
+        : `${change} has ${found.length} new archived folders ${side}: ${found.join(' ')}`,
+    );
+    return '';
   };
 
   const tail = (err) => {
@@ -359,20 +427,22 @@ const runGuard = ({
       );
       return null;
     }
-    const a = archivedFolder(cwd, change);
-    const r = archivedFolder(t, change);
+    const a = oneArchivedFolder(
+      cwd,
+      change,
+      `No new archived folder for ${change}.`,
+      'on the branch',
+    );
     if (!a) {
-      fail(branch, `No archived folder for ${change}.`);
       return null;
     }
-    if (!r) {
-      fail(
-        branch,
-        `openspec archive ${change} on ${base} wrote no archived folder.`,
-      );
-      return null;
-    }
-    return { a, r };
+    const r = oneArchivedFolder(
+      t,
+      change,
+      `openspec archive ${change} on ${base} wrote no archived folder.`,
+      `from openspec archive on ${base}`,
+    );
+    return r ? { a, r } : null;
   };
 
   // Re-runs `openspec archive <change>` on the base and requires the branch to match it.

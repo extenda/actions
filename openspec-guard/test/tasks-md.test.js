@@ -157,3 +157,34 @@ describe('keyFromTitle', () => {
     expect(keyFromTitle(title).status).toBe('skip'),
   );
 });
+
+describe('group keys', () => {
+  const two = (a, b) =>
+    `## 1. my-repo: One (${a})\n\n- [ ] 1.1 a\n\n## 2. my-repo: Two (${b})\n\n- [ ] 2.1 b\n`;
+
+  test('a key in two groups of one tasks.md is rejected', () => {
+    const problems = checkTasks(two('HICC-1', 'HICC-1'));
+    expect(problems).toEqual([
+      {
+        line: 5,
+        message: '"HICC-1" is the key of more than one group of this tasks.md.',
+      },
+    ]);
+  });
+
+  test('different keys, and (TBD) twice in a draft, are fine', () => {
+    expect(checkTasks(two('HICC-1', 'HICC-2'))).toEqual([]);
+    expect(checkTasks(two('TBD', 'TBD'), { draft: true })).toEqual([]);
+  });
+
+  test('a key used in another change of the store is rejected', () => {
+    const usedKeys = new Map([['HICC-2', 'openspec/changes/other/tasks.md']]);
+    expect(checkTasks(two('HICC-1', 'HICC-2'), { usedKeys })).toEqual([
+      {
+        line: 5,
+        message:
+          '"HICC-2" is already the key of a group in openspec/changes/other/tasks.md.',
+      },
+    ]);
+  });
+});

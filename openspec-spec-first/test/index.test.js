@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('@actions/core');
 
 const mockGetTree = vi.fn();
-const mockGetBlob = vi.fn();
+const mockGraphql = vi.fn();
 const mockRepoGet = vi.fn();
 vi.mock('@actions/github', () => ({
   context: {
@@ -14,9 +14,10 @@ vi.mock('@actions/github', () => ({
   },
   getOctokit: (token) => ({
     token,
+    graphql: mockGraphql,
     rest: {
       repos: { get: mockRepoGet },
-      git: { getTree: mockGetTree, getBlob: mockGetBlob },
+      git: { getTree: mockGetTree },
     },
   }),
 }));
@@ -38,11 +39,8 @@ describe('openspec-spec-first action', () => {
         ],
       },
     });
-    mockGetBlob.mockResolvedValue({
-      data: {
-        content: Buffer.from(heading).toString('base64'),
-        encoding: 'base64',
-      },
+    mockGraphql.mockResolvedValue({
+      repository: { b0: { text: heading, isTruncated: false } },
     });
   });
   afterEach(() => vi.resetAllMocks());

@@ -35,10 +35,8 @@ const readDraft = async () => {
 // this action (npm ci fails when it and package.json disagree); --ignore-scripts skips install scripts.
 // It runs with the node of this action, which satisfies OpenSpec's node >= 22.12.
 const installOpenSpec = async () => {
-  const dir = path.join(
-    process.env.GITHUB_ACTION_PATH ?? process.cwd(),
-    'openspec-cli',
-  );
+  // GITHUB_ACTION_PATH is set for composite actions only; dist/index.cjs sits in dist/ next to openspec-cli/.
+  const dir = path.join(__dirname, '..', 'openspec-cli');
   core.info(`Installing the pinned OpenSpec CLI from ${dir}`);
   execFileSync(
     await io.which('npm', true),
@@ -50,14 +48,18 @@ const installOpenSpec = async () => {
   return [process.execPath, path.join(dir, OPENSPEC_BIN)];
 };
 
-const gitBranch = (gitBin) =>
+const gitBranch = (gitBin, cwd) =>
   execFileSync(gitBin, ['branch', '--show-current'], {
+    cwd,
     encoding: 'utf8',
   }).trim();
 
 const action = async () => {
-  const cwd = process.cwd();
   const gitBin = await io.which('git', true);
+  // Like the bash guard, work from the git toplevel: git prints paths relative to it, also with a checkout path.
+  const cwd = execFileSync(gitBin, ['rev-parse', '--show-toplevel'], {
+    encoding: 'utf8',
+  }).trim();
   const baseInput = core.getInput('base-ref');
   const baseBranch = process.env.GITHUB_BASE_REF;
   const base = baseInput || (baseBranch ? `origin/${baseBranch}` : '');
@@ -69,7 +71,7 @@ const action = async () => {
   const branch =
     core.getInput('head-ref') ||
     process.env.GITHUB_HEAD_REF ||
-    gitBranch(gitBin);
+    gitBranch(gitBin, cwd);
 
   const commandInput = core.getInput('openspec-command').trim();
   let openspecCommand = [];

@@ -15,12 +15,13 @@ vi.mock('@actions/github', () => ({
 }));
 
 import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 
-import action from '../src/index.js';
 import { runGuard } from '../src/guard.js';
+import action from '../src/index.js';
 
 const orgEnv = process.env;
 
@@ -33,9 +34,12 @@ describe('openspec-guard action', () => {
       ...orgEnv,
       GITHUB_BASE_REF: 'master',
       GITHUB_HEAD_REF: 'feat/x',
-      GITHUB_ACTION_PATH: '/actions/openspec-guard',
     };
+    delete process.env.GITHUB_ACTION_PATH;
     io.which.mockImplementation(async (tool) => `/usr/bin/${tool}`);
+    execFileSync.mockImplementation((bin, args) =>
+      args[0] === 'rev-parse' ? '/work/store\n' : '',
+    );
     mockGet.mockResolvedValue({ data: { draft: true } });
     runGuard.mockReturnValue({ failures: [], skipped: false });
   });
@@ -70,8 +74,25 @@ describe('openspec-guard action', () => {
         openspecCommand: [],
       }),
     );
-    expect(execFileSync).not.toHaveBeenCalled();
+    expect(execFileSync).not.toHaveBeenCalledWith(
+      '/usr/bin/npm',
+      expect.anything(),
+      expect.anything(),
+    );
     expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
+  test('runs from the git toplevel, also with a checkout path', async () => {
+    inputs({ draft: 'false' });
+    await action();
+    expect(execFileSync).toHaveBeenCalledWith(
+      '/usr/bin/git',
+      ['rev-parse', '--show-toplevel'],
+      expect.anything(),
+    );
+    expect(runGuard).toHaveBeenCalledWith(
+      expect.objectContaining({ cwd: '/work/store' }),
+    );
   });
 
   test('the draft input wins over the API', async () => {
@@ -119,22 +140,18 @@ describe('openspec-guard action', () => {
     process.env.GITHUB_HEAD_REF = 'chore/archive-hicc-1-old';
     inputs({ draft: 'false' });
     await action();
+    // The runner sets no GITHUB_ACTION_PATH for a node action: the folder is found from the bundle location.
+    expect(process.env.GITHUB_ACTION_PATH).toBeUndefined();
+    const cliDir = path.resolve(__dirname, '..', 'openspec-cli');
     expect(execFileSync).toHaveBeenCalledWith(
       '/usr/bin/npm',
-      [
-        'ci',
-        '--ignore-scripts',
-        '--no-audit',
-        '--no-fund',
-        '--prefix',
-        '/actions/openspec-guard/openspec-cli',
-      ],
+      ['ci', '--ignore-scripts', '--no-audit', '--no-fund', '--prefix', cliDir],
       expect.anything(),
     );
     const { openspecCommand } = runGuard.mock.calls[0][0];
     expect(openspecCommand[0]).toBe(process.execPath);
     expect(openspecCommand[1]).toBe(
-      '/actions/openspec-guard/openspec-cli/node_modules/@fission-ai/openspec/bin/openspec.js',
+      path.join(cliDir, 'node_modules/@fission-ai/openspec/bin/openspec.js'),
     );
   });
 
@@ -145,7 +162,11 @@ describe('openspec-guard action', () => {
       'openspec-command': 'npx @fission-ai/openspec@2.0.0',
     });
     await action();
-    expect(execFileSync).not.toHaveBeenCalled();
+    expect(execFileSync).not.toHaveBeenCalledWith(
+      '/usr/bin/npm',
+      expect.anything(),
+      expect.anything(),
+    );
     expect(runGuard).toHaveBeenCalledWith(
       expect.objectContaining({
         openspecCommand: ['npx', '@fission-ai/openspec@2.0.0'],
@@ -179,6 +200,7 @@ describe('draft without a pull request', () => {
       GITHUB_HEAD_REF: 'x',
     };
     inputs({});
+    execFileSync.mockReturnValue('/work/store\n');
     runGuard.mockReturnValue({ failures: [], skipped: true });
     mockGet.mockRejectedValue(new Error('no token'));
     await action();

@@ -245,6 +245,37 @@ describe('openspec-guard: tasks.md and spec names of an unapproved change', () =
     good,
     'hiiconnect-router-refunds',
   );
+  // The store id is never a prefix, whatever the clan prefix says.
+  describe.each(['hiiconnect-', 'hiiconnect', 'hiiconnect-x'])(
+    'clan prefix %j',
+    (clanPrefix) => {
+      test('does not admit the store id as a prefix', () => {
+        newRepo();
+        write('openspec/changes/hicc-9-new/tasks.md', good);
+        write(
+          'openspec/changes/hicc-9-new/specs/hiiconnect-refunds/spec.md',
+          'x\n',
+        );
+        git(repo, 'add', '-A');
+        git(repo, 'commit', '-q', '-m', 'change');
+        const r = guard({ clanPrefix });
+        expect(ok(r), show(r)).toBe(false);
+        expect(show(r)).toContain('never the store id hiiconnect');
+      });
+      test('still admits a service that starts with the id', () => {
+        newRepo();
+        write('openspec/changes/hicc-9-new/tasks.md', good);
+        write(
+          'openspec/changes/hicc-9-new/specs/hiiconnect-router-refunds/spec.md',
+          'x\n',
+        );
+        git(repo, 'add', '-A');
+        git(repo, 'commit', '-q', '-m', 'change');
+        const r = guard({ clanPrefix });
+        expect(ok(r), show(r)).toBe(true);
+      });
+    },
+  );
   caseOf('unknown service prefix', false, false, good, 'foo-refunds');
   caseOf('bare service name', false, false, good, 'payment-router');
   caseOf(
@@ -633,5 +664,151 @@ describe('openspec-guard: extra cases beyond the bash self-test', () => {
     write('openspec/changes/hicc-1-old/design.md', 'x\n');
     commit();
     expect(show(guard())).not.toContain('Spec name');
+  });
+});
+
+describe('openspec-guard: group keys across the store', () => {
+  const commit = () => {
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'change');
+  };
+  const proposal = (key) =>
+    `## 1. payment-router: Do it (${key})\n\n- [ ] 1.1 a\n`;
+
+  test('a key of an open change on the base is rejected', () => {
+    newRepo();
+    write('openspec/changes/hicc-9-new/tasks.md', proposal('HICC-2'));
+    commit();
+    const r = guard();
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain(
+      '\\"HICC-2\\" is already the key of a group in openspec/changes/hicc-1-old/tasks.md.',
+    );
+  });
+
+  test('a key of an archived change on the base is rejected', () => {
+    newRepo();
+    write(
+      'openspec/changes/archive/2020-01-01-gone/tasks.md',
+      '## 1. payment-router: Old (HICC-77)\n\n- [x] 1.1 a\n',
+    );
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'archived');
+    git(repo, 'branch', '-f', 'main');
+    write('openspec/changes/hicc-9-new/tasks.md', proposal('HICC-77'));
+    commit();
+    const r = guard();
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain('already the key of a group in');
+  });
+
+  test('a key in two groups of the same tasks.md is rejected', () => {
+    newRepo();
+    write(
+      'openspec/changes/hicc-9-new/tasks.md',
+      `${proposal('HICC-5')}\n## 2. hps-nets: More (HICC-5)\n\n- [ ] 2.1 b\n`,
+    );
+    commit();
+    const r = guard();
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain('more than one group of this tasks.md');
+  });
+
+  test('a fresh key passes', () => {
+    newRepo();
+    write('openspec/changes/hicc-9-new/tasks.md', proposal('HICC-5'));
+    commit();
+    const r = guard();
+    expect(ok(r), show(r)).toBe(true);
+  });
+});
+
+describe('openspec-guard: archived folders of earlier changes', () => {
+  test('an older archive/<date>-<change> on the base is ignored', () => {
+    const bin = path.join(tmp, 'bin2');
+    fs.mkdirSync(bin, { recursive: true });
+    fs.writeFileSync(
+      path.join(bin, 'openspec'),
+      `#!/bin/bash
+[ "$1" = archive ] || exit 0
+mkdir -p openspec/changes/archive
+mv "openspec/changes/$2" "openspec/changes/archive/2026-01-01-$2"
+`,
+      { mode: 0o755 },
+    );
+    newRepo();
+    // The base already has a ticked archive of a change named like the one archived now.
+    write(
+      'openspec/changes/archive/2020-01-01-hicc-1-old/tasks.md',
+      '## 1. payment-router: Earlier (HICC-1)\n\n- [x] 1.1 a\n',
+    );
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'earlier archive');
+    git(repo, 'branch', '-f', 'main');
+    git(repo, 'checkout', '-q', '-b', 'chore/archive-hicc-1-old');
+    sh(repo, path.join(bin, 'openspec'), ['archive', 'hicc-1-old', '--yes']);
+    git(repo, 'add', '-A', '-f');
+    git(repo, 'commit', '-q', '-m', 'archive');
+    const r = guard({
+      branch: 'chore/archive-hicc-1-old',
+      openspecCommand: [path.join(bin, 'openspec')],
+    });
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain('Archived with unticked tasks.');
+  });
+
+  test('several new archived folders of the change fail', () => {
+    const bin = path.join(tmp, 'bin3');
+    fs.mkdirSync(bin, { recursive: true });
+    fs.writeFileSync(
+      path.join(bin, 'openspec'),
+      `#!/bin/bash
+[ "$1" = archive ] || exit 0
+mkdir -p openspec/changes/archive
+mv "openspec/changes/$2" "openspec/changes/archive/2026-01-01-$2"
+`,
+      { mode: 0o755 },
+    );
+    newRepo();
+    git(repo, 'checkout', '-q', '-b', 'chore/archive-hicc-1-old');
+    tickAll('openspec/changes/hicc-1-old/tasks.md');
+    sh(repo, path.join(bin, 'openspec'), ['archive', 'hicc-1-old', '--yes']);
+    fs.cpSync(
+      path.join(repo, 'openspec/changes/archive/2026-01-01-hicc-1-old'),
+      path.join(repo, 'openspec/changes/archive/2025-12-31-hicc-1-old'),
+      { recursive: true },
+    );
+    git(repo, 'add', '-A', '-f');
+    git(repo, 'commit', '-q', '-m', 'archive');
+    const r = guard({
+      branch: 'chore/archive-hicc-1-old',
+      openspecCommand: [path.join(bin, 'openspec')],
+    });
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain('2 new archived folders on the branch');
+  });
+});
+
+describe('openspec-guard: approved() is memoized', () => {
+  test('a change touching several files spawns cat-file once', () => {
+    newRepo();
+    const calls = [];
+    const wrapper = path.join(tmp, 'git-count');
+    fs.writeFileSync(
+      wrapper,
+      `#!/bin/bash\nfor a in "$@"; do [ "$a" = cat-file ] && echo x >>"${path.join(tmp, 'catfile.log')}"; done\nexec git "$@"\n`,
+      { mode: 0o755 },
+    );
+    for (const n of ['a', 'b', 'c', 'd']) {
+      write(`openspec/changes/hicc-1-old/${n}.md`, 'x\n');
+    }
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'change');
+    const r = guard({ gitBin: wrapper });
+    expect(show(r)).toContain('frozen');
+    const lines = fs.readFileSync(path.join(tmp, 'catfile.log'), 'utf8');
+    calls.push(...lines.trim().split('\n'));
+    expect(calls).toHaveLength(1);
+    fs.rmSync(path.join(tmp, 'catfile.log'));
   });
 });

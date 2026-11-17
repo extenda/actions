@@ -1,36 +1,38 @@
 const CHANGES = 'openspec/changes/';
-const CONCURRENCY = 6;
 
-// Runs fn on the items with at most limit calls in flight; the results keep the order of the items.
-const mapLimit = (items, limit, fn) =>
-  new Promise((resolve, reject) => {
-    const results = new Array(items.length);
-    let next = 0;
-    let active = 0;
-    let finished = 0;
-    const launch = () => {
-      while (active < limit && next < items.length) {
-        const i = next;
-        next += 1;
-        active += 1;
-        fn(items[i]).then((result) => {
-          results[i] = result;
-          active -= 1;
-          finished += 1;
-          if (finished === items.length) {
-            resolve(results);
-          } else {
-            launch();
-          }
-        }, reject);
-      }
-    };
-    if (items.length === 0) {
-      resolve(results);
-    } else {
-      launch();
-    }
+// Blobs read by one GraphQL call; the API takes up to 100 aliased objects of a query without hitting its
+// node limit.
+const BATCH = 100;
+
+const blobQuery = (n) => {
+  const vars = Array.from({ length: n }, (_, i) => `$o${i}: GitObjectID!`);
+  const fields = Array.from(
+    { length: n },
+    (_, i) => `b${i}: object(oid: $o${i}) { ... on Blob { text isTruncated } }`,
+  );
+  return `query($owner: String!, $repo: String!, ${vars.join(', ')}) {
+  repository(owner: $owner, name: $repo) { ${fields.join('\n    ')} }
+}`;
+};
+
+// The text of the blobs in one request. A GraphQL error, a missing blob, a binary or a truncated one throws:
+// a partial read must never pass the check.
+const readBlobs = async (octokit, owner, repo, entries) => {
+  const variables = { owner, repo };
+  entries.forEach((e, i) => {
+    variables[`o${i}`] = e.sha;
   });
+  const data = await octokit.graphql(blobQuery(entries.length), variables);
+  return entries.map((e, i) => {
+    const blob = data?.repository?.[`b${i}`];
+    if (!blob || typeof blob.text !== 'string' || blob.isTruncated) {
+      throw new Error(
+        `Cannot read ${e.path} completely from ${owner}/${repo}.`,
+      );
+    }
+    return { path: e.path, content: blob.text };
+  });
+};
 
 /**
  * Reads every tasks.md under openspec/changes/ (archived changes included) of a store repo through the GitHub
@@ -71,17 +73,13 @@ const loadTasksFiles = async (octokit, storeRepo, ref) => {
       e.path.startsWith(CHANGES) &&
       e.path.split('/').pop() === 'tasks.md',
   );
-  return mapLimit(tasks, CONCURRENCY, async (e) => {
-    const { data: blob } = await octokit.rest.git.getBlob({
-      owner,
-      repo,
-      file_sha: e.sha,
-    });
-    return {
-      path: e.path,
-      content: Buffer.from(blob.content, blob.encoding).toString('utf8'),
-    };
-  });
+  const files = [];
+  for (let i = 0; i < tasks.length; i += BATCH) {
+    files.push(
+      ...(await readBlobs(octokit, owner, repo, tasks.slice(i, i + BATCH))),
+    );
+  }
+  return files;
 };
 
 export { loadTasksFiles };

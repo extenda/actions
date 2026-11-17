@@ -63,13 +63,16 @@ const headingRepo = (heading) => heading.replace(/^## \S+ /, '').split(':')[0];
 /**
  * Checks tasks.md of a change that is not approved yet: groups are `## <n>. <repo>: <title> (<KEY>)`, numbered
  * from 1, one repo each, at most maxTasks tasks. `(TBD)` stands in for the key only while the PR is a draft.
+ * A key names one group: it may not repeat in this file, nor be a key of usedKeys (Jira key in upper case ->
+ * the tasks.md of the other change that uses it).
  * @returns {{line: number, message: string}[]} one entry per problem, line is 1-based
  */
 const checkTasks = (
   text,
-  { draft = false, maxTasks = DEFAULT_MAX_TASKS } = {},
+  { draft = false, maxTasks = DEFAULT_MAX_TASKS, usedKeys = new Map() } = {},
 ) => {
   const problems = [];
+  const seen = new Set();
   let groups = 0;
   let tasks = 0;
   let groupLine = 0;
@@ -113,6 +116,21 @@ const checkTasks = (
         }
       } else if (!JIRA_KEY_RE.test(key)) {
         problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
+      } else {
+        const upper = key.toUpperCase();
+        if (seen.has(upper)) {
+          problems.push({
+            line: lineNo,
+            message: `"${key}" is the key of more than one group of this tasks.md.`,
+          });
+        }
+        seen.add(upper);
+        if (usedKeys.has(upper)) {
+          problems.push({
+            line: lineNo,
+            message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`,
+          });
+        }
       }
     } else if (isTask(line)) {
       if (groups === 0) {

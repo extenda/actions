@@ -2,18 +2,26 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { loadTasksFiles } from '../src/store.js';
 
-const b64 = (s) => Buffer.from(s).toString('base64');
+// graphql answers every aliased b<i> of the query from the oid variables o<i>.
+const graphqlWith = (blobs) =>
+  vi.fn(async (query, variables) => {
+    const repository = {};
+    for (let i = 0; variables[`o${i}`] !== undefined; i += 1) {
+      const text = blobs[variables[`o${i}`]];
+      repository[`b${i}`] =
+        text === undefined ? null : { text, isTruncated: false };
+    }
+    return { repository };
+  });
 
 const octokitWith = ({ tree, truncated = false, blobs = {} }) => ({
+  graphql: graphqlWith(blobs),
   rest: {
     repos: {
       get: vi.fn().mockResolvedValue({ data: { default_branch: 'main' } }),
     },
     git: {
       getTree: vi.fn().mockResolvedValue({ data: { tree, truncated } }),
-      getBlob: vi.fn(async ({ file_sha }) => ({
-        data: { content: b64(blobs[file_sha]), encoding: 'base64' },
-      })),
     },
   },
 });
@@ -82,35 +90,64 @@ describe('loadTasksFiles', () => {
     );
   });
 
-  test('fetches at most 6 blobs at once and keeps the order', async () => {
+  test('reads all blobs in one call and keeps the order', async () => {
     const tree = Array.from({ length: 20 }, (_, i) => ({
       path: `openspec/changes/c${i}/tasks.md`,
       type: 'blob',
       sha: `s${i}`,
     }));
-    const octokit = octokitWith({ tree });
-    let active = 0;
-    let peak = 0;
-    octokit.rest.git.getBlob = vi.fn(async ({ file_sha }) => {
-      active += 1;
-      peak = Math.max(peak, active);
-      await new Promise((r) => setTimeout(r, 5));
-      active -= 1;
-      return { data: { content: b64(file_sha), encoding: 'base64' } };
-    });
+    const blobs = Object.fromEntries(tree.map((e) => [e.sha, `text ${e.sha}`]));
+    const octokit = octokitWith({ tree, blobs });
     const files = await loadTasksFiles(octokit, 'extenda/store');
-    expect(files.map((f) => f.content)).toEqual(tree.map((e) => e.sha));
-    expect(peak).toBeLessThanOrEqual(6);
-    expect(peak).toBeGreaterThan(1);
+    expect(files.map((f) => f.content)).toEqual(
+      tree.map((e) => `text ${e.sha}`),
+    );
+    expect(octokit.graphql).toHaveBeenCalledTimes(1);
+    expect(octokit.graphql.mock.calls[0][1]).toMatchObject({
+      owner: 'extenda',
+      repo: 'store',
+      o0: 's0',
+      o19: 's19',
+    });
   });
 
-  test('a failing blob fails the load', async () => {
+  test('more than 100 files take several calls', async () => {
+    const tree = Array.from({ length: 205 }, (_, i) => ({
+      path: `openspec/changes/c${i}/tasks.md`,
+      type: 'blob',
+      sha: `s${i}`,
+    }));
+    const blobs = Object.fromEntries(tree.map((e) => [e.sha, e.sha]));
+    const octokit = octokitWith({ tree, blobs });
+    const files = await loadTasksFiles(octokit, 'extenda/store');
+    expect(files.map((f) => f.content)).toEqual(tree.map((e) => e.sha));
+    expect(octokit.graphql).toHaveBeenCalledTimes(3);
+  });
+
+  test('a failing GraphQL call (API or rate limit error) fails the load', async () => {
     const octokit = octokitWith({
       tree: [{ path: 'openspec/changes/a/tasks.md', type: 'blob', sha: 's1' }],
     });
-    octokit.rest.git.getBlob = vi.fn().mockRejectedValue(new Error('boom'));
+    octokit.graphql = vi.fn().mockRejectedValue(new Error('rate limited'));
     await expect(loadTasksFiles(octokit, 'extenda/store')).rejects.toThrow(
-      'boom',
+      'rate limited',
+    );
+  });
+
+  test('a missing or truncated blob fails the load', async () => {
+    const tree = [
+      { path: 'openspec/changes/a/tasks.md', type: 'blob', sha: 's1' },
+    ];
+    const missing = octokitWith({ tree, blobs: {} });
+    await expect(loadTasksFiles(missing, 'extenda/store')).rejects.toThrow(
+      /Cannot read openspec\/changes\/a\/tasks.md/,
+    );
+    const truncated = octokitWith({ tree });
+    truncated.graphql = vi.fn().mockResolvedValue({
+      repository: { b0: { text: 'half', isTruncated: true } },
+    });
+    await expect(loadTasksFiles(truncated, 'extenda/store')).rejects.toThrow(
+      /Cannot read/,
     );
   });
 

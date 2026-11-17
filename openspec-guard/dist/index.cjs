@@ -32385,6 +32385,7 @@ var UNTICKED_RE = new RegExp(
 var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
 var JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-\d+$/;
 var DEFAULT_MAX_TASKS = 6;
+var isGroupHeading = /* @__PURE__ */ __name((line) => GROUP_HEADING_RE.test(line), "isGroupHeading");
 var isTask = /* @__PURE__ */ __name((line) => TASK_RE.test(line), "isTask");
 var isUnticked = /* @__PURE__ */ __name((line) => UNTICKED_RE.test(line), "isUnticked");
 var linesOf = /* @__PURE__ */ __name((text) => {
@@ -32415,8 +32416,9 @@ var headingKey = /* @__PURE__ */ __name((heading) => {
   const rest = text.slice(text.lastIndexOf("(") + 1);
   return rest.endsWith(")") ? rest.slice(0, -1) : rest;
 }, "headingKey");
-var checkTasks = /* @__PURE__ */ __name((text, { draft = false, maxTasks = DEFAULT_MAX_TASKS } = {}) => {
+var checkTasks = /* @__PURE__ */ __name((text, { draft = false, maxTasks = DEFAULT_MAX_TASKS, usedKeys = /* @__PURE__ */ new Map() } = {}) => {
   const problems = [];
+  const seen = /* @__PURE__ */ new Set();
   let groups = 0;
   let tasks = 0;
   let groupLine = 0;
@@ -32460,6 +32462,21 @@ list): ${line}`
         }
       } else if (!JIRA_KEY_RE.test(key)) {
         problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
+      } else {
+        const upper = key.toUpperCase();
+        if (seen.has(upper)) {
+          problems.push({
+            line: lineNo,
+            message: `"${key}" is the key of more than one group of this tasks.md.`
+          });
+        }
+        seen.add(upper);
+        if (usedKeys.has(upper)) {
+          problems.push({
+            line: lineNo,
+            message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`
+          });
+        }
       }
     } else if (isTask(line)) {
       if (groups === 0) {
@@ -32548,8 +32565,16 @@ var runGuard = /* @__PURE__ */ __name(({
     }
     return entries;
   }, "nameStatus");
-  const approved = /* @__PURE__ */ __name((change) => gitOk(["cat-file", "-e", `${base}:openspec/changes/${change}`]), "\
-approved");
+  const approvedCache = /* @__PURE__ */ new Map();
+  const approved = /* @__PURE__ */ __name((change) => {
+    if (!approvedCache.has(change)) {
+      approvedCache.set(
+        change,
+        gitOk(["cat-file", "-e", `${base}:openspec/changes/${change}`])
+      );
+    }
+    return approvedCache.get(change);
+  }, "approved");
   const archiving = /* @__PURE__ */ __name((branchName) => {
     const prefix = "chore/archive-";
     return branchName.startsWith(prefix) ? branchName.slice(prefix.length) : "";
@@ -32628,13 +32653,13 @@ approved");
     const id = resolveStoreId();
     const names = import_node_fs.default.readdirSync(import_node_path2.default.join(cwd, dir), { withFileTypes: true }).
     filter((e) => e.isDirectory()).map((e) => e.name).sort((a, b2) => a.localeCompare(b2));
-    const prefixes = [
-      ...clanPrefix && clanPrefix !== `${id}-` ? [clanPrefix] : [],
-      ...list.filter((s) => s !== id).map((s) => `${s}-`)
-    ];
+    const servicePrefixes = list.filter((s) => s !== id).map((s) => `${s}-`);
+    const startsWith = /* @__PURE__ */ __name((name, prefixes) => prefixes.some((x2) => name.startsWith(x2) && name.length >
+    x2.length), "startsWith");
     for (const name of names) {
       const bare = list.includes(name);
-      const ok = !bare && prefixes.some((x2) => name.startsWith(x2) && name.length > x2.length);
+      const idName = id !== "" && (name === id || name.startsWith(`${id}-`));
+      const ok = !bare && (startsWith(name, servicePrefixes) || !idName && clanPrefix !== "" && startsWith(name, [clanPrefix]));
       if (!ok) {
         const orPrefix = clanPrefix ? ` or ${clanPrefix}` : "";
         const notId = id ? ` (never the store id ${id})` : "";
@@ -32645,12 +32670,49 @@ approved");
       }
     }
   }, "checkSpecNames");
+  let storeKeys = null;
+  const loadStoreKeys = /* @__PURE__ */ __name(() => {
+    if (storeKeys) {
+      return storeKeys;
+    }
+    storeKeys = /* @__PURE__ */ new Map();
+    let out = "";
+    try {
+      out = git([
+        "grep",
+        "-z",
+        "-I",
+        "-e",
+        "^## ",
+        base,
+        "--",
+        ":(glob)openspec/changes/**/tasks.md"
+      ]);
+    } catch (err) {
+      if (err.status !== 1) {
+        die("git grep failed.");
+      }
+    }
+    for (const entry of out.split("\n")) {
+      const nul = entry.indexOf("\0");
+      const file = entry.slice(0, nul);
+      const heading = entry.slice(nul + 1).trimEnd();
+      if (nul > 0 && file.startsWith(`${base}:`) && isGroupHeading(heading)) {
+        const key = headingKey(heading).toUpperCase();
+        if (key !== "TBD" && !storeKeys.has(key)) {
+          storeKeys.set(key, file.slice(base.length + 1));
+        }
+      }
+    }
+    return storeKeys;
+  }, "loadStoreKeys");
   const checkNewChange = /* @__PURE__ */ __name((change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
     if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, tasksFile))) {
       for (const { line, message } of checkTasks(readWork(tasksFile), {
         draft,
-        maxTasks
+        maxTasks,
+        usedKeys: loadStoreKeys()
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
       }
@@ -32710,16 +32772,27 @@ approved");
     }
     checkChanges(entries);
   }, "checkDiff");
-  const archivedFolder = /* @__PURE__ */ __name((root, change) => {
+  const newArchivedFolders = /* @__PURE__ */ __name((root, change) => {
     const dir = import_node_path2.default.join(root, "openspec/changes/archive");
     if (!import_node_fs.default.existsSync(dir)) {
-      return "";
+      return [];
     }
     const re2 = new RegExp(`^${ARCHIVE_DATE}-${escapeRegExp(change)}$`);
-    const found = import_node_fs.default.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && re2.
-    test(e.name)).map((e) => e.name).sort((a, b2) => a.localeCompare(b2));
-    return found.length > 0 ? `openspec/changes/archive/${found[0]}` : "";
-  }, "archivedFolder");
+    return import_node_fs.default.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && re2.test(e.
+    name)).map((e) => `openspec/changes/archive/${e.name}`).filter((folder) => !gitOk(["cat-file", "-e", `${base}:${folder}`])).
+    sort((x2, y) => x2.localeCompare(y));
+  }, "newArchivedFolders");
+  const oneArchivedFolder = /* @__PURE__ */ __name((root, change, none, side) => {
+    const found = newArchivedFolders(root, change);
+    if (found.length === 1) {
+      return found[0];
+    }
+    fail(
+      branch,
+      found.length === 0 ? none : `${change} has ${found.length} new archived folders ${side}: ${found.join(" ")}`
+    );
+    return "";
+  }, "oneArchivedFolder");
   const tail = /* @__PURE__ */ __name((err) => {
     const out = `${err.stderr ?? ""}${err.stdout ?? ""}`.trim();
     return out ? `
@@ -32750,20 +32823,22 @@ ${out.slice(-1e3)}` : "";
       );
       return null;
     }
-    const a = archivedFolder(cwd, change);
-    const r2 = archivedFolder(t2, change);
+    const a = oneArchivedFolder(
+      cwd,
+      change,
+      `No new archived folder for ${change}.`,
+      "on the branch"
+    );
     if (!a) {
-      fail(branch, `No archived folder for ${change}.`);
       return null;
     }
-    if (!r2) {
-      fail(
-        branch,
-        `openspec archive ${change} on ${base} wrote no archived folder.`
-      );
-      return null;
-    }
-    return { a, r: r2 };
+    const r2 = oneArchivedFolder(
+      t2,
+      change,
+      `openspec archive ${change} on ${base} wrote no archived folder.`,
+      `from openspec archive on ${base}`
+    );
+    return r2 ? { a, r: r2 } : null;
   }, "recomputeArchive");
   const checkArchive = /* @__PURE__ */ __name((change, work2) => {
     if (!approved(change)) {
@@ -32869,10 +32944,7 @@ var readDraft = /* @__PURE__ */ __name(async () => {
   return data.draft === true;
 }, "readDraft");
 var installOpenSpec = /* @__PURE__ */ __name(async () => {
-  const dir = import_node_path3.default.join(
-    process.env.GITHUB_ACTION_PATH ?? process.cwd(),
-    "openspec-cli"
-  );
+  const dir = import_node_path3.default.join(__dirname, "..", "openspec-cli");
   info(`Installing the pinned OpenSpec CLI from ${dir}`);
   (0, import_node_child_process3.execFileSync)(
     await which("npm", true),
@@ -32883,13 +32955,16 @@ var installOpenSpec = /* @__PURE__ */ __name(async () => {
   );
   return [process.execPath, import_node_path3.default.join(dir, OPENSPEC_BIN)];
 }, "installOpenSpec");
-var gitBranch = /* @__PURE__ */ __name((gitBin) => (0, import_node_child_process3.execFileSync)(gitBin, ["branch", "--sh\
-ow-current"], {
+var gitBranch = /* @__PURE__ */ __name((gitBin, cwd) => (0, import_node_child_process3.execFileSync)(gitBin, ["branch", "\
+--show-current"], {
+  cwd,
   encoding: "utf8"
 }).trim(), "gitBranch");
 var action = /* @__PURE__ */ __name(async () => {
-  const cwd = process.cwd();
   const gitBin = await which("git", true);
+  const cwd = (0, import_node_child_process3.execFileSync)(gitBin, ["rev-parse", "--show-toplevel"], {
+    encoding: "utf8"
+  }).trim();
   const baseInput = getInput("base-ref");
   const baseBranch = process.env.GITHUB_BASE_REF;
   const base = baseInput || (baseBranch ? `origin/${baseBranch}` : "");
@@ -32898,7 +32973,7 @@ var action = /* @__PURE__ */ __name(async () => {
       "No base-ref input and no pull request base branch (GITHUB_BASE_REF) to compare with."
     );
   }
-  const branch = getInput("head-ref") || process.env.GITHUB_HEAD_REF || gitBranch(gitBin);
+  const branch = getInput("head-ref") || process.env.GITHUB_HEAD_REF || gitBranch(gitBin, cwd);
   const commandInput = getInput("openspec-command").trim();
   let openspecCommand = [];
   if (commandInput) {
