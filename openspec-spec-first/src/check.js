@@ -14,8 +14,8 @@ const checkKey = (files, key, repo) => {
   const hits = [];
   for (const file of files) {
     for (const line of file.content.split('\n')) {
-      if (/^## [0-9]+\. /.test(line)) {
-        const heading = line.replace(/\s*$/, '');
+      if (/^## \d+\. /.test(line)) {
+        const heading = line.trimEnd();
         if (headingKey(heading).toLowerCase() === wanted) {
           hits.push({ path: file.path, heading });
         }

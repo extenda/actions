@@ -5,16 +5,15 @@
 // then [ ], [x] or [], not followed by ( or [ (a link), except that [ ] followed by ( or [ still counts.
 const BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 const TASK_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*[^\\]\\s]?\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`,
+  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`,
 );
 const UNTICKED_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`,
+  String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`,
 );
 
 // `## <n>. <repo>: <title> (<KEY>)`; <repo> is a bare GitHub repo name, only its shape is checked.
-const GROUP_HEADING_RE =
-  /^## [0-9]+\. [A-Za-z0-9_][A-Za-z0-9._-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
-const JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-[0-9]+$/;
+const GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
+const JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-\d+$/;
 
 const DEFAULT_MAX_TASKS = 6;
 
@@ -138,7 +137,7 @@ const keyFromTitle = (title) => {
     return { status: 'skip' };
   }
   const scope = match[2] ?? '';
-  if (!/^[a-z][a-z0-9]*-[0-9]+$/.test(scope)) {
+  if (!/^[a-z][a-z0-9]*-\d+$/.test(scope)) {
     return { status: 'missing' };
   }
   return { status: 'key', key: scope.toUpperCase() };

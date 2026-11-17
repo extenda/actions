@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import * as io from '@actions/io';
 
 import { runGuard } from './guard.js';
 
@@ -33,14 +34,14 @@ const readDraft = async () => {
 // The OpenSpec CLI and its transitive dependencies come from the committed openspec-cli/package-lock.json of
 // this action (npm ci fails when it and package.json disagree); --ignore-scripts skips install scripts.
 // It runs with the node of this action, which satisfies OpenSpec's node >= 22.12.
-const installOpenSpec = () => {
+const installOpenSpec = async () => {
   const dir = path.join(
     process.env.GITHUB_ACTION_PATH ?? process.cwd(),
     'openspec-cli',
   );
   core.info(`Installing the pinned OpenSpec CLI from ${dir}`);
   execFileSync(
-    'npm',
+    await io.which('npm', true),
     ['ci', '--ignore-scripts', '--no-audit', '--no-fund', '--prefix', dir],
     {
       stdio: 'inherit',
@@ -49,13 +50,14 @@ const installOpenSpec = () => {
   return [process.execPath, path.join(dir, OPENSPEC_BIN)];
 };
 
-const gitBranch = () =>
-  execFileSync('git', ['branch', '--show-current'], {
+const gitBranch = (gitBin) =>
+  execFileSync(gitBin, ['branch', '--show-current'], {
     encoding: 'utf8',
   }).trim();
 
 const action = async () => {
   const cwd = process.cwd();
+  const gitBin = await io.which('git', true);
   const baseInput = core.getInput('base-ref');
   const baseBranch = process.env.GITHUB_BASE_REF;
   const base = baseInput || (baseBranch ? `origin/${baseBranch}` : '');
@@ -65,14 +67,16 @@ const action = async () => {
     );
   }
   const branch =
-    core.getInput('head-ref') || process.env.GITHUB_HEAD_REF || gitBranch();
+    core.getInput('head-ref') ||
+    process.env.GITHUB_HEAD_REF ||
+    gitBranch(gitBin);
 
   const commandInput = core.getInput('openspec-command').trim();
   let openspecCommand = [];
   if (commandInput) {
     openspecCommand = commandInput.split(/\s+/);
   } else if (branch.startsWith(ARCHIVE_PREFIX)) {
-    openspecCommand = installOpenSpec();
+    openspecCommand = await installOpenSpec();
   }
 
   const maxTasks = core.getInput('max-tasks');
@@ -87,6 +91,7 @@ const action = async () => {
     servicesFile: core.getInput('services-file') || undefined,
     servicesHeading: core.getInput('services-heading') || undefined,
     maxTasks: maxTasks ? Number(maxTasks) : undefined,
+    gitBin,
   });
 
   if (skipped) {

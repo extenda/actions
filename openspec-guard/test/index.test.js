@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@actions/core');
+vi.mock('@actions/io');
 vi.mock('../src/guard.js');
 vi.mock('node:child_process');
 
@@ -16,6 +17,7 @@ vi.mock('@actions/github', () => ({
 import { execFileSync } from 'node:child_process';
 
 import * as core from '@actions/core';
+import * as io from '@actions/io';
 
 import action from '../src/index.js';
 import { runGuard } from '../src/guard.js';
@@ -33,6 +35,7 @@ describe('openspec-guard action', () => {
       GITHUB_HEAD_REF: 'feat/x',
       GITHUB_ACTION_PATH: '/actions/openspec-guard',
     };
+    io.which.mockImplementation(async (tool) => `/usr/bin/${tool}`);
     mockGet.mockResolvedValue({ data: { draft: true } });
     runGuard.mockReturnValue({ failures: [], skipped: false });
   });
@@ -63,6 +66,7 @@ describe('openspec-guard action', () => {
         storeId: 'hiiconnect',
         maxTasks: 4,
         servicesFile: undefined,
+        gitBin: '/usr/bin/git',
         openspecCommand: [],
       }),
     );
@@ -116,7 +120,7 @@ describe('openspec-guard action', () => {
     inputs({ draft: 'false' });
     await action();
     expect(execFileSync).toHaveBeenCalledWith(
-      'npm',
+      '/usr/bin/npm',
       [
         'ci',
         '--ignore-scripts',

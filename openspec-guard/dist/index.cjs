@@ -246,8 +246,8 @@ var require_common = __commonJS({
         return debug2;
       }
       __name(createDebug, "createDebug");
-      function extend(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
+      function extend(namespace, delimiter2) {
+        const newDebug = createDebug(this.namespace + (typeof delimiter2 === "undefined" ? ":" : delimiter2) + namespace);
         newDebug.log = this.log;
         return newDebug;
       }
@@ -724,10 +724,10 @@ var require_src2 = __commonJS({
     var fs_1 = require("fs");
     var debug_1 = __importDefault(require_src());
     var log = debug_1.default("@kwsites/file-exists");
-    function check(path3, isFile, isDirectory2) {
-      log(`checking %s`, path3);
+    function check(path5, isFile, isDirectory2) {
+      log(`checking %s`, path5);
       try {
-        const stat2 = fs_1.statSync(path3);
+        const stat2 = fs_1.statSync(path5);
         if (stat2.isFile() && isFile) {
           log(`[OK] path represents a file`);
           return true;
@@ -748,8 +748,8 @@ var require_src2 = __commonJS({
       }
     }
     __name(check, "check");
-    function exists2(path3, type = exports2.READABLE) {
-      return check(path3, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
+    function exists2(path5, type = exports2.READABLE) {
+      return check(path5, (type & exports2.FILE) > 0, (type & exports2.FOLDER) > 0);
     }
     __name(exists2, "exists");
     exports2.exists = exists2;
@@ -1961,14 +1961,14 @@ eger.");
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol || ""}//${url.hostname || ""}:${port}`;
-        let path3 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path5 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path3 && path3[0] !== "/") {
-          path3 = `/${path3}`;
+        if (path5 && path5[0] !== "/") {
+          path5 = `/${path5}`;
         }
-        return new URL(`${origin}${path3}`);
+        return new URL(`${origin}${path5}`);
       }
       if (!isHttpOrHttpsPrefixed(url.origin || url.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -2459,39 +2459,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path3, origin }
+          request: { method, path: path5, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path3);
+        debuglog("sending request to %s %s/%s", method, origin, path5);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path3, origin },
+          request: { method, path: path5, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path3,
+          path5,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path3, origin }
+          request: { method, path: path5, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path3);
+        debuglog("trailers received from %s %s/%s", method, origin, path5);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path3, origin },
+          request: { method, path: path5, origin },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path3,
+          path5,
           error2.message
         );
       });
@@ -2540,9 +2540,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path3, origin }
+            request: { method, path: path5, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path3);
+          debuglog("sending request to %s %s/%s", method, origin, path5);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -2608,7 +2608,7 @@ var require_request = __commonJS({
         __name(this, "Request");
       }
       constructor(origin, {
-        path: path3,
+        path: path5,
         method,
         body,
         headers,
@@ -2623,12 +2623,12 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler2) {
-        if (typeof path3 !== "string") {
+        if (typeof path5 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path3[0] !== "/" && !(path3.startsWith("http://") || path3.startsWith("https://")) && method !== "CON\
+        } else if (path5[0] !== "/" && !(path5.startsWith("http://") || path5.startsWith("https://")) && method !== "CON\
 NECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path3)) {
+        } else if (invalidPathRegex.test(path5)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2695,7 +2695,7 @@ terable");
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL(path3, query) : path3;
+        this.path = query ? buildURL(path5, query) : path5;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -8643,7 +8643,7 @@ var require_client_h1 = __commonJS({
     }
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH1(client, request2) {
-      const { method, path: path3, host, upgrade, blocking, reset } = request2;
+      const { method, path: path5, host, upgrade, blocking, reset } = request2;
       let { body, headers, contentLength } = request2;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method ===
       "PROPFIND" || method === "PROPPATCH";
@@ -8726,7 +8726,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path3} HTTP/1.1\r
+      let header = `${method} ${path5} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -9274,7 +9274,7 @@ var require_client_h2 = __commonJS({
     __name(shouldSendContentLength, "shouldSendContentLength");
     function writeH2(client, request2) {
       const session = client[kHTTP2Session];
-      const { method, path: path3, host, upgrade, expectContinue, signal, headers: reqHeaders } = request2;
+      const { method, path: path5, host, upgrade, expectContinue, signal, headers: reqHeaders } = request2;
       let { body } = request2;
       if (upgrade) {
         util.errorRequest(client, request2, new Error("Upgrade not supported for H2"));
@@ -9371,7 +9371,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path3;
+      headers[HTTP2_HEADER_PATH] = path5;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -9742,9 +9742,9 @@ var require_redirect_handler = __commonJS({
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.
         path, this.opts.origin)));
-        const path3 = search ? `${pathname}${search}` : pathname;
+        const path5 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path3;
+        this.opts.path = path5;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -11039,10 +11039,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path3 = "/",
+          path: path5 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path3;
+        opts.path = origin + path5;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -13090,21 +13090,21 @@ var require_mock_utils = __commonJS({
       return true;
     }
     __name(matchHeaders, "matchHeaders");
-    function safeUrl(path3) {
-      if (typeof path3 !== "string") {
-        return path3;
+    function safeUrl(path5) {
+      if (typeof path5 !== "string") {
+        return path5;
       }
-      const pathSegments = path3.split("?");
+      const pathSegments = path5.split("?");
       if (pathSegments.length !== 2) {
-        return path3;
+        return path5;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
     __name(safeUrl, "safeUrl");
-    function matchKey(mockDispatch2, { path: path3, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path3);
+    function matchKey(mockDispatch2, { path: path5, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path5);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -13128,8 +13128,8 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path3 }) => matchValue(
-      safeUrl(path3), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path5 }) => matchValue(
+      safeUrl(path5), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -13171,9 +13171,9 @@ var require_mock_utils = __commonJS({
     }
     __name(deleteMockDispatch, "deleteMockDispatch");
     function buildKey(opts) {
-      const { path: path3, method, body, headers, query } = opts;
+      const { path: path5, method, body, headers, query } = opts;
       return {
-        path: path3,
+        path: path5,
         method,
         body,
         headers,
@@ -13666,10 +13666,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path3, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path5, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path3,
+            Path: path5,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -14462,10 +14462,10 @@ var require_headers = __commonJS({
         const lowercaseName = isLowerCase ? name : name.toLowerCase();
         const exists2 = this[kHeadersMap].get(lowercaseName);
         if (exists2) {
-          const delimiter = lowercaseName === "cookie" ? "; " : ", ";
+          const delimiter2 = lowercaseName === "cookie" ? "; " : ", ";
           this[kHeadersMap].set(lowercaseName, {
             name: exists2.name,
-            value: `${exists2.value}${delimiter}${value}`
+            value: `${exists2.value}${delimiter2}${value}`
           });
         } else {
           this[kHeadersMap].set(lowercaseName, { name, value });
@@ -18663,9 +18663,9 @@ var require_util6 = __commonJS({
       }
     }
     __name(validateCookieValue, "validateCookieValue");
-    function validateCookiePath(path3) {
-      for (let i = 0; i < path3.length; ++i) {
-        const code = path3.charCodeAt(i);
+    function validateCookiePath(path5) {
+      for (let i = 0; i < path5.length; ++i) {
+        const code = path5.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -21668,11 +21668,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path3 = opts.path;
+          let path5 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path3 = `/${path3}`;
+            path5 = `/${path5}`;
           }
-          url = new URL(util.parseOrigin(url).origin + path3);
+          url = new URL(util.parseOrigin(url).origin + path5);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -24117,7 +24117,7 @@ var require_lib = __commonJS({
         return result;
       };
     })();
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
         return value instanceof P2 ? value : new P2(function(resolve) {
           resolve(value);
@@ -24237,8 +24237,8 @@ var require_lib = __commonJS({
         this.message = message;
       }
       readBody() {
-        return __awaiter3(this, void 0, void 0, function* () {
-          return new Promise((resolve) => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter5(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
@@ -24250,8 +24250,8 @@ var require_lib = __commonJS({
         });
       }
       readBodyBuffer() {
-        return __awaiter3(this, void 0, void 0, function* () {
-          return new Promise((resolve) => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter5(this, void 0, void 0, function* () {
             const chunks = [];
             this.message.on("data", (chunk) => {
               chunks.push(chunk);
@@ -24311,42 +24311,42 @@ var require_lib = __commonJS({
         }
       }
       options(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("OPTIONS", requestUrl, null, additionalHeaders || {});
         });
       }
       get(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("GET", requestUrl, null, additionalHeaders || {});
         });
       }
       del(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("DELETE", requestUrl, null, additionalHeaders || {});
         });
       }
       post(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("POST", requestUrl, data, additionalHeaders || {});
         });
       }
       patch(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("PATCH", requestUrl, data, additionalHeaders || {});
         });
       }
       put(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("PUT", requestUrl, data, additionalHeaders || {});
         });
       }
       head(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("HEAD", requestUrl, null, additionalHeaders || {});
         });
       }
       sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request(verb, requestUrl, stream, additionalHeaders);
         });
       }
@@ -24355,7 +24355,7 @@ var require_lib = __commonJS({
        * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
        */
       getJson(requestUrl_1) {
-        return __awaiter3(this, arguments, void 0, function* (requestUrl, additionalHeaders = {}) {
+        return __awaiter5(this, arguments, void 0, function* (requestUrl, additionalHeaders = {}) {
           additionalHeaders[Headers2.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers2.Accept, MediaTypes2.
           ApplicationJson);
           const res = yield this.get(requestUrl, additionalHeaders);
@@ -24363,7 +24363,7 @@ var require_lib = __commonJS({
         });
       }
       postJson(requestUrl_1, obj_1) {
-        return __awaiter3(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter5(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers2.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers2.Accept, MediaTypes2.
           ApplicationJson);
@@ -24374,7 +24374,7 @@ var require_lib = __commonJS({
         });
       }
       putJson(requestUrl_1, obj_1) {
-        return __awaiter3(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter5(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers2.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers2.Accept, MediaTypes2.
           ApplicationJson);
@@ -24385,7 +24385,7 @@ var require_lib = __commonJS({
         });
       }
       patchJson(requestUrl_1, obj_1) {
-        return __awaiter3(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter5(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers2.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers2.Accept, MediaTypes2.
           ApplicationJson);
@@ -24401,7 +24401,7 @@ var require_lib = __commonJS({
        * Prefer get, del, post and patch
        */
       request(verb, requestUrl, data, headers) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           if (this._disposed) {
             throw new Error("Client has already been disposed.");
           }
@@ -24477,7 +24477,7 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
        * @param data
        */
       requestRaw(info2, data) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
               if (err) {
@@ -24729,15 +24729,15 @@ s. If you want to allow this behavior, set the allowRedirectDowngrade option to 
         return baseUserAgent;
       }
       _performExponentialBackoff(retryNumber) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms2 = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
           return new Promise((resolve) => setTimeout(() => resolve(), ms2));
         });
       }
       _processResponse(res, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject) => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => __awaiter5(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -28254,11 +28254,233 @@ var _summary = new Summary();
 // node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
 
+// node_modules/@actions/io/lib/io.js
+var path2 = __toESM(require("path"), 1);
+
 // node_modules/@actions/io/lib/io-util.js
 var fs2 = __toESM(require("fs"), 1);
+var path = __toESM(require("path"), 1);
+var __awaiter2 = function(thisArg, _arguments, P2, generator) {
+  function adopt(value) {
+    return value instanceof P2 ? value : new P2(function(resolve) {
+      resolve(value);
+    });
+  }
+  __name(adopt, "adopt");
+  return new (P2 || (P2 = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(fulfilled, "fulfilled");
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(rejected, "rejected");
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    __name(step, "step");
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
 var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
 var IS_WINDOWS = process.platform === "win32";
 var READONLY = fs2.constants.O_RDONLY;
+function isRooted(p2) {
+  p2 = normalizeSeparators(p2);
+  if (!p2) {
+    throw new Error('isRooted() parameter "p" cannot be empty');
+  }
+  if (IS_WINDOWS) {
+    return p2.startsWith("\\") || /^[A-Z]:/i.test(p2);
+  }
+  return p2.startsWith("/");
+}
+__name(isRooted, "isRooted");
+function tryGetExecutablePath(filePath, extensions) {
+  return __awaiter2(this, void 0, void 0, function* () {
+    let stats = void 0;
+    try {
+      stats = yield stat(filePath);
+    } catch (err) {
+      if (err.code !== "ENOENT") {
+        console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+      }
+    }
+    if (stats && stats.isFile()) {
+      if (IS_WINDOWS) {
+        const upperExt = path.extname(filePath).toUpperCase();
+        if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
+          return filePath;
+        }
+      } else {
+        if (isUnixExecutable(stats)) {
+          return filePath;
+        }
+      }
+    }
+    const originalFilePath = filePath;
+    for (const extension of extensions) {
+      filePath = originalFilePath + extension;
+      stats = void 0;
+      try {
+        stats = yield stat(filePath);
+      } catch (err) {
+        if (err.code !== "ENOENT") {
+          console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+        }
+      }
+      if (stats && stats.isFile()) {
+        if (IS_WINDOWS) {
+          try {
+            const directory = path.dirname(filePath);
+            const upperName = path.basename(filePath).toUpperCase();
+            for (const actualName of yield readdir(directory)) {
+              if (upperName === actualName.toUpperCase()) {
+                filePath = path.join(directory, actualName);
+                break;
+              }
+            }
+          } catch (err) {
+            console.log(`Unexpected error attempting to determine the actual case of the file '${filePath}': ${err}`);
+          }
+          return filePath;
+        } else {
+          if (isUnixExecutable(stats)) {
+            return filePath;
+          }
+        }
+      }
+    }
+    return "";
+  });
+}
+__name(tryGetExecutablePath, "tryGetExecutablePath");
+function normalizeSeparators(p2) {
+  p2 = p2 || "";
+  if (IS_WINDOWS) {
+    p2 = p2.replace(/\//g, "\\");
+    return p2.replace(/\\\\+/g, "\\");
+  }
+  return p2.replace(/\/\/+/g, "/");
+}
+__name(normalizeSeparators, "normalizeSeparators");
+function isUnixExecutable(stats) {
+  return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && process.getgid !== void 0 && stats.gid === process.getgid() || (stats.
+  mode & 64) > 0 && process.getuid !== void 0 && stats.uid === process.getuid();
+}
+__name(isUnixExecutable, "isUnixExecutable");
+
+// node_modules/@actions/io/lib/io.js
+var __awaiter3 = function(thisArg, _arguments, P2, generator) {
+  function adopt(value) {
+    return value instanceof P2 ? value : new P2(function(resolve) {
+      resolve(value);
+    });
+  }
+  __name(adopt, "adopt");
+  return new (P2 || (P2 = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(fulfilled, "fulfilled");
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(rejected, "rejected");
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    __name(step, "step");
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+function which(tool, check) {
+  return __awaiter3(this, void 0, void 0, function* () {
+    if (!tool) {
+      throw new Error("parameter 'tool' is required");
+    }
+    if (check) {
+      const result = yield which(tool, false);
+      if (!result) {
+        if (IS_WINDOWS) {
+          throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the f\
+ile can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extensi\
+on for an executable file.`);
+        } else {
+          throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the f\
+ile can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the f\
+ile is executable.`);
+        }
+      }
+      return result;
+    }
+    const matches = yield findInPath(tool);
+    if (matches && matches.length > 0) {
+      return matches[0];
+    }
+    return "";
+  });
+}
+__name(which, "which");
+function findInPath(tool) {
+  return __awaiter3(this, void 0, void 0, function* () {
+    if (!tool) {
+      throw new Error("parameter 'tool' is required");
+    }
+    const extensions = [];
+    if (IS_WINDOWS && process.env["PATHEXT"]) {
+      for (const extension of process.env["PATHEXT"].split(path2.delimiter)) {
+        if (extension) {
+          extensions.push(extension);
+        }
+      }
+    }
+    if (isRooted(tool)) {
+      const filePath = yield tryGetExecutablePath(tool, extensions);
+      if (filePath) {
+        return [filePath];
+      }
+      return [];
+    }
+    if (tool.includes(path2.sep)) {
+      return [];
+    }
+    const directories = [];
+    if (process.env.PATH) {
+      for (const p2 of process.env.PATH.split(path2.delimiter)) {
+        if (p2) {
+          directories.push(p2);
+        }
+      }
+    }
+    const matches = [];
+    for (const directory of directories) {
+      const filePath = yield tryGetExecutablePath(path2.join(directory, tool), extensions);
+      if (filePath) {
+        matches.push(filePath);
+      }
+    }
+    return matches;
+  });
+}
+__name(findInPath, "findInPath");
 
 // node_modules/@actions/exec/lib/toolrunner.js
 var IS_WINDOWS2 = process.platform === "win32";
@@ -28337,8 +28559,8 @@ var Context = class {
       if ((0, import_fs2.existsSync)(process.env.GITHUB_EVENT_PATH)) {
         this.payload = JSON.parse((0, import_fs2.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
       } else {
-        const path3 = process.env.GITHUB_EVENT_PATH;
-        process.stdout.write(`GITHUB_EVENT_PATH ${path3} does not exist${import_os3.EOL}`);
+        const path5 = process.env.GITHUB_EVENT_PATH;
+        process.stdout.write(`GITHUB_EVENT_PATH ${path5} does not exist${import_os3.EOL}`);
       }
     }
     this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -28378,7 +28600,7 @@ phql`;
 // node_modules/@actions/github/lib/internal/utils.js
 var httpClient = __toESM(require_lib(), 1);
 var import_undici2 = __toESM(require_undici(), 1);
-var __awaiter2 = function(thisArg, _arguments, P2, generator) {
+var __awaiter4 = function(thisArg, _arguments, P2, generator) {
   function adopt(value) {
     return value instanceof P2 ? value : new P2(function(resolve) {
       resolve(value);
@@ -28430,7 +28652,7 @@ function getProxyAgentDispatcher(destinationUrl) {
 __name(getProxyAgentDispatcher, "getProxyAgentDispatcher");
 function getProxyFetch(destinationUrl) {
   const httpDispatcher = getProxyAgentDispatcher(destinationUrl);
-  const proxyFetch = /* @__PURE__ */ __name((url, opts) => __awaiter2(this, void 0, void 0, function* () {
+  const proxyFetch = /* @__PURE__ */ __name((url, opts) => __awaiter4(this, void 0, void 0, function* () {
     return (0, import_undici2.fetch)(url, Object.assign(Object.assign({}, opts), { dispatcher: httpDispatcher }));
   }), "proxyFetch");
   return proxyFetch;
@@ -29352,8 +29574,8 @@ __name(withCustomRequest, "withCustomRequest");
 
 // node_modules/@octokit/auth-token/dist-bundle/index.js
 var b64url = "(?:[a-zA-Z0-9_-]+)";
-var sep = "\\.";
-var jwtRE = new RegExp(`^${b64url}${sep}${b64url}${sep}${b64url}$`);
+var sep2 = "\\.";
+var jwtRE = new RegExp(`^${b64url}${sep2}${b64url}${sep2}${b64url}$`);
 var isJWT = jwtRE.test.bind(jwtRE);
 async function auth(token) {
   const isApp = isJWT(token);
@@ -32155,13 +32377,13 @@ var import_node_path2 = __toESM(require("node:path"), 1);
 // openspec-guard/src/tasks-md.js
 var BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 var TASK_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*[^\\]\\s]?\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`
+  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`
 );
 var UNTICKED_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`
+  String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
-var GROUP_HEADING_RE = /^## [0-9]+\. [A-Za-z0-9_][A-Za-z0-9._-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
-var JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-[0-9]+$/;
+var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
+var JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-\d+$/;
 var DEFAULT_MAX_TASKS = 6;
 var isTask = /* @__PURE__ */ __name((line) => TASK_RE.test(line), "isTask");
 var isUnticked = /* @__PURE__ */ __name((line) => UNTICKED_RE.test(line), "isUnticked");
@@ -32274,7 +32496,8 @@ var runGuard = /* @__PURE__ */ __name(({
   clanPrefix = "",
   servicesFile = ".agent/discovered.md",
   servicesHeading = "Other services in this clan",
-  maxTasks = DEFAULT_MAX_TASKS
+  maxTasks = DEFAULT_MAX_TASKS,
+  gitBin = "git"
 }) => {
   const failures = [];
   const fail = /* @__PURE__ */ __name((file, message) => failures.push({ file, message }), "fail");
@@ -32285,7 +32508,7 @@ var runGuard = /* @__PURE__ */ __name(({
     stdio: ["ignore", "pipe", "pipe"],
     ...opts
   }), "run");
-  const git = /* @__PURE__ */ __name((args, opts) => run2("git", ["-c", "core.quotePath=false", ...args], opts), "git");
+  const git = /* @__PURE__ */ __name((args, opts) => run2(gitBin, ["-c", "core.quotePath=false", ...args], opts), "git");
   const gitOrDie = /* @__PURE__ */ __name((args, opts) => {
     try {
       return git(args, opts);
@@ -32394,58 +32617,55 @@ approved");
       return storeId;
     }
     const text = gitShow(`${base}:.openspec-store/store.yaml`) ?? "";
-    const m2 = /^id: *(.*)$/m.exec(text);
-    return m2 ? m2[1].trim() : "";
+    const line = text.split("\n").find((l3) => l3.startsWith("id:"));
+    return line ? line.slice("id:".length).trim() : "";
   }, "resolveStoreId");
   const checkSpecNames = /* @__PURE__ */ __name((dir) => {
     const list = loadServices();
     const id = resolveStoreId();
     const names = import_node_fs.default.readdirSync(import_node_path2.default.join(cwd, dir), { withFileTypes: true }).
-    filter((e) => e.isDirectory()).map((e) => e.name).sort();
+    filter((e) => e.isDirectory()).map((e) => e.name).sort((a, b2) => a.localeCompare(b2));
     for (const name of names) {
       const bare = list.includes(name);
       const ok = !bare && (clanPrefix && name.startsWith(clanPrefix) && name.length > clanPrefix.length || list.some(
         (s) => name.startsWith(`${s}-`) && name.length > s.length + 1
       ));
       if (!ok) {
+        const orPrefix = clanPrefix ? ` or ${clanPrefix}` : "";
+        const notId = id ? ` (never the store id ${id})` : "";
         fail(
           `${dir}/${name}`,
-          `Spec name must start with a service of this clan${clanPrefix ? ` or ${clanPrefix}` : ""}${id ? ` (never the s\
-tore id ${id})` : ""}.`
+          `Spec name must start with a service of this clan${orPrefix}${notId}.`
         );
       }
     }
   }, "checkSpecNames");
+  const checkNewChange = /* @__PURE__ */ __name((change) => {
+    const tasksFile = `openspec/changes/${change}/tasks.md`;
+    if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, tasksFile))) {
+      for (const { line, message } of checkTasks(readWork(tasksFile), {
+        draft,
+        maxTasks
+      })) {
+        fail(tasksFile, line ? `${line}: ${message}` : message);
+      }
+    }
+    const specs = `openspec/changes/${change}/specs`;
+    const specsPath = import_node_path2.default.join(cwd, specs);
+    if (import_node_fs.default.existsSync(specsPath) && import_node_fs.default.statSync(specsPath).isDirectory()) {
+      checkSpecNames(specs);
+    }
+  }, "checkNewChange");
   const checkChanges = /* @__PURE__ */ __name((entries) => {
-    const seen = /* @__PURE__ */ new Set();
+    const changes = /* @__PURE__ */ new Set();
     for (const [, p2] of entries) {
-      if (p2.startsWith("openspec/changes/archive/") || !/^openspec\/changes\/[^/]+\/./.test(p2)) {
-        continue;
+      if (!p2.startsWith("openspec/changes/archive/") && /^openspec\/changes\/[^/]+\/./.test(p2)) {
+        changes.add(p2.slice("openspec/changes/".length).split("/")[0]);
       }
-      const change = p2.slice("openspec/changes/".length).split("/")[0];
-      if (seen.has(change)) {
-        continue;
-      }
-      seen.add(change);
-      if (approved(change)) {
-        continue;
-      }
-      const tasksFile = `openspec/changes/${change}/tasks.md`;
-      if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, tasksFile))) {
-        for (const problem of checkTasks(readWork(tasksFile), {
-          draft,
-          maxTasks
-        })) {
-          fail(
-            tasksFile,
-            problem.line ? `${problem.line}: ${problem.message}` : problem.message
-          );
-        }
-      }
-      const specs = `openspec/changes/${change}/specs`;
-      if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, specs)) && import_node_fs.default.statSync(
-      import_node_path2.default.join(cwd, specs)).isDirectory()) {
-        checkSpecNames(specs);
+    }
+    for (const change of changes) {
+      if (!approved(change)) {
+        checkNewChange(change);
       }
     }
   }, "checkChanges");
@@ -32492,7 +32712,7 @@ tore id ${id})` : ""}.`
     }
     const re2 = new RegExp(`^${ARCHIVE_DATE}-${escapeRegExp(change)}$`);
     const found = import_node_fs.default.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && re2.
-    test(e.name)).map((e) => e.name).sort();
+    test(e.name)).map((e) => e.name).sort((a, b2) => a.localeCompare(b2));
     return found.length > 0 ? `openspec/changes/archive/${found[0]}` : "";
   }, "archivedFolder");
   const tail = /* @__PURE__ */ __name((err) => {
@@ -32500,6 +32720,46 @@ tore id ${id})` : ""}.`
     return out ? `
 ${out.slice(-1e3)}` : "";
   }, "tail");
+  const recomputeArchive = /* @__PURE__ */ __name((change, t2) => {
+    const [cmd, ...args] = openspecCommand;
+    try {
+      run2(cmd, [...args, "archive", change, "--yes"], { cwd: t2 });
+      run2(cmd, [...args, "validate", "--specs"], { cwd: t2 });
+    } catch (err) {
+      fail(branch, `openspec archive ${change} fails on ${base}.${tail(err)}`);
+      return null;
+    }
+    let ignored;
+    try {
+      ignored = git(
+        ["ls-files", "-o", "-i", "--exclude-standard", "--", ...OPENSPEC_DIRS],
+        { cwd: t2 }
+      ).split("\n").filter(Boolean);
+    } catch {
+      return die("Cannot list ignored files.");
+    }
+    if (ignored.length > 0) {
+      fail(
+        branch,
+        `openspec archive ${change} wrote files that .gitignore hides, so they cannot be compared: ${ignored.join(" ")}`
+      );
+      return null;
+    }
+    const a = archivedFolder(cwd, change);
+    const r2 = archivedFolder(t2, change);
+    if (!a) {
+      fail(branch, `No archived folder for ${change}.`);
+      return null;
+    }
+    if (!r2) {
+      fail(
+        branch,
+        `openspec archive ${change} on ${base} wrote no archived folder.`
+      );
+      return null;
+    }
+    return { a, r: r2 };
+  }, "recomputeArchive");
   const checkArchive = /* @__PURE__ */ __name((change, work2) => {
     if (!approved(change)) {
       fail(branch, `${change} is not an open change on ${base}.`);
@@ -32516,53 +32776,11 @@ ${out.slice(-1e3)}` : "";
       return;
     }
     try {
-      const [cmd, ...args] = openspecCommand;
-      try {
-        run2(cmd, [...args, "archive", change, "--yes"], { cwd: t2 });
-        run2(cmd, [...args, "validate", "--specs"], { cwd: t2 });
-      } catch (err) {
-        fail(
-          branch,
-          `openspec archive ${change} fails on ${base}.${tail(err)}`
-        );
+      const folders = recomputeArchive(change, t2);
+      if (!folders) {
         return;
       }
-      let ignored;
-      try {
-        ignored = git(
-          [
-            "ls-files",
-            "-o",
-            "-i",
-            "--exclude-standard",
-            "--",
-            ...OPENSPEC_DIRS
-          ],
-          { cwd: t2 }
-        ).split("\n").filter(Boolean);
-      } catch {
-        die("Cannot list ignored files.");
-      }
-      if (ignored.length > 0) {
-        fail(
-          branch,
-          `openspec archive ${change} wrote files that .gitignore hides, so they cannot be compared: ${ignored.join(" ")}`
-        );
-        return;
-      }
-      const a = archivedFolder(cwd, change);
-      const r2 = archivedFolder(t2, change);
-      if (!a) {
-        fail(branch, `No archived folder for ${change}.`);
-        return;
-      }
-      if (!r2) {
-        fail(
-          branch,
-          `openspec archive ${change} on ${base} wrote no archived folder.`
-        );
-        return;
-      }
+      const { a, r: r2 } = folders;
       if (a !== r2) {
         import_node_fs.default.renameSync(import_node_path2.default.join(t2, r2), import_node_path2.default.join(t2, a));
       }
@@ -32573,12 +32791,8 @@ ${out.slice(-1e3)}` : "";
       } catch {
         die("Cannot snapshot the archived base.");
       }
-      for (const [st2, p2] of nameStatus([
-        tree,
-        "HEAD",
-        "--",
-        ...OPENSPEC_DIRS
-      ])) {
+      const diff = nameStatus([tree, "HEAD", "--", ...OPENSPEC_DIRS]);
+      for (const [st2, p2] of diff) {
         const same = st2 === "M" && p2 === `${a}/tasks.md` && ticksOnly(
           gitOrDie(["show", `${tree}:${p2}`]),
           gitOrDie(["show", `HEAD:${p2}`])
@@ -32649,14 +32863,14 @@ var readDraft = /* @__PURE__ */ __name(async () => {
   });
   return data.draft === true;
 }, "readDraft");
-var installOpenSpec = /* @__PURE__ */ __name(() => {
+var installOpenSpec = /* @__PURE__ */ __name(async () => {
   const dir = import_node_path3.default.join(
     process.env.GITHUB_ACTION_PATH ?? process.cwd(),
     "openspec-cli"
   );
   info(`Installing the pinned OpenSpec CLI from ${dir}`);
   (0, import_node_child_process3.execFileSync)(
-    "npm",
+    await which("npm", true),
     ["ci", "--ignore-scripts", "--no-audit", "--no-fund", "--prefix", dir],
     {
       stdio: "inherit"
@@ -32664,12 +32878,13 @@ var installOpenSpec = /* @__PURE__ */ __name(() => {
   );
   return [process.execPath, import_node_path3.default.join(dir, OPENSPEC_BIN)];
 }, "installOpenSpec");
-var gitBranch = /* @__PURE__ */ __name(() => (0, import_node_child_process3.execFileSync)("git", ["branch", "--show-curr\
-ent"], {
+var gitBranch = /* @__PURE__ */ __name((gitBin) => (0, import_node_child_process3.execFileSync)(gitBin, ["branch", "--sh\
+ow-current"], {
   encoding: "utf8"
 }).trim(), "gitBranch");
 var action = /* @__PURE__ */ __name(async () => {
   const cwd = process.cwd();
+  const gitBin = await which("git", true);
   const baseInput = getInput("base-ref");
   const baseBranch = process.env.GITHUB_BASE_REF;
   const base = baseInput || (baseBranch ? `origin/${baseBranch}` : "");
@@ -32678,13 +32893,13 @@ var action = /* @__PURE__ */ __name(async () => {
       "No base-ref input and no pull request base branch (GITHUB_BASE_REF) to compare with."
     );
   }
-  const branch = getInput("head-ref") || process.env.GITHUB_HEAD_REF || gitBranch();
+  const branch = getInput("head-ref") || process.env.GITHUB_HEAD_REF || gitBranch(gitBin);
   const commandInput = getInput("openspec-command").trim();
   let openspecCommand = [];
   if (commandInput) {
     openspecCommand = commandInput.split(/\s+/);
   } else if (branch.startsWith(ARCHIVE_PREFIX)) {
-    openspecCommand = installOpenSpec();
+    openspecCommand = await installOpenSpec();
   }
   const maxTasks = getInput("max-tasks");
   const { failures, skipped } = runGuard({
@@ -32697,7 +32912,8 @@ var action = /* @__PURE__ */ __name(async () => {
     clanPrefix: getInput("clan-prefix"),
     servicesFile: getInput("services-file") || void 0,
     servicesHeading: getInput("services-heading") || void 0,
-    maxTasks: maxTasks ? Number(maxTasks) : void 0
+    maxTasks: maxTasks ? Number(maxTasks) : void 0,
+    gitBin
   });
   if (skipped) {
     info("Nothing under openspec/ or .openspec-store/ changed.");

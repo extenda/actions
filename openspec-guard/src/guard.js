@@ -43,6 +43,7 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
  * @param {string} [options.servicesFile] the clan service list on the base
  * @param {string} [options.servicesHeading] the heading of the bullets in servicesFile that list the services
  * @param {number} [options.maxTasks] tasks per group
+ * @param {string} [options.gitBin] the git executable, default git from the PATH
  * @returns {{failures: {file: string, message: string}[], skipped: boolean}}
  */
 const runGuard = ({
@@ -56,6 +57,7 @@ const runGuard = ({
   servicesFile = '.agent/discovered.md',
   servicesHeading = 'Other services in this clan',
   maxTasks = DEFAULT_MAX_TASKS,
+  gitBin = 'git',
 }) => {
   const failures = [];
   const fail = (file, message) => failures.push({ file, message });
@@ -69,7 +71,7 @@ const runGuard = ({
       ...opts,
     });
   const git = (args, opts) =>
-    run('git', ['-c', 'core.quotePath=false', ...args], opts);
+    run(gitBin, ['-c', 'core.quotePath=false', ...args], opts);
   const gitOrDie = (args, opts) => {
     try {
       return git(args, opts);
@@ -196,8 +198,8 @@ const runGuard = ({
       return storeId;
     }
     const text = gitShow(`${base}:.openspec-store/store.yaml`) ?? '';
-    const m = /^id: *(.*)$/m.exec(text);
-    return m ? m[1].trim() : '';
+    const line = text.split('\n').find((l) => l.startsWith('id:'));
+    return line ? line.slice('id:'.length).trim() : '';
   };
 
   // Capability folders of an unapproved change start with a service of the clan or the clan prefix; the store
@@ -209,7 +211,7 @@ const runGuard = ({
       .readdirSync(path.join(cwd, dir), { withFileTypes: true })
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
-      .sort();
+      .sort((a, b) => a.localeCompare(b));
     for (const name of names) {
       const bare = list.includes(name); // a bare service name is not a capability name
       const ok =
@@ -221,52 +223,48 @@ const runGuard = ({
             (s) => name.startsWith(`${s}-`) && name.length > s.length + 1,
           ));
       if (!ok) {
+        const orPrefix = clanPrefix ? ` or ${clanPrefix}` : '';
+        const notId = id ? ` (never the store id ${id})` : '';
         fail(
           `${dir}/${name}`,
-          `Spec name must start with a service of this clan${clanPrefix ? ` or ${clanPrefix}` : ''}${id ? ` (never the store id ${id})` : ''}.`,
+          `Spec name must start with a service of this clan${orPrefix}${notId}.`,
         );
       }
     }
   };
 
+  // tasks.md and spec names of a change that is not on the base yet.
+  const checkNewChange = (change) => {
+    const tasksFile = `openspec/changes/${change}/tasks.md`;
+    if (fs.existsSync(path.join(cwd, tasksFile))) {
+      for (const { line, message } of checkTasks(readWork(tasksFile), {
+        draft,
+        maxTasks,
+      })) {
+        fail(tasksFile, line ? `${line}: ${message}` : message);
+      }
+    }
+    const specs = `openspec/changes/${change}/specs`;
+    const specsPath = path.join(cwd, specs);
+    if (fs.existsSync(specsPath) && fs.statSync(specsPath).isDirectory()) {
+      checkSpecNames(specs);
+    }
+  };
+
   // Changed changes that are not on the base yet get the tasks.md and spec name checks.
   const checkChanges = (entries) => {
-    const seen = new Set();
+    const changes = new Set();
     for (const [, p] of entries) {
       if (
-        p.startsWith('openspec/changes/archive/') ||
-        !/^openspec\/changes\/[^/]+\/./.test(p)
+        !p.startsWith('openspec/changes/archive/') &&
+        /^openspec\/changes\/[^/]+\/./.test(p)
       ) {
-        continue;
+        changes.add(p.slice('openspec/changes/'.length).split('/')[0]);
       }
-      const change = p.slice('openspec/changes/'.length).split('/')[0];
-      if (seen.has(change)) {
-        continue;
-      }
-      seen.add(change);
-      if (approved(change)) {
-        continue;
-      }
-      const tasksFile = `openspec/changes/${change}/tasks.md`;
-      if (fs.existsSync(path.join(cwd, tasksFile))) {
-        for (const problem of checkTasks(readWork(tasksFile), {
-          draft,
-          maxTasks,
-        })) {
-          fail(
-            tasksFile,
-            problem.line
-              ? `${problem.line}: ${problem.message}`
-              : problem.message,
-          );
-        }
-      }
-      const specs = `openspec/changes/${change}/specs`;
-      if (
-        fs.existsSync(path.join(cwd, specs)) &&
-        fs.statSync(path.join(cwd, specs)).isDirectory()
-      ) {
-        checkSpecNames(specs);
+    }
+    for (const change of changes) {
+      if (!approved(change)) {
+        checkNewChange(change);
       }
     }
   };
@@ -323,13 +321,58 @@ const runGuard = ({
       .readdirSync(dir, { withFileTypes: true })
       .filter((e) => e.isDirectory() && re.test(e.name))
       .map((e) => e.name)
-      .sort();
+      .sort((a, b) => a.localeCompare(b));
     return found.length > 0 ? `openspec/changes/archive/${found[0]}` : '';
   };
 
   const tail = (err) => {
     const out = `${err.stderr ?? ''}${err.stdout ?? ''}`.trim();
     return out ? `\n${out.slice(-1000)}` : '';
+  };
+
+  // Runs `openspec archive <change>` in the worktree t of the base. Returns the archived folders of the branch
+  // and of the base, or null after a failure.
+  const recomputeArchive = (change, t) => {
+    const [cmd, ...args] = openspecCommand;
+    try {
+      run(cmd, [...args, 'archive', change, '--yes'], { cwd: t });
+      run(cmd, [...args, 'validate', '--specs'], { cwd: t });
+    } catch (err) {
+      fail(branch, `openspec archive ${change} fails on ${base}.${tail(err)}`);
+      return null;
+    }
+    let ignored;
+    try {
+      ignored = git(
+        ['ls-files', '-o', '-i', '--exclude-standard', '--', ...OPENSPEC_DIRS],
+        { cwd: t },
+      )
+        .split('\n')
+        .filter(Boolean);
+    } catch {
+      return die('Cannot list ignored files.');
+    }
+    if (ignored.length > 0) {
+      fail(
+        branch,
+        `openspec archive ${change} wrote files that .gitignore hides, so they cannot be compared: ${ignored.join(' ')}`,
+      );
+      return null;
+    }
+    const a = archivedFolder(cwd, change);
+    const r = archivedFolder(t, change);
+    if (!a) {
+      fail(branch, `No archived folder for ${change}.`);
+      return null;
+    }
+    if (!r) {
+      fail(
+        branch,
+        `openspec archive ${change} on ${base} wrote no archived folder.`,
+      );
+      return null;
+    }
+    return { a, r };
   };
 
   // Re-runs `openspec archive <change>` on the base and requires the branch to match it.
@@ -349,55 +392,11 @@ const runGuard = ({
       return;
     }
     try {
-      const [cmd, ...args] = openspecCommand;
-      try {
-        run(cmd, [...args, 'archive', change, '--yes'], { cwd: t });
-        run(cmd, [...args, 'validate', '--specs'], { cwd: t });
-      } catch (err) {
-        fail(
-          branch,
-          `openspec archive ${change} fails on ${base}.${tail(err)}`,
-        );
+      const folders = recomputeArchive(change, t);
+      if (!folders) {
         return;
       }
-      let ignored;
-      try {
-        ignored = git(
-          [
-            'ls-files',
-            '-o',
-            '-i',
-            '--exclude-standard',
-            '--',
-            ...OPENSPEC_DIRS,
-          ],
-          { cwd: t },
-        )
-          .split('\n')
-          .filter(Boolean);
-      } catch {
-        die('Cannot list ignored files.');
-      }
-      if (ignored.length > 0) {
-        fail(
-          branch,
-          `openspec archive ${change} wrote files that .gitignore hides, so they cannot be compared: ${ignored.join(' ')}`,
-        );
-        return;
-      }
-      const a = archivedFolder(cwd, change);
-      const r = archivedFolder(t, change);
-      if (!a) {
-        fail(branch, `No archived folder for ${change}.`);
-        return;
-      }
-      if (!r) {
-        fail(
-          branch,
-          `openspec archive ${change} on ${base} wrote no archived folder.`,
-        );
-        return;
-      }
+      const { a, r } = folders;
       if (a !== r) {
         fs.renameSync(path.join(t, r), path.join(t, a)); // the archive date may differ
       }
@@ -408,12 +407,8 @@ const runGuard = ({
       } catch {
         die('Cannot snapshot the archived base.');
       }
-      for (const [st, p] of nameStatus([
-        tree,
-        'HEAD',
-        '--',
-        ...OPENSPEC_DIRS,
-      ])) {
+      const diff = nameStatus([tree, 'HEAD', '--', ...OPENSPEC_DIRS]);
+      for (const [st, p] of diff) {
         const same =
           st === 'M' &&
           p === `${a}/tasks.md` &&

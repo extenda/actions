@@ -1,19 +1,21 @@
 const CHANGES = 'openspec/changes/';
 const CONCURRENCY = 10;
 
+// Runs fn on the items in batches of limit; the results keep the order of the items.
 const mapLimit = async (items, limit, fn) => {
-  const results = new Array(items.length);
-  let next = 0;
-  const worker = async () => {
-    while (next < items.length) {
-      const i = next;
-      next += 1;
-      results[i] = await fn(items[i]);
-    }
-  };
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, worker),
-  );
+  const batches = [];
+  for (let i = 0; i < items.length; i += limit) {
+    batches.push(items.slice(i, i + limit));
+  }
+  const results = [];
+  let previous = Promise.resolve();
+  const runs = batches.map((batch) => {
+    previous = previous.then(() => Promise.all(batch.map(fn)));
+    return previous;
+  });
+  for (const run of runs) {
+    results.push(...(await run));
+  }
   return results;
 };
 

@@ -32188,10 +32188,10 @@ __name(getOctokit, "getOctokit");
 // openspec-guard/src/tasks-md.js
 var BULLET = String.raw`^\s*(?:[-*+]|\d+[.)])\s*`;
 var TASK_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*[^\\]\\s]?\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`
+  String.raw`${BULLET}(?:\[\s*[^\]\s]?\s*\](?:[^(\[]|$)|\[\s+\])`
 );
 var UNTICKED_RE = new RegExp(
-  `${BULLET}(?:\\[\\s*\\](?:[^(\\[]|$)|\\[\\s+\\])`
+  String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
 var headingKey = /* @__PURE__ */ __name((heading) => heading.replace(/\s*$/, "").replace(/^.*\(/, "").replace(/\)$/, ""),
 "headingKey");
@@ -32204,7 +32204,7 @@ var keyFromTitle = /* @__PURE__ */ __name((title) => {
     return { status: "skip" };
   }
   const scope = match[2] ?? "";
-  if (!/^[a-z][a-z0-9]*-[0-9]+$/.test(scope)) {
+  if (!/^[a-z][a-z0-9]*-\d+$/.test(scope)) {
     return { status: "missing" };
   }
   return { status: "key", key: scope.toUpperCase() };
@@ -32217,8 +32217,8 @@ var checkKey = /* @__PURE__ */ __name((files, key, repo) => {
   const hits = [];
   for (const file of files) {
     for (const line of file.content.split("\n")) {
-      if (/^## [0-9]+\. /.test(line)) {
-        const heading = line.replace(/\s*$/, "");
+      if (/^## \d+\. /.test(line)) {
+        const heading = line.trimEnd();
         if (headingKey(heading).toLowerCase() === wanted) {
           hits.push({ path: file.path, heading });
         }
@@ -32263,18 +32263,19 @@ var checkKey = /* @__PURE__ */ __name((files, key, repo) => {
 var CHANGES = "openspec/changes/";
 var CONCURRENCY = 10;
 var mapLimit = /* @__PURE__ */ __name(async (items, limit, fn2) => {
-  const results = new Array(items.length);
-  let next = 0;
-  const worker = /* @__PURE__ */ __name(async () => {
-    while (next < items.length) {
-      const i = next;
-      next += 1;
-      results[i] = await fn2(items[i]);
-    }
-  }, "worker");
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, worker)
-  );
+  const batches = [];
+  for (let i = 0; i < items.length; i += limit) {
+    batches.push(items.slice(i, i + limit));
+  }
+  const results = [];
+  let previous = Promise.resolve();
+  const runs = batches.map((batch) => {
+    previous = previous.then(() => Promise.all(batch.map(fn2)));
+    return previous;
+  });
+  for (const run2 of runs) {
+    results.push(...await run2);
+  }
   return results;
 }, "mapLimit");
 var loadTasksFiles = /* @__PURE__ */ __name(async (octokit, storeRepo, ref) => {
