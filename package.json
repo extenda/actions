@@ -29,6 +29,8 @@
     "maven",
     "nexus-auth-npm",
     "opa-policy-test",
+    "openspec-guard",
+    "openspec-spec-first",
     "publish-openapi",
     "repository-dispatch",
     "rs-create-installerpkg",

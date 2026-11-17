@@ -1,0 +1,57 @@
+name: OpenSpec guard
+description: >-
+  Keeps approved OpenSpec changes in an OpenSpec store approved: merged changes are frozen, tasks.md may only get
+  ticks, archives must equal `openspec archive` run on the base, and new changes follow the group and spec name rules.
+author: Extenda Retail
+inputs:
+  base-ref:
+    description: |
+      The base ref to compare with, e.g. origin/master. The checkout needs fetch-depth: 0.
+      Default is origin/<the pull request base branch>.
+    required: false
+  head-ref:
+    description: |
+      The head branch of the pull request. Only chore/archive-<change> branches may archive a change.
+      Default is the head branch of the pull request.
+    required: false
+  github-token:
+    description: |
+      A token that can read the pull request. It is used to read the live draft state of the pull request.
+    required: false
+    default: ${{ github.token }}
+  draft:
+    description: |
+      'true' lets task groups say (TBD) as their key. Default is the live draft state of the pull request,
+      read through the API.
+    required: false
+  store-id:
+    description: |
+      The id of the store. A spec name may never start with it. Default is the id in .openspec-store/store.yaml
+      on the base.
+    required: false
+  clan-prefix:
+    description: |
+      A spec name prefix that is allowed besides the services of the clan, e.g. cardpayment-.
+      Without one only the services of the clan are accepted.
+    required: false
+  services-file:
+    description: The file on the base branch that lists the services of the clan.
+    required: false
+    default: .agent/discovered.md
+  services-heading:
+    description: |
+      The services are the `- name` bullets under the `### ` heading of services-file that contains this text.
+    required: false
+    default: Other services in this clan
+  max-tasks:
+    description: The most tasks one group of tasks.md may have.
+    required: false
+    default: '6'
+  openspec-command:
+    description: |
+      The OpenSpec CLI command to run on archive branches, e.g. `npx @fission-ai/openspec@2.0.0`.
+      Default is the CLI pinned and locked in this action, installed with `npm ci --ignore-scripts` when needed.
+    required: false
+runs:
+  using: node24
+  main: dist/index.cjs

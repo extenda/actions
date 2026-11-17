@@ -32,6 +32,8 @@ The following actions are available
   * [maven](maven#readme)
   * [nexus-auth-npm](nexus-auth-npm#readme)
   * [opa-policy-test](opa-policy-test#readme)
+  * [openspec-guard](openspec-guard#readme)
+  * [openspec-spec-first](openspec-spec-first#readme)
   * [pact-broker](pact-broker#readme)
   * [pact-can-i-deploy](pact-can-i-deploy#readme)
   * [pact-publish](pact-publish#readme)

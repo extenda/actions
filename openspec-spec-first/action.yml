@@ -1,0 +1,31 @@
+name: OpenSpec spec first
+description: >-
+  Checks that the Jira key of a feat pull request title is the key of exactly one group heading in a change of
+  the OpenSpec store, open or archived. A heading that names another repo only gives a warning.
+author: Extenda Retail
+inputs:
+  store:
+    description: The OpenSpec store repository as owner/name, e.g. extenda/experience-cardpayment-common.
+    required: true
+  token:
+    description: |
+      A token with contents:read on the store repository, e.g. from actions/create-github-app-token.
+      The workflow's GITHUB_TOKEN cannot read another private repository.
+    required: true
+  store-ref:
+    description: Branch, tag or SHA of the store to read. Default is the default branch.
+    required: false
+  title:
+    description: The pull request title. Default is the title of the pull request in the event.
+    required: false
+    default: ${{ github.event.pull_request.title }}
+  repo-name:
+    description: The name of this repository, compared with the repo of the group heading (warning only).
+    required: false
+    default: ${{ github.event.repository.name }}
+outputs:
+  key:
+    description: The Jira key of a feat title, or an empty string when spec first does not apply.
+runs:
+  using: node24
+  main: dist/index.cjs

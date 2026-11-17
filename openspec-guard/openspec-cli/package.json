@@ -1,0 +1,8 @@
+{
+  "name": "openspec-cli-pin",
+  "private": true,
+  "description": "Pins OpenSpec and its transitive dependencies for the openspec-guard workflow. Install with npm ci.",
+  "dependencies": {
+    "@fission-ai/openspec": "2.0.0"
+  }
+}
