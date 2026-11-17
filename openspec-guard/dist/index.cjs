@@ -32416,6 +32416,20 @@ var headingKey = /* @__PURE__ */ __name((heading) => {
   const rest = text.slice(text.lastIndexOf("(") + 1);
   return rest.endsWith(")") ? rest.slice(0, -1) : rest;
 }, "headingKey");
+var checkKey = /* @__PURE__ */ __name((key, lineNo, { draft, seen, usedKeys }) => {
+  if (key === "TBD") {
+    return draft ? [] : [
+      {
+        line: lineNo,
+        message: "(TBD) is only allowed while the PR is a draft."
+      }
+    ];
+  }
+  if (!JIRA_KEY_RE.test(key)) {
+    return [{ line: lineNo, message: `"${key}" is not a Jira key.` }];
+  }
+  return checkKeyUnused(key, lineNo, seen, usedKeys);
+}, "checkKey");
 var checkKeyUnused = /* @__PURE__ */ __name((key, lineNo, seen, usedKeys) => {
   const problems = [];
   const upper = key.toUpperCase();
@@ -32470,19 +32484,9 @@ list): ${line}`
           message: `group number ${line.split(/[ .]/)[1]} should be ${groups}.`
         });
       }
-      const key = headingKey(line);
-      if (key === "TBD") {
-        if (!draft) {
-          problems.push({
-            line: lineNo,
-            message: "(TBD) is only allowed while the PR is a draft."
-          });
-        }
-      } else if (!JIRA_KEY_RE.test(key)) {
-        problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
-      } else {
-        problems.push(...checkKeyUnused(key, lineNo, seen, usedKeys));
-      }
+      problems.push(
+        ...checkKey(headingKey(line), lineNo, { draft, seen, usedKeys })
+      );
     } else if (isTask(line)) {
       if (groups === 0) {
         problems.push({ line: lineNo, message: "task outside a group." });
@@ -32711,6 +32715,14 @@ var runGuard = /* @__PURE__ */ __name(({
     }
     return storeKeys;
   }, "loadStoreKeys");
+  const rememberKeys = /* @__PURE__ */ __name((text, tasksFile, usedKeys) => {
+    for (const line of text.split("\n").map((l3) => l3.trimEnd())) {
+      const key = isGroupHeading(line) ? headingKey(line).toUpperCase() : "TBD";
+      if (key !== "TBD" && !usedKeys.has(key)) {
+        usedKeys.set(key, tasksFile);
+      }
+    }
+  }, "rememberKeys");
   const checkNewChange = /* @__PURE__ */ __name((change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
     if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, tasksFile))) {
@@ -32723,14 +32735,7 @@ var runGuard = /* @__PURE__ */ __name(({
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
       }
-      for (const line of text.split("\n")) {
-        if (isGroupHeading(line.trimEnd())) {
-          const key = headingKey(line.trimEnd()).toUpperCase();
-          if (key !== "TBD" && !usedKeys.has(key)) {
-            usedKeys.set(key, tasksFile);
-          }
-        }
-      }
+      rememberKeys(text, tasksFile, usedKeys);
     }
     const specs = `openspec/changes/${change}/specs`;
     const specsPath = import_node_path2.default.join(cwd, specs);

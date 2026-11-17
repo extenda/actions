@@ -284,6 +284,16 @@ const runGuard = ({
     return storeKeys;
   };
 
+  // Later new changes of this PR may not reuse the keys of this one.
+  const rememberKeys = (text, tasksFile, usedKeys) => {
+    for (const line of text.split('\n').map((l) => l.trimEnd())) {
+      const key = isGroupHeading(line) ? headingKey(line).toUpperCase() : 'TBD';
+      if (key !== 'TBD' && !usedKeys.has(key)) {
+        usedKeys.set(key, tasksFile);
+      }
+    }
+  };
+
   // tasks.md and spec names of a change that is not on the base yet.
   const checkNewChange = (change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
@@ -297,15 +307,7 @@ const runGuard = ({
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
       }
-      // Later new changes of this PR may not reuse the keys of this one.
-      for (const line of text.split('\n')) {
-        if (isGroupHeading(line.trimEnd())) {
-          const key = headingKey(line.trimEnd()).toUpperCase();
-          if (key !== 'TBD' && !usedKeys.has(key)) {
-            usedKeys.set(key, tasksFile);
-          }
-        }
-      }
+      rememberKeys(text, tasksFile, usedKeys);
     }
     const specs = `openspec/changes/${change}/specs`;
     const specsPath = path.join(cwd, specs);

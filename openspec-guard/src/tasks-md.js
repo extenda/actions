@@ -60,6 +60,24 @@ const headingKey = (heading) => {
 // The repo a group heading names: `## 1. my-repo: Title (HICC-1)` is `my-repo`.
 const headingRepo = (heading) => heading.replace(/^## \S+ /, '').split(':')[0];
 
+// The key of a group heading: TBD only in a draft, otherwise a Jira key that names one group.
+const checkKey = (key, lineNo, { draft, seen, usedKeys }) => {
+  if (key === 'TBD') {
+    return draft
+      ? []
+      : [
+          {
+            line: lineNo,
+            message: '(TBD) is only allowed while the PR is a draft.',
+          },
+        ];
+  }
+  if (!JIRA_KEY_RE.test(key)) {
+    return [{ line: lineNo, message: `"${key}" is not a Jira key.` }];
+  }
+  return checkKeyUnused(key, lineNo, seen, usedKeys);
+};
+
 // A Jira key may name one group: not twice in this file (seen) and not in another change's file (usedKeys).
 const checkKeyUnused = (key, lineNo, seen, usedKeys) => {
   const problems = [];
@@ -126,19 +144,9 @@ const checkTasks = (
           message: `group number ${line.split(/[ .]/)[1]} should be ${groups}.`,
         });
       }
-      const key = headingKey(line);
-      if (key === 'TBD') {
-        if (!draft) {
-          problems.push({
-            line: lineNo,
-            message: '(TBD) is only allowed while the PR is a draft.',
-          });
-        }
-      } else if (!JIRA_KEY_RE.test(key)) {
-        problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
-      } else {
-        problems.push(...checkKeyUnused(key, lineNo, seen, usedKeys));
-      }
+      problems.push(
+        ...checkKey(headingKey(line), lineNo, { draft, seen, usedKeys }),
+      );
     } else if (isTask(line)) {
       if (groups === 0) {
         problems.push({ line: lineNo, message: 'task outside a group.' });
