@@ -278,7 +278,7 @@ Hook `script` paths must be direct children of `hooks/` (for example `hooks/my-g
 
 ### Clan review policy
 
-`agent-registry/config/review.md` contains the clan's review policy: extra review passes, what counts as Important, what not to report, the Nit cap. It is uploaded to GCS and downloaded to `.agent/review.md` on every session start, where the `review-pr` skill reads it next to the repository's own `REVIEW.md`, which wins where the two differ.
+`agent-registry/config/review.md` contains the clan's review policy: extra review passes, what counts as Important, what not to report, the Nit cap. It is uploaded to GCS and downloaded to `.agent/review.md` on every session start, where the `review-change` skill reads it next to the repository's own `REVIEW.md`, which wins where the two differ.
 The file is optional, and an empty file means no policy.
 Edit it in the clan common repo, not in `.agent/review.md`, which is replaced on every session start.
 
