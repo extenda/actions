@@ -32625,11 +32625,13 @@ approved");
     const id = resolveStoreId();
     const names = import_node_fs.default.readdirSync(import_node_path2.default.join(cwd, dir), { withFileTypes: true }).
     filter((e) => e.isDirectory()).map((e) => e.name).sort((a, b2) => a.localeCompare(b2));
+    const prefixes = [
+      ...clanPrefix && clanPrefix !== `${id}-` ? [clanPrefix] : [],
+      ...list.filter((s) => s !== id).map((s) => `${s}-`)
+    ];
     for (const name of names) {
       const bare = list.includes(name);
-      const ok = !bare && (clanPrefix && name.startsWith(clanPrefix) && name.length > clanPrefix.length || list.some(
-        (s) => name.startsWith(`${s}-`) && name.length > s.length + 1
-      ));
+      const ok = !bare && prefixes.some((x2) => name.startsWith(x2) && name.length > x2.length);
       if (!ok) {
         const orPrefix = clanPrefix ? ` or ${clanPrefix}` : "";
         const notId = id ? ` (never the store id ${id})` : "";
@@ -32901,7 +32903,12 @@ var action = /* @__PURE__ */ __name(async () => {
   } else if (branch.startsWith(ARCHIVE_PREFIX)) {
     openspecCommand = await installOpenSpec();
   }
-  const maxTasks = getInput("max-tasks");
+  const maxTasksInput = getInput("max-tasks");
+  if (maxTasksInput && !/^[1-9]\d*$/.test(maxTasksInput)) {
+    throw new Error(
+      `max-tasks must be a positive integer, got '${maxTasksInput}'.`
+    );
+  }
   const { failures, skipped } = runGuard({
     cwd,
     base,
@@ -32912,7 +32919,7 @@ var action = /* @__PURE__ */ __name(async () => {
     clanPrefix: getInput("clan-prefix"),
     servicesFile: getInput("services-file") || void 0,
     servicesHeading: getInput("services-heading") || void 0,
-    maxTasks: maxTasks ? Number(maxTasks) : void 0,
+    maxTasks: maxTasksInput ? Number(maxTasksInput) : void 0,
     gitBin
   });
   if (skipped) {

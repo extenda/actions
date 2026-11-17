@@ -212,16 +212,16 @@ const runGuard = ({
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
       .sort((a, b) => a.localeCompare(b));
+    // The store id is never a prefix of its own, even when the clan prefix or the service list says so.
+    const prefixes = [
+      ...(clanPrefix && clanPrefix !== `${id}-` ? [clanPrefix] : []),
+      ...list.filter((s) => s !== id).map((s) => `${s}-`),
+    ];
     for (const name of names) {
       const bare = list.includes(name); // a bare service name is not a capability name
       const ok =
         !bare &&
-        ((clanPrefix &&
-          name.startsWith(clanPrefix) &&
-          name.length > clanPrefix.length) ||
-          list.some(
-            (s) => name.startsWith(`${s}-`) && name.length > s.length + 1,
-          ));
+        prefixes.some((x) => name.startsWith(x) && name.length > x.length);
       if (!ok) {
         const orPrefix = clanPrefix ? ` or ${clanPrefix}` : '';
         const notId = id ? ` (never the store id ${id})` : '';

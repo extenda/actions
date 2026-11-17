@@ -519,6 +519,45 @@ describe('openspec-guard: extra cases beyond the bash self-test', () => {
     );
   });
 
+  test('the store id is never a prefix, even when the clan prefix or the list says so', () => {
+    newRepo();
+    write('openspec/changes/hicc-9-new/tasks.md', good);
+    write(
+      'openspec/changes/hicc-9-new/specs/hiiconnect-refunds/spec.md',
+      'x\n',
+    );
+    commit();
+    expect(ok(guard({ clanPrefix: 'hiiconnect-' }))).toBe(false);
+    expect(
+      ok(guard({ clanPrefix: 'hiiconnect-', storeId: 'hiiconnect' })),
+    ).toBe(false);
+  });
+
+  test('a service named like the store id gives no prefix, its longer siblings do', () => {
+    newRepo();
+    write(
+      '.agent/discovered.md',
+      '### Other services in this clan\n\n- hiiconnect\n- hiiconnect-router\n',
+    );
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'list');
+    git(repo, 'branch', '-f', 'main');
+    write('openspec/changes/hicc-9-new/tasks.md', good);
+    write(
+      'openspec/changes/hicc-9-new/specs/hiiconnect-refunds/spec.md',
+      'x\n',
+    );
+    write(
+      'openspec/changes/hicc-9-new/specs/hiiconnect-router-x/spec.md',
+      'x\n',
+    );
+    commit();
+    const r = guard({ clanPrefix: 'hiiconnect-' });
+    expect(r.failures.map((f) => f.file)).toEqual([
+      'openspec/changes/hicc-9-new/specs/hiiconnect-refunds',
+    ]);
+  });
+
   test('a clan without a prefix accepts only its services', () => {
     newRepo();
     write('openspec/changes/hicc-9-new/tasks.md', good);

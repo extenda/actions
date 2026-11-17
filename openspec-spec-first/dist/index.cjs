@@ -32193,6 +32193,8 @@ var TASK_RE = new RegExp(
 var UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
+var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
+var isGroupHeading = /* @__PURE__ */ __name((line) => GROUP_HEADING_RE.test(line), "isGroupHeading");
 var headingKey = /* @__PURE__ */ __name((heading) => heading.replace(/\s*$/, "").replace(/^.*\(/, "").replace(/\)$/, ""),
 "headingKey");
 var headingRepo = /* @__PURE__ */ __name((heading) => heading.replace(/^## \S+ /, "").split(":")[0], "headingRepo");
@@ -32217,8 +32219,8 @@ var checkKey = /* @__PURE__ */ __name((files, key, repo) => {
   const hits = [];
   for (const file of files) {
     for (const line of file.content.split("\n")) {
-      if (/^## \d+\. /.test(line)) {
-        const heading = line.trimEnd();
+      const heading = line.trimEnd();
+      if (isGroupHeading(heading)) {
         if (headingKey(heading).toLowerCase() === wanted) {
           hits.push({ path: file.path, heading });
         }

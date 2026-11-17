@@ -79,7 +79,12 @@ const action = async () => {
     openspecCommand = await installOpenSpec();
   }
 
-  const maxTasks = core.getInput('max-tasks');
+  const maxTasksInput = core.getInput('max-tasks');
+  if (maxTasksInput && !/^[1-9]\d*$/.test(maxTasksInput)) {
+    throw new Error(
+      `max-tasks must be a positive integer, got '${maxTasksInput}'.`,
+    );
+  }
   const { failures, skipped } = runGuard({
     cwd,
     base,
@@ -90,7 +95,7 @@ const action = async () => {
     clanPrefix: core.getInput('clan-prefix'),
     servicesFile: core.getInput('services-file') || undefined,
     servicesHeading: core.getInput('services-heading') || undefined,
-    maxTasks: maxTasks ? Number(maxTasks) : undefined,
+    maxTasks: maxTasksInput ? Number(maxTasksInput) : undefined,
     gitBin,
   });
 

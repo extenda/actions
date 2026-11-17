@@ -153,6 +153,17 @@ describe('openspec-guard action', () => {
     );
   });
 
+  test.each(['words', '0', '-1', '1.5', '4x'])(
+    'max-tasks %j fails the action',
+    async (value) => {
+      inputs({ draft: 'false', 'max-tasks': value });
+      await expect(action()).rejects.toThrow(
+        /max-tasks must be a positive integer/,
+      );
+      expect(runGuard).not.toHaveBeenCalled();
+    },
+  );
+
   test('needs a base', async () => {
     delete process.env.GITHUB_BASE_REF;
     inputs({});

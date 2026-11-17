@@ -100,6 +100,23 @@ describe('spec-first extra cases beyond the bash self-test', () => {
     );
   });
 
+  test('a malformed heading is not a match', () => {
+    const bad = [
+      '## 1. my-repo: Title (HICC-50) trailing',
+      '## 1. my repo: Title (HICC-51)',
+      '## 1. my-repo Title (HICC-52)',
+      '## 1. extenda/my-repo: Title (HICC-53)',
+      '## 1. -x: Title (HICC-54)',
+      '## 1. my-repo: (HICC-55)',
+    ];
+    const f = [
+      { path: 'openspec/changes/z/tasks.md', content: `${bad.join('\n')}\n` },
+    ];
+    for (const n of [50, 51, 52, 53, 54, 55]) {
+      expect(checkKey(f, `HICC-${n}`, 'my-repo').ok).toBe(false);
+    }
+  });
+
   test('several groups are listed', () => {
     const r = checkKey(files, 'HICC-30', 'my-repo');
     expect(r.errors.join('\n')).toContain('HICC-30 is in 2 group headings');

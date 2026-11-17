@@ -1,4 +1,8 @@
-import { headingKey, headingRepo } from '../../openspec-guard/src/tasks-md.js';
+import {
+  headingKey,
+  headingRepo,
+  isGroupHeading,
+} from '../../openspec-guard/src/tasks-md.js';
 
 /**
  * The key must be the key of exactly one group heading `## <n>. <repo>: <title> (<KEY>)` in a tasks.md of the
@@ -14,8 +18,8 @@ const checkKey = (files, key, repo) => {
   const hits = [];
   for (const file of files) {
     for (const line of file.content.split('\n')) {
-      if (/^## \d+\. /.test(line)) {
-        const heading = line.trimEnd();
+      const heading = line.trimEnd();
+      if (isGroupHeading(heading)) {
         if (headingKey(heading).toLowerCase() === wanted) {
           hits.push({ path: file.path, heading });
         }

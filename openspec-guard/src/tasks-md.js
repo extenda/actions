@@ -17,6 +17,7 @@ const JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-\d+$/;
 
 const DEFAULT_MAX_TASKS = 6;
 
+const isGroupHeading = (line) => GROUP_HEADING_RE.test(line);
 const isTask = (line) => TASK_RE.test(line);
 const isUnticked = (line) => UNTICKED_RE.test(line);
 
@@ -149,6 +150,7 @@ export {
   hasUnticked,
   headingKey,
   headingRepo,
+  isGroupHeading,
   isTask,
   isUnticked,
   keyFromTitle,
