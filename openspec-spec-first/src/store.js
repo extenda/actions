@@ -75,6 +75,7 @@ const loadTasksFiles = async (octokit, storeRepo, ref) => {
   );
   const files = [];
   for (let i = 0; i < tasks.length; i += BATCH) {
+    // Sequential on purpose: one GraphQL batch at a time keeps within the API rate budget.
     files.push(
       ...(await readBlobs(octokit, owner, repo, tasks.slice(i, i + BATCH))),
     );

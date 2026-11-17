@@ -702,6 +702,16 @@ describe('openspec-guard: group keys across the store', () => {
     expect(show(r)).toContain('already the key of a group in');
   });
 
+  test('two new changes sharing a key are rejected', () => {
+    newRepo();
+    write('openspec/changes/hicc-9-new/tasks.md', proposal('HICC-5'));
+    write('openspec/changes/hicc-8-other/tasks.md', proposal('HICC-5'));
+    commit();
+    const r = guard();
+    expect(ok(r)).toBe(false);
+    expect(show(r)).toContain('\\"HICC-5\\" is already the key of a group in');
+  });
+
   test('a key in two groups of the same tasks.md is rejected', () => {
     newRepo();
     write(

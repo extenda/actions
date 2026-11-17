@@ -60,6 +60,26 @@ const headingKey = (heading) => {
 // The repo a group heading names: `## 1. my-repo: Title (HICC-1)` is `my-repo`.
 const headingRepo = (heading) => heading.replace(/^## \S+ /, '').split(':')[0];
 
+// A Jira key may name one group: not twice in this file (seen) and not in another change's file (usedKeys).
+const checkKeyUnused = (key, lineNo, seen, usedKeys) => {
+  const problems = [];
+  const upper = key.toUpperCase();
+  if (seen.has(upper)) {
+    problems.push({
+      line: lineNo,
+      message: `"${key}" is the key of more than one group of this tasks.md.`,
+    });
+  }
+  seen.add(upper);
+  if (usedKeys.has(upper)) {
+    problems.push({
+      line: lineNo,
+      message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`,
+    });
+  }
+  return problems;
+};
+
 /**
  * Checks tasks.md of a change that is not approved yet: groups are `## <n>. <repo>: <title> (<KEY>)`, numbered
  * from 1, one repo each, at most maxTasks tasks. `(TBD)` stands in for the key only while the PR is a draft.
@@ -117,20 +137,7 @@ const checkTasks = (
       } else if (!JIRA_KEY_RE.test(key)) {
         problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
       } else {
-        const upper = key.toUpperCase();
-        if (seen.has(upper)) {
-          problems.push({
-            line: lineNo,
-            message: `"${key}" is the key of more than one group of this tasks.md.`,
-          });
-        }
-        seen.add(upper);
-        if (usedKeys.has(upper)) {
-          problems.push({
-            line: lineNo,
-            message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`,
-          });
-        }
+        problems.push(...checkKeyUnused(key, lineNo, seen, usedKeys));
       }
     } else if (isTask(line)) {
       if (groups === 0) {

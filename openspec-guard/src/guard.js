@@ -288,12 +288,23 @@ const runGuard = ({
   const checkNewChange = (change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
     if (fs.existsSync(path.join(cwd, tasksFile))) {
-      for (const { line, message } of checkTasks(readWork(tasksFile), {
+      const text = readWork(tasksFile);
+      const usedKeys = loadStoreKeys();
+      for (const { line, message } of checkTasks(text, {
         draft,
         maxTasks,
-        usedKeys: loadStoreKeys(),
+        usedKeys,
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
+      }
+      // Later new changes of this PR may not reuse the keys of this one.
+      for (const line of text.split('\n')) {
+        if (isGroupHeading(line.trimEnd())) {
+          const key = headingKey(line.trimEnd()).toUpperCase();
+          if (key !== 'TBD' && !usedKeys.has(key)) {
+            usedKeys.set(key, tasksFile);
+          }
+        }
       }
     }
     const specs = `openspec/changes/${change}/specs`;

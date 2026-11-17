@@ -32416,6 +32416,24 @@ var headingKey = /* @__PURE__ */ __name((heading) => {
   const rest = text.slice(text.lastIndexOf("(") + 1);
   return rest.endsWith(")") ? rest.slice(0, -1) : rest;
 }, "headingKey");
+var checkKeyUnused = /* @__PURE__ */ __name((key, lineNo, seen, usedKeys) => {
+  const problems = [];
+  const upper = key.toUpperCase();
+  if (seen.has(upper)) {
+    problems.push({
+      line: lineNo,
+      message: `"${key}" is the key of more than one group of this tasks.md.`
+    });
+  }
+  seen.add(upper);
+  if (usedKeys.has(upper)) {
+    problems.push({
+      line: lineNo,
+      message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`
+    });
+  }
+  return problems;
+}, "checkKeyUnused");
 var checkTasks = /* @__PURE__ */ __name((text, { draft = false, maxTasks = DEFAULT_MAX_TASKS, usedKeys = /* @__PURE__ */ new Map() } = {}) => {
   const problems = [];
   const seen = /* @__PURE__ */ new Set();
@@ -32463,20 +32481,7 @@ list): ${line}`
       } else if (!JIRA_KEY_RE.test(key)) {
         problems.push({ line: lineNo, message: `"${key}" is not a Jira key.` });
       } else {
-        const upper = key.toUpperCase();
-        if (seen.has(upper)) {
-          problems.push({
-            line: lineNo,
-            message: `"${key}" is the key of more than one group of this tasks.md.`
-          });
-        }
-        seen.add(upper);
-        if (usedKeys.has(upper)) {
-          problems.push({
-            line: lineNo,
-            message: `"${key}" is already the key of a group in ${usedKeys.get(upper)}.`
-          });
-        }
+        problems.push(...checkKeyUnused(key, lineNo, seen, usedKeys));
       }
     } else if (isTask(line)) {
       if (groups === 0) {
@@ -32709,12 +32714,22 @@ var runGuard = /* @__PURE__ */ __name(({
   const checkNewChange = /* @__PURE__ */ __name((change) => {
     const tasksFile = `openspec/changes/${change}/tasks.md`;
     if (import_node_fs.default.existsSync(import_node_path2.default.join(cwd, tasksFile))) {
-      for (const { line, message } of checkTasks(readWork(tasksFile), {
+      const text = readWork(tasksFile);
+      const usedKeys = loadStoreKeys();
+      for (const { line, message } of checkTasks(text, {
         draft,
         maxTasks,
-        usedKeys: loadStoreKeys()
+        usedKeys
       })) {
         fail(tasksFile, line ? `${line}: ${message}` : message);
+      }
+      for (const line of text.split("\n")) {
+        if (isGroupHeading(line.trimEnd())) {
+          const key = headingKey(line.trimEnd()).toUpperCase();
+          if (key !== "TBD" && !usedKeys.has(key)) {
+            usedKeys.set(key, tasksFile);
+          }
+        }
       }
     }
     const specs = `openspec/changes/${change}/specs`;
