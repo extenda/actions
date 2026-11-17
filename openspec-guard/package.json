@@ -1,0 +1,11 @@
+{
+  "name": "openspec-guard",
+  "version": "0.0.1-local",
+  "description": "Keep approved OpenSpec changes approved in an OpenSpec store",
+  "private": true,
+  "main": "dist/index.cjs",
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
+}

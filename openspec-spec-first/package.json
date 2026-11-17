@@ -1,0 +1,11 @@
+{
+  "name": "openspec-spec-first",
+  "version": "0.0.1-local",
+  "description": "Check that a feat pull request has its change in the OpenSpec store",
+  "private": true,
+  "main": "dist/index.cjs",
+  "type": "module",
+  "scripts": {
+    "build": "node ../.scripts/build-workspace.js"
+  }
+}
