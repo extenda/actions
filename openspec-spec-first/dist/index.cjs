@@ -32193,6 +32193,8 @@ var TASK_RE = new RegExp(
 var UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
+var LEADING_UNTICKED_RE = new RegExp(String.raw`(${BULLET})\[\s*\]`);
+var LEADING_TICKED_RE = new RegExp(String.raw`(${BULLET})\[[xX]\]`);
 var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
 var isGroupHeading = /* @__PURE__ */ __name((line) => GROUP_HEADING_RE.test(line), "isGroupHeading");
 var headingKey = /* @__PURE__ */ __name((heading) => {

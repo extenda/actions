@@ -61,6 +61,11 @@ describe('ticksOnly', () => {
     ['- [ ] a\n- [ ] b\n', '- [x] a\n', false],
     ['text\n', 'other\n', false],
     ['- [ ] a\n', '- [y] a\n', false],
+    ['- [ ] a\n', '- [X] a\n', true],
+    ['- [ ] a [X]\n', '- [x] a [X]\n', true],
+    ['- [ ] a [x]\n', '- [x] a [X]\n', false],
+    ['1. [ ] a [ ]\n', '1. [x] a [ ]\n', true],
+    ['- [ ] a [ ]\n', '- [ ] a [x]\n', false],
   ])('%j -> %j is %s', (o, n, want) => expect(ticksOnly(o, n)).toBe(want));
 });
 

@@ -32382,6 +32382,8 @@ var TASK_RE = new RegExp(
 var UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`
 );
+var LEADING_UNTICKED_RE = new RegExp(String.raw`(${BULLET})\[\s*\]`);
+var LEADING_TICKED_RE = new RegExp(String.raw`(${BULLET})\[[xX]\]`);
 var GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
 var JIRA_KEY_RE = /^[A-Z][A-Z0-9]*-\d+$/;
 var DEFAULT_MAX_TASKS = 6;
@@ -32406,8 +32408,8 @@ var ticksOnly = /* @__PURE__ */ __name((oldText, newText) => {
     if (line === o2[i]) {
       return true;
     }
-    const ticked = o2[i].replace(/\[\s*\]/, "[x]");
-    const normalized = line.replace("[X]", "[x]");
+    const ticked = o2[i].replace(LEADING_UNTICKED_RE, "$1[x]");
+    const normalized = line.replace(LEADING_TICKED_RE, "$1[x]");
     return isUnticked(o2[i]) && ticked === normalized;
   });
 }, "ticksOnly");

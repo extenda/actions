@@ -10,6 +10,9 @@ const TASK_RE = new RegExp(
 const UNTICKED_RE = new RegExp(
   String.raw`${BULLET}(?:\[\s*\](?:[^(\[]|$)|\[\s+\])`,
 );
+// The leading box of a task line, unticked or ticked, with the bullet before it in group 1.
+const LEADING_UNTICKED_RE = new RegExp(String.raw`(${BULLET})\[\s*\]`);
+const LEADING_TICKED_RE = new RegExp(String.raw`(${BULLET})\[[xX]\]`);
 
 // `## <n>. <repo>: <title> (<KEY>)`; <repo> is a bare GitHub repo name, only its shape is checked.
 const GROUP_HEADING_RE = /^## \d+\. \w[\w.-]*: .+ \([A-Za-z0-9-]+\)\s*$/;
@@ -43,8 +46,9 @@ const ticksOnly = (oldText, newText) => {
     if (line === o[i]) {
       return true;
     }
-    const ticked = o[i].replace(/\[\s*\]/, '[x]');
-    const normalized = line.replace('[X]', '[x]');
+    // Only the leading box: a [ ] or [X] later in the text is text, not a tick.
+    const ticked = o[i].replace(LEADING_UNTICKED_RE, '$1[x]');
+    const normalized = line.replace(LEADING_TICKED_RE, '$1[x]');
     return isUnticked(o[i]) && ticked === normalized;
   });
 };
