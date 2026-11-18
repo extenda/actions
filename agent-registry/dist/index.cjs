@@ -103236,10 +103236,12 @@ var bootstrapHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => 
   const runs = scripts.map(runArg).join("");
   const run2 = interpreter(name);
   const check = run2 === "node" ? "node --check" : "bash -n";
+  const fix = run2 === "node" ? ", or node is not installed. Install Node.js or run gcloud auth login" : ". Run gcloud a\
+uth login";
   const command = `s="${CD}/.claude/hooks/${name}"; [ -f "$s" ] || CLOUDSDK_CORE_DISABLE_PROMPTS=1 gcloud storage cp ${GCS2}\
 /hooks/${name} "$s" </dev/null >/dev/null 2>&1; if ${check} "$s" 2>/dev/null; then ${run2} "$s"${clanArg}${runs}; else e\
-cho '{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded. Run gcloud auth login, \
-then start a new session."}'; fi`;
+cho '{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded${fix}, then start a new \
+session."}'; fi`;
   const timeout = scripts.reduce((sum, e) => sum + (e.timeout ?? 0), 0) + SETUP_TIMEOUT_ALLOWANCE;
   return [hookCmd(command, timeout)];
 }, "bootstrapHooks");

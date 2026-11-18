@@ -97,6 +97,8 @@ describe('buildSettingsJson', () => {
       expect(command(result)).toContain(
         `bash "$s" --clan retail --run ensure-pre-commit.sh --run 'verify-on-stop.sh --baseline'`,
       );
+      expect(command(result)).toContain('if bash -n "$s" 2>/dev/null; then bash "$s" --clan retail');
+      expect(command(result)).toContain('could not be downloaded. Run gcloud auth login, then start a new session.');
       expect(sessionHooks(result)[0].timeout).toBe(90);
     });
 
@@ -115,6 +117,7 @@ describe('buildSettingsJson', () => {
       expect(cmd).toContain('if node --check "$s" 2>/dev/null; then node "$s" --clan retail --run ensure-pre-commit.sh');
       expect(cmd).toContain('gcloud storage cp gs://extenda-agent-artifacts/hooks/session-start.mjs "$s"');
       expect(cmd).not.toContain('bash');
+      expect(cmd).toContain('or node is not installed. Install Node.js or run gcloud auth login, then start a new session.');
       expect(cmd.match(/gcloud storage/g)).toHaveLength(1);
       expect(sessionHooks(buildSettingsJson(mjs, {}, 'retail'))[0].timeout).toBe(90);
     });
