@@ -65,9 +65,9 @@
           "minimum": 1
         },
         "script": {
-          "description": "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
+          "description": "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no subdirectories) and end in .sh (run with bash) or .mjs (run with node)",
           "type": "string",
-          "pattern": "^hooks/[^/]+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     },
@@ -100,9 +100,9 @@
           "minimum": 1
         },
         "script": {
-          "description": "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no subdirectories) and end in .sh",
+          "description": "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no subdirectories) and end in .sh (run with bash) or .mjs (run with node)",
           "type": "string",
-          "pattern": "^hooks/[^/]+\\.sh$"
+          "pattern": "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     }

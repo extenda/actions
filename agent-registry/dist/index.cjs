@@ -102994,9 +102994,9 @@ It downloads and installs the agent config, then runs the SessionStart scripts. 
         },
         script: {
           description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     },
@@ -103030,9 +103030,9 @@ directories) and end in .sh",
         },
         script: {
           description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     }
@@ -103111,9 +103111,9 @@ var clan_settings_schema_default = {
         },
         script: {
           description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     },
@@ -103139,9 +103139,9 @@ directories) and end in .sh",
         },
         script: {
           description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     }
@@ -103186,9 +103186,11 @@ var shellQuote = /* @__PURE__ */ __name((arg) => {
 }, "shellQuote");
 var argString = /* @__PURE__ */ __name((entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join(""), "argS\
 tring");
+var interpreter = /* @__PURE__ */ __name((script) => script.endsWith(".mjs") ? "node" : "bash", "interpreter");
 var gcpHook = /* @__PURE__ */ __name((entry) => {
-  const script = `"${CD}/.claude/hooks/${filename(entry.script)}"`;
-  return `[ -f ${script} ] || exit 0; bash ${script}${argString(entry)}`;
+  const name = filename(entry.script);
+  const script = `"${CD}/.claude/hooks/${name}"`;
+  return `[ -f ${script} ] || exit 0; ${interpreter(name)} ${script}${argString(entry)}`;
 }, "gcpHook");
 var hookCmd = /* @__PURE__ */ __name((command, timeout) => ({
   type: "command",
@@ -103299,16 +103301,16 @@ se rm -f "$tmp"; fi`
   }
   for (const entry of baseline?.hooks?.SessionStart ?? []) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`,
-    entry.timeout));
+    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)}\
+ || true`, entry.timeout));
   }
   if (clanName) {
     const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
       const s = filename(entry.script);
       if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`,
-      entry.timeout));
+      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)}\
+ || true`, entry.timeout));
     }
   }
   return [sequential(cmds)];

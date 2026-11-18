@@ -307,6 +307,23 @@ describe('buildSettingsJson', () => {
     expect(command).not.toMatch(/\|\| exit 0$/);
   });
 
+  test('.mjs hooks are started with node, with the same guard and args', () => {
+    const nodeBaseline = {
+      hooks: {
+        PreToolUse: [{ matcher: 'Bash', script: 'hooks/tool-guardian.mjs', args: ['--strict'] }],
+        SessionStart: [{ script: 'hooks/warm-up.mjs' }],
+      },
+    };
+    const result = buildSettingsJson(nodeBaseline, {}, 'retail');
+    expect(result.hooks.PreToolUse[0].hooks[0].command).toBe(
+      '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.mjs" ] || exit 0;' +
+        ' node "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.mjs" --strict',
+    );
+    expect(sessionCommands(result)).toContain(
+      '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/warm-up.mjs" ] && node "${CLAUDE_PROJECT_DIR}/.claude/hooks/warm-up.mjs" || true',
+    );
+  });
+
   test('hooks without args or timeout emit neither field', () => {
     const hook = buildSettingsJson(baseline, {}, 'retail').hooks.PreToolUse[0].hooks[0];
     expect(hook).toEqual({ type: 'command', command: expect.any(String) });
@@ -806,6 +823,21 @@ describe('hook script paths', () => {
       Stop: [{ script: 'hooks/c.sh', timeout: 10 }],
     };
     expect(validate(withHooks(hooks), schema).valid).toBe(true);
+  });
+
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])('%s schema accepts .mjs scripts in every event, and no other extension', (_name, schema) => {
+    const hooks = {
+      SessionStart: [{ script: 'hooks/a.mjs', args: ['--x'] }],
+      PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.mjs' }],
+      Stop: [{ script: 'hooks/c.mjs', timeout: 10 }],
+    };
+    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+    for (const script of ['hooks/d.js', 'hooks/e.py', 'hooks/f.mjs.bak']) {
+      expect(validate(withHooks({ Stop: [{ script }] }), schema).valid).toBe(false);
+    }
   });
 
   test('a clan script with the same file name as a global one is not downloaded', () => {
