@@ -59,7 +59,7 @@ agent-registry/
   config/                 # clan-specific Claude Code settings
     settings.yaml         # clan name, additional permissions, hooks, and commands
     hooks/
-      *.sh                # clan SessionStart and PreToolUse hook scripts
+      *.sh, *.mjs         # clan SessionStart and PreToolUse hook scripts (.mjs runs with node)
     commands/
       *.md                # slash commands available to clan developers
     conventions.md        # clan coding conventions — downloaded to .agent/conventions.md
@@ -264,7 +264,7 @@ commands:
 
 Hook scripts go in `agent-registry/config/hooks/` and slash-command files in `agent-registry/config/commands/`.
 
-Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args`, so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts are run as `[ -f script ] && bash script args || true` and never block session start, whatever their exit code.
+Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args` (`node` instead of `bash` for a `.mjs` script; Node is a prerequisite of the orchestrator install), so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts are run as `[ -f script ] && bash script args || true` (again `node` for `.mjs`) and never block session start, whatever their exit code.
 The SessionStart hook has matcher `startup|clear|fork`: it does not run on resume or compaction.
 All SessionStart setup steps run sequentially in one hook, so its timeout is the sum of the scripts' `timeout` values plus a 60-second allowance for setup and downloads.
 

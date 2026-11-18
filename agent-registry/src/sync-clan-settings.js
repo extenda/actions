@@ -52,16 +52,21 @@ const shellQuote = (arg) => {
 
 const argString = (entry) => (entry.args ?? []).map(shellQuote).map((a) => ` ${a}`).join('');
 
-// Runs the hook script through bash if it exists. The script is the last
-// command so its exit code propagates; exit 2 blocks the tool call. A missing
-// script is a no-op.
+// The interpreter a hook script is started with: node for a .mjs script,
+// bash for everything else. Node is a prerequisite of the orchestrator install.
+const interpreter = (script) => (script.endsWith('.mjs') ? 'node' : 'bash');
+
+// Runs the hook script through its interpreter if it exists. The script is the
+// last command so its exit code propagates; exit 2 blocks the tool call. A
+// missing script is a no-op.
 //
-// The script is started with `bash` and tested with `-f`, never `-x`: the
-// executable bit is not reliable (it is lost on every download, and Windows
-// has none), and hook commands run in Git Bash there too.
+// The script is started with `bash` or `node` and tested with `-f`, never
+// `-x`: the executable bit is not reliable (it is lost on every download, and
+// Windows has none), and hook commands run in Git Bash there too.
 const gcpHook = (entry) => {
-  const script = `"${CD}/.claude/hooks/${filename(entry.script)}"`;
-  return `[ -f ${script} ] || exit 0; bash ${script}${argString(entry)}`;
+  const name = filename(entry.script);
+  const script = `"${CD}/.claude/hooks/${name}"`;
+  return `[ -f ${script} ] || exit 0; ${interpreter(name)} ${script}${argString(entry)}`;
 };
 
 const hookCmd = (command, timeout) => ({
@@ -187,8 +192,8 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
     }
   }
 
-  // chmod all hooks at once. Hooks are started with bash and do not need it;
-  // it keeps the scripts runnable by hand.
+  // chmod all hooks at once. Hooks are started with bash or node and do not
+  // need it; it keeps the shell scripts runnable by hand.
   cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
 
   // Fetch orchestrator CLAUDE.md (strip frontmatter, preserve existing on failure)
@@ -224,14 +229,14 @@ const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
   // Run global SessionStart scripts, then clan SessionStart scripts
   for (const entry of (baseline?.hooks?.SessionStart ?? [])) {
     const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
+    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
   }
   if (clanName) {
     const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
     for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
       const s = filename(entry.script);
       if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && bash "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
+      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
     }
   }
 
