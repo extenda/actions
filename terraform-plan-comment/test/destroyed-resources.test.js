@@ -1309,6 +1309,45 @@ environments:
       });
     });
 
+    test('It skips hits in test folders', async () => {
+      const tests = [
+        'test/a.ts',
+        'src/test/java/A.java',
+        'tests/a.py',
+        'testsrc/a.ts',
+        'src/__tests__/a.ts',
+        'src/__snapshots__/a.snap',
+        'Snd.Item.Tests/A.cs',
+        'Test/a.ts',
+        'Tests/a.ts',
+        'TestSrc/a.ts',
+        'Foo.tests/A.cs',
+        'Foo.Test/A.cs',
+        'Foo.UnitTests/A.cs',
+      ];
+      const kept = [
+        'e2e/a.ts',
+        'acceptance/a.ts',
+        'latest/a.ts',
+        'contest/a.ts',
+        'test-utils/a.ts',
+        'src/test.ts',
+        'Foo.IntegrationTests/A.cs',
+        'src/a.ts',
+      ];
+      mockSearch(octokit, {
+        [SA]: [...tests, ...kept].map((file) => searchItem('extenda/a', file)),
+      });
+      const checker = await run(octokit, [
+        'google_service_account',
+        { email: SA },
+      ]);
+
+      expect(
+        checker.resources.get(`sa:${SA}`).refs.map(({ file }) => file),
+      ).toEqual(kept);
+    });
+
     test('It searches archived repositories if they can not be listed', async () => {
       octokit.rest.repos.listForOrg.mockRejectedValue(
         Object.assign(new Error('forbidden'), { status: 403 }),

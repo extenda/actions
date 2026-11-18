@@ -41815,6 +41815,9 @@ var findLines = /* @__PURE__ */ __name((text, pattern) => {
 }, "findLines");
 var isDoc = /* @__PURE__ */ __name((file) => DOC_EXTENSIONS.has(import_node_path2.default.extname(file).toLowerCase()), "\
 isDoc");
+var TEST_FOLDER = /^(tests?|testsrc|__tests__|__snapshots__)$|\.(tests?|unittests)$/i;
+var isTest = /* @__PURE__ */ __name((file) => file.split("/").slice(0, -1).some((folder) => TEST_FOLDER.test(folder)), "\
+isTest");
 var plural = /* @__PURE__ */ __name((n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`, "plural");
 var gitOutput = /* @__PURE__ */ __name(async (args) => {
   let stdout = "";
@@ -42435,7 +42438,7 @@ ources added/destroyed there since. Update the branch and plan again <ins>before
     const items = data.items || [];
     return {
       items: items.filter(
-        ({ repository }) => !archived.has(repository.full_name)
+        ({ repository, path: file }) => !archived.has(repository.full_name) && !isTest(file)
       ),
       truncated: (data.total_count ?? 0) > items.length
     };

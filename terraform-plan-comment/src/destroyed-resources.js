@@ -71,6 +71,16 @@ const findLines = (text, pattern) => {
 
 const isDoc = (file) => DOC_EXTENSIONS.has(path.extname(file).toLowerCase());
 
+// Test folders, e.g. src/test or Snd.Item.Tests.
+const TEST_FOLDER =
+  /^(tests?|testsrc|__tests__|__snapshots__)$|\.(tests?|unittests)$/i;
+
+const isTest = (file) =>
+  file
+    .split('/')
+    .slice(0, -1)
+    .some((folder) => TEST_FOLDER.test(folder));
+
 const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 
 const gitOutput = async (args) => {
@@ -807,7 +817,8 @@ class DestroyedResources {
     const items = data.items || [];
     return {
       items: items.filter(
-        ({ repository }) => !archived.has(repository.full_name),
+        ({ repository, path: file }) =>
+          !archived.has(repository.full_name) && !isTest(file),
       ),
       truncated: (data.total_count ?? 0) > items.length,
     };
