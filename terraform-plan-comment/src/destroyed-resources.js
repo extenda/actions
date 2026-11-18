@@ -71,6 +71,16 @@ const findLines = (text, pattern) => {
 
 const isDoc = (file) => DOC_EXTENSIONS.has(path.extname(file).toLowerCase());
 
+// Test folders, e.g. src/test or Snd.Item.Tests.
+const TEST_FOLDER =
+  /^(tests?|testsrc|__tests__|__snapshots__)$|\.(tests?|unittests)$/i;
+
+const isTest = (file) =>
+  file
+    .split('/')
+    .slice(0, -1)
+    .some((folder) => TEST_FOLDER.test(folder));
+
 const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 
 const gitOutput = async (args) => {
@@ -257,6 +267,8 @@ class DestroyedResources {
     this.diff = undefined;
     this.files = new Map();
     this.limit = pLimit(MAX_PARALLEL_READS);
+    // Promise of the archived repositories, read once.
+    this.archived = undefined;
   }
 
   addResource(kind, name) {
@@ -765,7 +777,33 @@ class DestroyedResources {
     }
   }
 
+  // Code search can't exclude archived repositories, so they are listed.
+  archivedRepos() {
+    this.archived ??= this.octokit
+      .paginate(this.octokit.rest.repos.listForOrg, {
+        org: this.org,
+        type: 'all',
+        per_page: 100,
+      })
+      .then(
+        (repos) =>
+          new Set(
+            repos
+              .filter(({ archived }) => archived)
+              .map(({ full_name: name }) => name),
+          ),
+      )
+      .catch((err) => {
+        core.warning(
+          `Could not list archived repositories, so they are searched too: ${err.status || err.message}`,
+        );
+        return new Set();
+      });
+    return this.archived;
+  }
+
   async searchCode(text) {
+    const archived = await this.archivedRepos();
     const wait = this.lastSearch + this.searchInterval - Date.now();
     if (wait > 0) {
       await sleep(wait);
@@ -777,7 +815,13 @@ class DestroyedResources {
       headers: { accept: 'application/vnd.github.text-match+json' },
     });
     const items = data.items || [];
-    return { items, truncated: (data.total_count ?? 0) > items.length };
+    return {
+      items: items.filter(
+        ({ repository, path: file }) =>
+          !archived.has(repository.full_name) && !isTest(file),
+      ),
+      truncated: (data.total_count ?? 0) > items.length,
+    };
   }
 
   async checkCode(resource) {

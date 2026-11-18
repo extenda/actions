@@ -41815,6 +41815,9 @@ var findLines = /* @__PURE__ */ __name((text, pattern) => {
 }, "findLines");
 var isDoc = /* @__PURE__ */ __name((file) => DOC_EXTENSIONS.has(import_node_path2.default.extname(file).toLowerCase()), "\
 isDoc");
+var TEST_FOLDER = /^(tests?|testsrc|__tests__|__snapshots__)$|\.(tests?|unittests)$/i;
+var isTest = /* @__PURE__ */ __name((file) => file.split("/").slice(0, -1).some((folder) => TEST_FOLDER.test(folder)), "\
+isTest");
 var plural = /* @__PURE__ */ __name((n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`, "plural");
 var gitOutput = /* @__PURE__ */ __name(async (args) => {
   let stdout = "";
@@ -41955,6 +41958,7 @@ var DestroyedResources = class {
     this.diff = void 0;
     this.files = /* @__PURE__ */ new Map();
     this.limit = pLimit(MAX_PARALLEL_READS);
+    this.archived = void 0;
   }
   addResource(kind, name) {
     const key = `${kind}:${name.toLowerCase()}`;
@@ -42401,7 +42405,26 @@ ources added/destroyed there since. Update the branch and plan again <ins>before
       );
     }
   }
+  // Code search can't exclude archived repositories, so they are listed.
+  archivedRepos() {
+    this.archived ??= this.octokit.paginate(this.octokit.rest.repos.listForOrg, {
+      org: this.org,
+      type: "all",
+      per_page: 100
+    }).then(
+      (repos) => new Set(
+        repos.filter(({ archived }) => archived).map(({ full_name: name }) => name)
+      )
+    ).catch((err) => {
+      warning(
+        `Could not list archived repositories, so they are searched too: ${err.status || err.message}`
+      );
+      return /* @__PURE__ */ new Set();
+    });
+    return this.archived;
+  }
   async searchCode(text) {
+    const archived = await this.archivedRepos();
     const wait = this.lastSearch + this.searchInterval - Date.now();
     if (wait > 0) {
       await sleep(wait);
@@ -42413,7 +42436,12 @@ ources added/destroyed there since. Update the branch and plan again <ins>before
       headers: { accept: "application/vnd.github.text-match+json" }
     });
     const items = data.items || [];
-    return { items, truncated: (data.total_count ?? 0) > items.length };
+    return {
+      items: items.filter(
+        ({ repository, path: file }) => !archived.has(repository.full_name) && !isTest(file)
+      ),
+      truncated: (data.total_count ?? 0) > items.length
+    };
   }
   async checkCode(resource) {
     const refs = await this.findReferences(resource);
