@@ -97,6 +97,8 @@ describe('buildSettingsJson', () => {
       expect(command(result)).toContain(
         `bash "$s" --clan retail --run ensure-pre-commit.sh --run 'verify-on-stop.sh --baseline'`,
       );
+      expect(command(result)).toContain('if bash -n "$s" 2>/dev/null; then bash "$s" --clan retail');
+      expect(command(result)).toContain('could not be downloaded. Run gcloud auth login, then start a new session.');
       expect(sessionHooks(result)[0].timeout).toBe(90);
     });
 
@@ -107,6 +109,17 @@ describe('buildSettingsJson', () => {
       );
       expect(cmd.match(/gcloud storage/g)).toHaveLength(1);
       expect(cmd).not.toContain('orchestrator/instructions.md');
+    });
+
+    test('a .mjs bootstrap is checked and run with node', () => {
+      const mjs = { ...boot, bootstrap: 'hooks/session-start.mjs' };
+      const cmd = command(buildSettingsJson(mjs, {}, 'retail'));
+      expect(cmd).toContain('if node --check "$s" 2>/dev/null; then node "$s" --clan retail --run ensure-pre-commit.sh');
+      expect(cmd).toContain('gcloud storage cp gs://extenda-agent-artifacts/hooks/session-start.mjs "$s"');
+      expect(cmd).not.toContain('bash');
+      expect(cmd).toContain('or node is not installed. Install Node.js or run gcloud auth login, then start a new session.');
+      expect(cmd.match(/gcloud storage/g)).toHaveLength(1);
+      expect(sessionHooks(buildSettingsJson(mjs, {}, 'retail'))[0].timeout).toBe(90);
     });
 
     test('template mode (clanName=null) passes no --clan', () => {
@@ -140,6 +153,8 @@ describe('buildSettingsJson', () => {
     test('the global schema accepts bootstrap under hooks/', () => {
       const ok = (bootstrap) => validate({ bootstrap }, globalSchema).valid;
       expect(ok('hooks/session-start.sh')).toBe(true);
+      expect(ok('hooks/session-start.mjs')).toBe(true);
+      expect(ok('hooks/x.js')).toBe(false);
       expect(ok('hooks/sub/x.sh')).toBe(false);
       expect(ok('hooks/foo bar.sh')).toBe(false);
       expect(ok('hooks/$(x).sh')).toBe(false);
