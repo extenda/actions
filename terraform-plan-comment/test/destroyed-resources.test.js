@@ -118,6 +118,7 @@ const mockOctokit = () => {
           },
         }),
         getContent: vi.fn(),
+        listForOrg: vi.fn().mockResolvedValue({ data: [] }),
       },
       search: {
         code: vi.fn().mockResolvedValue({ data: { items: [] } }),
@@ -1273,6 +1274,60 @@ environments:
       const sa = checker.resources.get(`sa:${SA}`);
       expect(sa.inUse).toBe(false);
       expect(sa.failed).toBe('code search failed: 403');
+    });
+
+    test('It skips hits in archived repositories', async () => {
+      octokit.rest.repos.listForOrg.mockResolvedValue({
+        data: [
+          { full_name: 'extenda/old', archived: true },
+          { full_name: 'extenda/live', archived: false },
+        ],
+      });
+      mockSearch(octokit, {
+        [SA]: [
+          searchItem('extenda/old', 'a.ts'),
+          searchItem('extenda/live', 'a.ts'),
+        ],
+        'api.example.com': [searchItem('extenda/old', 'b.ts')],
+      });
+      const checker = await run(
+        octokit,
+        ['google_service_account', { email: SA }],
+        ['google_dns_record_set', { name: 'api.example.com.' }],
+      );
+
+      expect(
+        checker.resources.get(`sa:${SA}`).refs.map(({ repo }) => repo),
+      ).toEqual(['extenda/live']);
+      expect(checker.resources.get('dns:api.example.com').refs).toEqual([]);
+      expect(octokit.rest.search.code).toHaveBeenCalledTimes(2);
+      expect(octokit.rest.repos.listForOrg).toHaveBeenCalledTimes(1);
+      expect(octokit.rest.repos.listForOrg).toHaveBeenCalledWith({
+        org: 'extenda',
+        type: 'all',
+        per_page: 100,
+      });
+    });
+
+    test('It searches archived repositories if they can not be listed', async () => {
+      octokit.rest.repos.listForOrg.mockRejectedValue(
+        Object.assign(new Error('forbidden'), { status: 403 }),
+      );
+      mockSearch(octokit, {
+        [SA]: [searchItem('extenda/old', 'a.ts')],
+      });
+      const checker = await run(octokit, [
+        'google_service_account',
+        { email: SA },
+      ]);
+
+      expect(
+        checker.resources.get(`sa:${SA}`).refs.map(({ repo }) => repo),
+      ).toEqual(['extenda/old']);
+      expect(checker.resources.get(`sa:${SA}`).failed).toBeUndefined();
+      expect(core.warning).toHaveBeenCalledWith(
+        'Could not list archived repositories, so they are searched too: 403',
+      );
     });
 
     test('It warns if the pull request is behind its base branch', async () => {

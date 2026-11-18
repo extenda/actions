@@ -257,6 +257,8 @@ class DestroyedResources {
     this.diff = undefined;
     this.files = new Map();
     this.limit = pLimit(MAX_PARALLEL_READS);
+    // Promise of the archived repositories, read once.
+    this.archived = undefined;
   }
 
   addResource(kind, name) {
@@ -765,7 +767,33 @@ class DestroyedResources {
     }
   }
 
+  // Code search can't exclude archived repositories, so they are listed.
+  archivedRepos() {
+    this.archived ??= this.octokit
+      .paginate(this.octokit.rest.repos.listForOrg, {
+        org: this.org,
+        type: 'all',
+        per_page: 100,
+      })
+      .then(
+        (repos) =>
+          new Set(
+            repos
+              .filter(({ archived }) => archived)
+              .map(({ full_name: name }) => name),
+          ),
+      )
+      .catch((err) => {
+        core.warning(
+          `Could not list archived repositories, so they are searched too: ${err.status || err.message}`,
+        );
+        return new Set();
+      });
+    return this.archived;
+  }
+
   async searchCode(text) {
+    const archived = await this.archivedRepos();
     const wait = this.lastSearch + this.searchInterval - Date.now();
     if (wait > 0) {
       await sleep(wait);
@@ -777,7 +805,12 @@ class DestroyedResources {
       headers: { accept: 'application/vnd.github.text-match+json' },
     });
     const items = data.items || [];
-    return { items, truncated: (data.total_count ?? 0) > items.length };
+    return {
+      items: items.filter(
+        ({ repository }) => !archived.has(repository.full_name),
+      ),
+      truncated: (data.total_count ?? 0) > items.length,
+    };
   }
 
   async checkCode(resource) {

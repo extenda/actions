@@ -37,6 +37,7 @@ followed by a checklist for what can't be checked automatically. The checks cove
 Each resource is checked for references:
 
 * In other repositories in the organization, found with GitHub code search. Code search only covers default branches.
+  Archived repositories are skipped, unless they can't be listed, then they are searched too, with a warning.
   References from the repository of a service the pull request removes are ignored.
 * For DNS names of a repository the pull request removes: in the `cloud-deploy.yaml` of another service. This happens when a new
   service takes over the URI of that service, so the domain must be kept. The comment then warns
