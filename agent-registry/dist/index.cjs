@@ -102936,7 +102936,7 @@ var global_settings_schema_default = {
 It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when\
  a repository does not have it.",
       type: "string",
-      pattern: "^hooks/[A-Za-z0-9_.-]+\\.sh$"
+      pattern: "^hooks/[A-Za-z0-9_.-]+\\.(sh|mjs)$"
     },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/GlobalHooks" },
@@ -103234,10 +103234,12 @@ var bootstrapHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => 
   const clanArg = clanName ? ` --clan ${shellQuote(clanName)}` : "";
   const scripts = sessionStartScripts(baseline, clanConfig, clanName);
   const runs = scripts.map(runArg).join("");
+  const run2 = interpreter(name);
+  const check = run2 === "node" ? "node --check" : "bash -n";
   const command = `s="${CD}/.claude/hooks/${name}"; [ -f "$s" ] || CLOUDSDK_CORE_DISABLE_PROMPTS=1 gcloud storage cp ${GCS2}\
-/hooks/${name} "$s" </dev/null >/dev/null 2>&1; if bash -n "$s" 2>/dev/null; then bash "$s"${clanArg}${runs}; else echo \
-'{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded. Run gcloud auth login, then\
- start a new session."}'; fi`;
+/hooks/${name} "$s" </dev/null >/dev/null 2>&1; if ${check} "$s" 2>/dev/null; then ${run2} "$s"${clanArg}${runs}; else e\
+cho '{"systemMessage":"agent-sync: .claude/hooks/${name} is missing and could not be downloaded. Run gcloud auth login, \
+then start a new session."}'; fi`;
   const timeout = scripts.reduce((sum, e) => sum + (e.timeout ?? 0), 0) + SETUP_TIMEOUT_ALLOWANCE;
   return [hookCmd(command, timeout)];
 }, "bootstrapHooks");
