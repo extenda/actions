@@ -102994,9 +102994,9 @@ It downloads and installs the agent config, then runs the SessionStart scripts. 
         },
         script: {
           description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     },
@@ -103030,9 +103030,9 @@ directories) and end in .sh",
         },
         script: {
           description: "Path to hook script relative to agent-registry/global/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     }
@@ -103111,9 +103111,9 @@ var clan_settings_schema_default = {
         },
         script: {
           description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     },
@@ -103139,9 +103139,9 @@ directories) and end in .sh",
         },
         script: {
           description: "Path to hook script relative to agent-registry/config/. Must be a direct child of hooks/ (no sub\
-directories) and end in .sh",
+directories) and end in .sh (run with bash) or .mjs (run with node)",
           type: "string",
-          pattern: "^hooks/[^/]+\\.sh$"
+          pattern: "^hooks/[^/]+\\.(sh|mjs)$"
         }
       }
     }

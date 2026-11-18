@@ -825,6 +825,21 @@ describe('hook script paths', () => {
     expect(validate(withHooks(hooks), schema).valid).toBe(true);
   });
 
+  test.each([
+    ['global', globalSchema],
+    ['clan', clanSchema],
+  ])('%s schema accepts .mjs scripts in every event, and no other extension', (_name, schema) => {
+    const hooks = {
+      SessionStart: [{ script: 'hooks/a.mjs', args: ['--x'] }],
+      PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.mjs' }],
+      Stop: [{ script: 'hooks/c.mjs', timeout: 10 }],
+    };
+    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+    for (const script of ['hooks/d.js', 'hooks/e.py', 'hooks/f.mjs.bak']) {
+      expect(validate(withHooks({ Stop: [{ script }] }), schema).valid).toBe(false);
+    }
+  });
+
   test('a clan script with the same file name as a global one is not downloaded', () => {
     const baseline = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
     const clan = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
