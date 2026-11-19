@@ -14,6 +14,7 @@ vi.mock('../src/upload-gcs.js');
 
 import * as core from '@actions/core';
 import { readFileSync, existsSync, writeFileSync, unlinkSync } from 'node:fs';
+import fg from 'fast-glob';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from '../src/upload-gcs.js';
 
@@ -295,6 +296,39 @@ describe('buildSettingsJson', () => {
   });
 });
 
+// ── checkMainAgent in a clan repo ────────────────────────────────────────────
+
+describe('checkMainAgent in a repo without global/settings.yaml', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    existsSync.mockReturnValue(false);
+    readFileSync.mockReturnValue(`agent: orchestrator\n${'bootstrap: hooks/session-start.mjs'}\n`);
+    execGcloud.mockResolvedValue('');
+  });
+
+  test('fails when the repo defines the main-thread agent', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent', 'agents/orchestrator']);
+    await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(
+      /agents\/orchestrator\/ is the main-thread agent/,
+    );
+  });
+
+  test('passes for other agents, and skips the fetch without agents', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent']);
+    await expect(checkMainAgent('/root/agent-registry')).resolves.toBeUndefined();
+    fg.sync.mockReturnValue([]);
+    execGcloud.mockClear();
+    await checkMainAgent('/root/agent-registry');
+    expect(execGcloud).not.toHaveBeenCalled();
+  });
+
+  test('fails when the global baseline cannot be fetched', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent']);
+    execGcloud.mockRejectedValue(new Error('denied'));
+    await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(/Could not fetch the global baseline/);
+  });
+});
+
 // ── syncClanSettings ─────────────────────────────────────────────────────────
 
 const GLOBAL_YAML = `
@@ -372,13 +406,13 @@ describe('syncClanSettings', () => {
       expect(upload).not.toHaveBeenCalled();
     });
 
-    test('checkMainAgent fails on a missing agent instructions file, whatever changed', () => {
+    test('checkMainAgent fails on a missing agent instructions file, whatever changed', async () => {
       readFileSync.mockImplementation((p) =>
         p.includes('global/settings.yaml') ? `agent: orchestrator\n${GLOBAL_YAML}` : '');
       existsSync.mockImplementation((p) => p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('global/CLAUDE.md'));
-      expect(() => checkMainAgent('/root/agent-registry')).toThrow(/agents\/orchestrator\/instructions\.md/);
+      await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(/agents\/orchestrator\/instructions\.md/);
       existsSync.mockReturnValue(true);
-      expect(() => checkMainAgent('/root/agent-registry')).not.toThrow();
+      await expect(checkMainAgent('/root/agent-registry')).resolves.toBeUndefined();
     });
 
     test('uploads global/CLAUDE.md as the shared rules, and sets agent in settings.json', async () => {

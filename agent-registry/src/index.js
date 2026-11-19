@@ -211,7 +211,7 @@ const action = async () => {
 
   const registryRoot = path.join(process.cwd(), AGENT_REGISTRY_PATH);
   // Before anything is published, also when only the agent's instructions changed.
-  checkMainAgent(registryRoot);
+  await checkMainAgent(registryRoot);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(

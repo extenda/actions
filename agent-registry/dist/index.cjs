@@ -103347,9 +103347,12 @@ var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
   (0, import_node_fs9.writeFileSync)(tmpPath, content, "utf8");
   return tmpPath;
 }, "writeTempFile");
-var checkMainAgent = /* @__PURE__ */ __name((registryRoot) => {
+var checkMainAgent = /* @__PURE__ */ __name(async (registryRoot) => {
   const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
-  if (!(0, import_node_fs9.existsSync)(globalYamlPath)) return;
+  if (!(0, import_node_fs9.existsSync)(globalYamlPath)) {
+    await checkNotMainAgent(registryRoot);
+    return;
+  }
   const { agent } = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8")) ?? {};
   if (!agent) return;
   for (const required of [
@@ -103363,6 +103366,26 @@ var checkMainAgent = /* @__PURE__ */ __name((registryRoot) => {
     }
   }
 }, "checkMainAgent");
+var checkNotMainAgent = /* @__PURE__ */ __name(async (registryRoot) => {
+  const local = import_fast_glob3.default.sync("agents/*", { cwd: registryRoot, onlyDirectories: true }).map((dir) => import_node_path8.default.
+  basename(dir));
+  if (!local.length) return;
+  let baseline;
+  try {
+    baseline = await fetchGlobalBaseline();
+  } catch (e) {
+    throw new Error(
+      `Could not fetch the global baseline from GCS to check agents/: ${e.message}`,
+      { cause: e }
+    );
+  }
+  const agent = baseline?.agent;
+  if (agent && local.includes(agent)) {
+    throw new Error(
+      `agents/${agent}/ is the main-thread agent; only the platform repo (with global/settings.yaml) publishes it`
+    );
+  }
+}, "checkNotMainAgent");
 var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
   const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
   const clanYamlPath = import_node_path8.default.join(registryRoot, "config", "settings.yaml");
@@ -103372,7 +103395,7 @@ var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths,
   const affected = /* @__PURE__ */ __name((prefix2) => !changedPaths.length || changedPaths.some((p2) => p2.startsWith(`\
 agent-registry/${prefix2}`)), "affected");
   if (hasGlobal && affected("global/")) {
-    checkMainAgent(registryRoot);
+    await checkMainAgent(registryRoot);
     startGroup("Global baseline");
     const globalConfig = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
@@ -103480,7 +103503,8 @@ agent-registry/${prefix2}`)), "affected");
       info("Fetched global baseline from GCS");
     } catch (e) {
       throw new Error(
-        `Could not fetch the global baseline from GCS: ${e.message}`
+        `Could not fetch the global baseline from GCS: ${e.message}`,
+        { cause: e }
       );
     }
   }
@@ -103665,7 +103689,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     info("No changed paths detected \u2014 processing all items");
   }
   const registryRoot = import_node_path9.default.join(process.cwd(), AGENT_REGISTRY_PATH);
-  checkMainAgent(registryRoot);
+  await checkMainAgent(registryRoot);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(

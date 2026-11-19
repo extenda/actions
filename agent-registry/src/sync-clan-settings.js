@@ -259,12 +259,17 @@ const writeTempFile = (content, suffix) => {
 };
 
 /**
- * Throws when global/settings.yaml selects an agent the bootstrap cannot install: no
- * agents/<agent>/instructions.md or global/CLAUDE.md. Runs on every publish, whatever paths changed.
+ * Runs on every publish, before anything is uploaded, whatever paths changed.
+ * Platform repo (has global/settings.yaml): throws when its agent has no agents/<agent>/instructions.md
+ * or no global/CLAUDE.md, so the bootstrap cannot install it.
+ * Any other repo: throws when it defines the main-thread agent, which would replace that agent in every repo.
  */
-export const checkMainAgent = (registryRoot) => {
+export const checkMainAgent = async (registryRoot) => {
   const globalYamlPath = path.join(registryRoot, 'global', 'settings.yaml');
-  if (!existsSync(globalYamlPath)) return;
+  if (!existsSync(globalYamlPath)) {
+    await checkNotMainAgent(registryRoot);
+    return;
+  }
   const { agent } = load(readFileSync(globalYamlPath, 'utf8')) ?? {};
   if (!agent) return;
   for (const required of [
@@ -276,6 +281,28 @@ export const checkMainAgent = (registryRoot) => {
         `global/settings.yaml: agent ${agent} needs agent-registry/${required}`,
       );
     }
+  }
+};
+
+const checkNotMainAgent = async (registryRoot) => {
+  const local = fg
+    .sync('agents/*', { cwd: registryRoot, onlyDirectories: true })
+    .map((dir) => path.basename(dir));
+  if (!local.length) return;
+  let baseline;
+  try {
+    baseline = await fetchGlobalBaseline();
+  } catch (e) {
+    throw new Error(
+      `Could not fetch the global baseline from GCS to check agents/: ${e.message}`,
+      { cause: e },
+    );
+  }
+  const agent = baseline?.agent;
+  if (agent && local.includes(agent)) {
+    throw new Error(
+      `agents/${agent}/ is the main-thread agent; only the platform repo (with global/settings.yaml) publishes it`,
+    );
   }
 };
 
@@ -293,7 +320,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
   // --- Global baseline (platform repo only) ---
   if (hasGlobal && affected('global/')) {
-    checkMainAgent(registryRoot);
+    await checkMainAgent(registryRoot);
     core.startGroup('Global baseline');
     const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
     validateSettings('global/settings.yaml', globalConfig, globalSchema);
@@ -425,6 +452,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
     } catch (e) {
       throw new Error(
         `Could not fetch the global baseline from GCS: ${e.message}`,
+        { cause: e },
       );
     }
   }
