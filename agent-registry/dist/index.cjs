@@ -103423,6 +103423,27 @@ var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
   (0, import_node_fs9.writeFileSync)(tmpPath, content, "utf8");
   return tmpPath;
 }, "writeTempFile");
+var checkMainAgent = /* @__PURE__ */ __name((registryRoot) => {
+  const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
+  if (!(0, import_node_fs9.existsSync)(globalYamlPath)) return;
+  const { agent, bootstrap } = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8")) ?? {};
+  if (!agent) return;
+  if (!bootstrap) {
+    throw new Error(
+      "global/settings.yaml: agent needs bootstrap, which installs the agent file"
+    );
+  }
+  for (const required of [
+    `agents/${agent}/instructions.md`,
+    "global/CLAUDE.md"
+  ]) {
+    if (!(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, required))) {
+      throw new Error(
+        `global/settings.yaml: agent ${agent} needs agent-registry/${required}`
+      );
+    }
+  }
+}, "checkMainAgent");
 var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
   const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
   const clanYamlPath = import_node_path8.default.join(registryRoot, "config", "settings.yaml");
@@ -103432,6 +103453,7 @@ var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths,
   const affected = /* @__PURE__ */ __name((prefix2) => !changedPaths.length || changedPaths.some((p2) => p2.startsWith(`\
 agent-registry/${prefix2}`)), "affected");
   if (hasGlobal && affected("global/")) {
+    checkMainAgent(registryRoot);
     startGroup("Global baseline");
     const globalConfig = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
@@ -103440,17 +103462,6 @@ agent-registry/${prefix2}`)), "affected");
       throw new Error(
         `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`
       );
-    }
-    const { agent } = globalConfig;
-    if (agent) {
-      if (!bootstrap) {
-        throw new Error("global/settings.yaml: agent needs bootstrap, which installs the agent file");
-      }
-      for (const required of [`agents/${agent}/instructions.md`, "global/CLAUDE.md"]) {
-        if (!(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, required))) {
-          throw new Error(`global/settings.yaml: agent ${agent} needs agent-registry/${required}`);
-        }
-      }
     }
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "commands"), "commands", dryRun);
@@ -103734,6 +103745,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     info("No changed paths detected \u2014 processing all items");
   }
   const registryRoot = import_node_path9.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  checkMainAgent(registryRoot);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(

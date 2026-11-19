@@ -12,7 +12,7 @@ import { deleteSkills } from './delete-skills.js';
 import { registerAgent } from './register-agent.js';
 import { registerMcp } from './register-mcp.js';
 import { registerSkill } from './register-skill.js';
-import { syncClanSettings } from './sync-clan-settings.js';
+import { checkMainAgent, syncClanSettings } from './sync-clan-settings.js';
 import { upload } from './upload-gcs.js';
 
 const AGENT_REGISTRY_PATH = 'agent-registry';
@@ -210,6 +210,8 @@ const action = async () => {
   }
 
   const registryRoot = path.join(process.cwd(), AGENT_REGISTRY_PATH);
+  // Before anything is published, also when only the agent's instructions changed.
+  checkMainAgent(registryRoot);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(

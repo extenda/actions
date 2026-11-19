@@ -365,6 +365,32 @@ const writeTempFile = (content, suffix) => {
   return tmpPath;
 };
 
+/**
+ * Throws when global/settings.yaml selects an agent the bootstrap cannot install: no bootstrap, or no
+ * agents/<agent>/instructions.md or global/CLAUDE.md. Runs on every publish, whatever paths changed.
+ */
+export const checkMainAgent = (registryRoot) => {
+  const globalYamlPath = path.join(registryRoot, 'global', 'settings.yaml');
+  if (!existsSync(globalYamlPath)) return;
+  const { agent, bootstrap } = load(readFileSync(globalYamlPath, 'utf8')) ?? {};
+  if (!agent) return;
+  if (!bootstrap) {
+    throw new Error(
+      'global/settings.yaml: agent needs bootstrap, which installs the agent file',
+    );
+  }
+  for (const required of [
+    `agents/${agent}/instructions.md`,
+    'global/CLAUDE.md',
+  ]) {
+    if (!existsSync(path.join(registryRoot, required))) {
+      throw new Error(
+        `global/settings.yaml: agent ${agent} needs agent-registry/${required}`,
+      );
+    }
+  }
+};
+
 export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan) => {
   const globalYamlPath = path.join(registryRoot, 'global', 'settings.yaml');
   const clanYamlPath = path.join(registryRoot, 'config', 'settings.yaml');
@@ -379,6 +405,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
   // --- Global baseline (platform repo only) ---
   if (hasGlobal && affected('global/')) {
+    checkMainAgent(registryRoot);
     core.startGroup('Global baseline');
     const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
     validateSettings('global/settings.yaml', globalConfig, globalSchema);
@@ -391,19 +418,6 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
       throw new Error(
         `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`,
       );
-    }
-
-    // Never publish a settings.json that selects an agent the bootstrap cannot install, or without its shared rules.
-    const { agent } = globalConfig;
-    if (agent) {
-      if (!bootstrap) {
-        throw new Error('global/settings.yaml: agent needs bootstrap, which installs the agent file');
-      }
-      for (const required of [`agents/${agent}/instructions.md`, 'global/CLAUDE.md']) {
-        if (!existsSync(path.join(registryRoot, required))) {
-          throw new Error(`global/settings.yaml: agent ${agent} needs agent-registry/${required}`);
-        }
-      }
     }
 
     await syncFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);

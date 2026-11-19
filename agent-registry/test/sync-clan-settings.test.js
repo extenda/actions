@@ -20,7 +20,7 @@ import { upload } from '../src/upload-gcs.js';
 import { validate } from 'jsonschema';
 import globalSchema from '../src/global-settings.schema.json';
 import clanSchema from '../src/clan-settings.schema.json';
-import { buildSettingsJson, syncClanSettings } from '../src/sync-clan-settings.js';
+import { buildSettingsJson, checkMainAgent, syncClanSettings } from '../src/sync-clan-settings.js';
 
 // ── buildSettingsJson ────────────────────────────────────────────────────────
 
@@ -534,6 +534,15 @@ describe('syncClanSettings', () => {
         || p.includes('agents/orchestrator/instructions.md'));
       await expect(syncClanSettings('/root/agent-registry', [], false, 'platform')).rejects.toThrow(/global\/CLAUDE\.md/);
       expect(upload).not.toHaveBeenCalled();
+    });
+
+    test('checkMainAgent fails on a missing agent instructions file, whatever changed', () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml') ? `bootstrap: hooks/session-start.mjs\nagent: orchestrator\n${GLOBAL_YAML}` : '');
+      existsSync.mockImplementation((p) => p.includes('global/settings.yaml') || p.includes('global/CLAUDE.md'));
+      expect(() => checkMainAgent('/root/agent-registry')).toThrow(/agents\/orchestrator\/instructions\.md/);
+      existsSync.mockReturnValue(true);
+      expect(() => checkMainAgent('/root/agent-registry')).not.toThrow();
     });
 
     test('uploads global/CLAUDE.md as the shared rules, and sets agent in settings.json', async () => {
