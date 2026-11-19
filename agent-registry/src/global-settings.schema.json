@@ -4,11 +4,17 @@
   "description": "Platform baseline applied to all clans. Managed by the platform team.",
   "type": "object",
   "additionalProperties": false,
+  "required": ["bootstrap"],
   "properties": {
     "bootstrap": {
-      "description": "Optional. Script under hooks/ that the SessionStart hook runs instead of the inline download steps. It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when a repository does not have it.",
+      "description": "Required. Script under hooks/ that the SessionStart hook runs. It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when a repository does not have it.",
       "type": "string",
       "pattern": "^hooks/[A-Za-z0-9_.-]+\\.(sh|mjs)$"
+    },
+    "agent": {
+      "description": "Optional. The main-thread agent, set as `agent` in every settings.json. The bootstrap installs agents/<agent>/instructions.md as .claude/agents/<agent>.md, and global/CLAUDE.md, published as CLAUDE.md, becomes the shared rules in CLAUDE.md and AGENTS.md. Both files must exist in agent-registry/.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
     },
     "permissions": { "$ref": "#/definitions/Permissions" },
     "hooks": { "$ref": "#/definitions/GlobalHooks" },

@@ -77,28 +77,9 @@ const hookCmd = (command, timeout) => ({
 
 const hookEntryCmd = (entry) => hookCmd(gcpHook(entry), entry.timeout);
 
-// Every hook entry across all events, used to decide which scripts to download.
-const allHookEntries = (config) => [
-  ...(config?.hooks?.SessionStart ?? []),
-  ...(config?.hooks?.PreToolUse ?? []),
-  ...(config?.hooks?.Stop ?? []),
-];
-
-// Claude Code starts the hooks of one SessionStart group in parallel. The steps
-// below depend on each other (a script must be downloaded before it is run), so
-// they are emitted as ONE hook whose command runs them in order, one per line.
-//
-// The hook timeout covers the whole joined command, so it is the SUM of the
-// scripts' own timeouts plus an allowance for the untimed setup and download
-// steps. Steps without a timeout add nothing; if no step has one, the Claude
-// Code default applies.
+// The bootstrap hook's timeout is the SUM of the SessionStart scripts' own
+// timeouts plus an allowance for its download, validation and install.
 const SETUP_TIMEOUT_ALLOWANCE = 60;
-
-const sequential = (steps) => {
-  const scriptTimeouts = steps.reduce((sum, step) => sum + (step.timeout ?? 0), 0);
-  const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : undefined;
-  return hookCmd(steps.map((step) => step.command).join('\n'), timeout);
-};
 
 // Global SessionStart scripts, then the clan's; a clan script named like a global one is skipped.
 const sessionStartScripts = (baseline, clanConfig, clanName) => {
@@ -151,102 +132,14 @@ const bootstrapHooks = (baseline, clanConfig, clanName) => {
   return [hookCmd(command, timeout)];
 };
 
+// The bootstrap script is the only way settings.json syncs the agent config.
 const buildSessionStartHooks = (baseline, clanConfig, clanName) => {
-  if (baseline?.bootstrap) {
-    return bootstrapHooks(baseline, clanConfig, clanName);
+  if (!baseline?.bootstrap) {
+    throw new Error(
+      'The global baseline has no bootstrap: settings.json would not sync the agent config',
+    );
   }
-  const cmds = [];
-
-  // Setup
-  cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
-
-  // Fetch clan-specific settings.json (self-updates this file on next session).
-  // Template mode (clanName=null): derive clan at runtime from discovered.md.
-  // Clan mode: hardcoded path — no fallback needed, bootstrap gap handled gracefully.
-  if (clanName) {
-    cmds.push(hookCmd(
-      `gcloud storage cp ${GCS}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`,
-    ));
-  } else {
-    cmds.push(hookCmd(
-      `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null);` +
-      ` [ -n "$CLAN" ] && gcloud storage cp ${GCS}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null` +
-      ` || gcloud storage cp ${GCS}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`,
-    ));
-  }
-
-  // Download global hook scripts (SessionStart + PreToolUse + Stop). A script
-  // used by several events is downloaded once.
-  const downloadedGlobal = new Set();
-  for (const entry of allHookEntries(baseline)) {
-    const s = filename(entry.script);
-    if (downloadedGlobal.has(s)) continue;
-    downloadedGlobal.add(s);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
-  }
-
-  // Download clan hook scripts (SessionStart + PreToolUse + Stop) — global filenames take precedence
-  if (clanName) {
-    const globalHookNames = new Set(allHookEntries(baseline).map((e) => filename(e.script)));
-
-    const downloadedClan = new Set();
-    for (const entry of allHookEntries(clanConfig)) {
-      const s = filename(entry.script);
-      if (globalHookNames.has(s) || downloadedClan.has(s)) continue;
-      downloadedClan.add(s);
-      cmds.push(hookCmd(`gcloud storage cp ${GCS}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
-    }
-  }
-
-  // chmod all hooks at once. Hooks are started with bash or node and do not
-  // need it; it keeps the shell scripts runnable by hand.
-  cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
-
-  // Fetch orchestrator CLAUDE.md (strip frontmatter, preserve existing on failure)
-  cmds.push(hookCmd(
-    `tmp=$(mktemp); gcloud storage cat ${GCS}/agents/orchestrator/instructions.md 2>/dev/null` +
-    ` | awk '/^---$/{c++;if(c==2){p=1;next}}p' > "$tmp";` +
-    ` if [ -s "$tmp" ]; then mv "$tmp" "${CD}/CLAUDE.md"; cp "${CD}/CLAUDE.md" "${CD}/AGENTS.md"; else rm -f "$tmp"; fi`,
-  ));
-
-  // Download global commands
-  for (const c of (baseline?.commands ?? [])) {
-    const f = filename(c);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
-  }
-
-  // Download clan commands — global filenames take precedence
-  if (clanName) {
-    const globalCommandNames = new Set((baseline?.commands ?? []).map((c) => filename(c)));
-    for (const c of (clanConfig?.commands ?? [])) {
-      const f = filename(c);
-      if (globalCommandNames.has(f)) continue;
-      cmds.push(hookCmd(`gcloud storage cp ${GCS}/commands/${clanName}/${f} "${CD}/.claude/commands/${f}" 2>/dev/null || true`));
-    }
-  }
-
-  // Download clan conventions and review policy (clan-specific settings.json only)
-  if (clanName) {
-    for (const f of CLAN_AGENT_FILES) {
-      cmds.push(hookCmd(`gcloud storage cp ${GCS}/config/${clanName}/${f} "${CD}/.agent/${f}" 2>/dev/null || true`));
-    }
-  }
-
-  // Run global SessionStart scripts, then clan SessionStart scripts
-  for (const entry of (baseline?.hooks?.SessionStart ?? [])) {
-    const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
-  }
-  if (clanName) {
-    const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
-    for (const entry of (clanConfig?.hooks?.SessionStart ?? [])) {
-      const s = filename(entry.script);
-      if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)} || true`, entry.timeout));
-    }
-  }
-
-  return [sequential(cmds)];
+  return bootstrapHooks(baseline, clanConfig, clanName);
 };
 
 export const buildSettingsJson = (baseline, clanConfig, clanName) => {
@@ -271,6 +164,7 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
   ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
 
   return {
+    ...(baseline?.agent ? { agent: baseline.agent } : {}),
     permissions: { allow: allPerms },
     hooks: {
       // Run for events that begin a new session id: startup, clear and fork. Skip resume and
@@ -364,6 +258,54 @@ const writeTempFile = (content, suffix) => {
   return tmpPath;
 };
 
+/**
+ * Runs on every publish, before anything is uploaded, whatever paths changed.
+ * Platform repo (has global/settings.yaml): throws when its agent has no agents/<agent>/instructions.md
+ * or no global/CLAUDE.md, so the bootstrap cannot install it.
+ * Any other repo: throws when it defines the main-thread agent, which would replace that agent in every repo.
+ */
+export const checkMainAgent = async (registryRoot) => {
+  const globalYamlPath = path.join(registryRoot, 'global', 'settings.yaml');
+  if (!existsSync(globalYamlPath)) {
+    await checkNotMainAgent(registryRoot);
+    return;
+  }
+  const { agent } = load(readFileSync(globalYamlPath, 'utf8')) ?? {};
+  if (!agent) return;
+  for (const required of [
+    `agents/${agent}/instructions.md`,
+    'global/CLAUDE.md',
+  ]) {
+    if (!existsSync(path.join(registryRoot, required))) {
+      throw new Error(
+        `global/settings.yaml: agent ${agent} needs agent-registry/${required}`,
+      );
+    }
+  }
+};
+
+const checkNotMainAgent = async (registryRoot) => {
+  const local = fg
+    .sync('agents/*', { cwd: registryRoot, onlyDirectories: true })
+    .map((dir) => path.basename(dir));
+  if (!local.length) return;
+  let baseline;
+  try {
+    baseline = await fetchGlobalBaseline();
+  } catch (e) {
+    throw new Error(
+      `Could not fetch the global baseline from GCS to check agents/: ${e.message}`,
+      { cause: e },
+    );
+  }
+  const agent = baseline?.agent;
+  if (agent && local.includes(agent)) {
+    throw new Error(
+      `agents/${agent}/ is the main-thread agent; only the platform repo (with global/settings.yaml) publishes it`,
+    );
+  }
+};
+
 export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan) => {
   const globalYamlPath = path.join(registryRoot, 'global', 'settings.yaml');
   const clanYamlPath = path.join(registryRoot, 'config', 'settings.yaml');
@@ -378,6 +320,7 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
   // --- Global baseline (platform repo only) ---
   if (hasGlobal && affected('global/')) {
+    await checkMainAgent(registryRoot);
     core.startGroup('Global baseline');
     const globalConfig = load(readFileSync(globalYamlPath, 'utf8'));
     validateSettings('global/settings.yaml', globalConfig, globalSchema);
@@ -394,6 +337,17 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
 
     await syncFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
     await syncFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);
+
+    // The shared rules for every role, installed by the bootstrap as CLAUDE.md and AGENTS.md
+    const rulesPath = path.join(registryRoot, 'global', 'CLAUDE.md');
+    if (existsSync(rulesPath)) {
+      if (dryRun) {
+        core.info(`[dry-run] Would upload global/CLAUDE.md → gs://${GCS_BUCKET}/CLAUDE.md`);
+      } else {
+        await upload(rulesPath, 'CLAUDE.md');
+        core.info(`Shared rules uploaded: gs://${GCS_BUCKET}/CLAUDE.md`);
+      }
+    }
 
     // Upload raw global YAML for clan repos that need to fetch the baseline
     if (dryRun) {
@@ -496,8 +450,10 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
       baseline = await fetchGlobalBaseline();
       core.info('Fetched global baseline from GCS');
     } catch (e) {
-      core.warning(`Could not fetch global baseline from GCS: ${e.message}. Using empty baseline.`);
-      baseline = { permissions: { allow: [] }, hooks: {} };
+      throw new Error(
+        `Could not fetch the global baseline from GCS: ${e.message}`,
+        { cause: e },
+      );
     }
   }
 

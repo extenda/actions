@@ -14,18 +14,20 @@ vi.mock('../src/upload-gcs.js');
 
 import * as core from '@actions/core';
 import { readFileSync, existsSync, writeFileSync, unlinkSync } from 'node:fs';
+import fg from 'fast-glob';
 import { execGcloud } from '../../setup-gcloud/src/exec-gcloud.js';
 import { upload } from '../src/upload-gcs.js';
 
 import { validate } from 'jsonschema';
 import globalSchema from '../src/global-settings.schema.json';
 import clanSchema from '../src/clan-settings.schema.json';
-import { buildSettingsJson, syncClanSettings } from '../src/sync-clan-settings.js';
+import { buildSettingsJson, checkMainAgent, syncClanSettings } from '../src/sync-clan-settings.js';
 
 // ── buildSettingsJson ────────────────────────────────────────────────────────
 
 describe('buildSettingsJson', () => {
   const baseline = {
+    bootstrap: 'hooks/session-start.mjs',
     permissions: { allow: ['Bash(git status*)', 'Bash(ls)'] },
     commands: ['commands/init.md'],
     hooks: {
@@ -52,14 +54,6 @@ describe('buildSettingsJson', () => {
   const sessionHooks = (result) => result.hooks.SessionStart[0].hooks;
   // The steps of the one SessionStart hook, in the order they run.
   const sessionCommands = (result) => sessionHooks(result).flatMap((h) => h.command.split('\n'));
-
-  test('SessionStart is a single entry with a single hook that runs its steps in order', () => {
-    const result = buildSettingsJson(baseline, {}, 'retail');
-    expect(result.hooks.SessionStart).toHaveLength(1);
-    // Hooks of one group run in parallel, so downloads, chmod and runs must share one command.
-    expect(sessionHooks(result)).toHaveLength(1);
-    expect(sessionCommands(result).length).toBeGreaterThan(1);
-  });
 
   test('SessionStart runs on startup, clear and fork, not on resume or compact', () => {
     const matcher = (clanName) =>
@@ -160,21 +154,11 @@ describe('buildSettingsJson', () => {
       expect(ok('hooks/$(x).sh')).toBe(false);
     });
 
-    test('without bootstrap the inline steps are generated as before', () => {
-      expect(command(buildSettingsJson(baseline, {}, 'retail'))).toContain(
-        'chmod +x',
-      );
+    test('without bootstrap it fails instead of generating settings that never sync', () => {
+      const { bootstrap: _, ...noBoot } = baseline;
+      expect(() => buildSettingsJson(noBoot, {}, 'retail')).toThrow(/no bootstrap/);
+      expect(validate({}, globalSchema).valid).toBe(false);
     });
-  });
-
-  test('SessionStart downloads every script before it runs one', () => {
-    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));
-    const lastDownload = cmds.findLastIndex((c) => c.includes('gcloud storage cp') && c.includes('/hooks/'));
-    const chmod = cmds.findIndex((c) => c.startsWith('chmod'));
-    const firstRun = cmds.findIndex((c) => c.includes('bash "'));
-    expect(chmod).toBeGreaterThan(lastDownload);
-    expect(firstRun).toBeGreaterThan(chmod);
   });
 
   test('SessionStart timeout is the sum of script timeouts plus the setup allowance', () => {
@@ -195,30 +179,6 @@ describe('buildSettingsJson', () => {
     expect(commands.every((c) => !c.includes('[ -x'))).toBe(true);
   });
 
-  test('SessionStart hooks include setup, fetch, chmod, CLAUDE.md sync', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    expect(cmds.some((c) => c.includes('mkdir -p'))).toBe(true);
-    expect(cmds.some((c) => c.includes('config/retail/settings.json'))).toBe(true);
-    expect(cmds.some((c) => c.includes('chmod +x'))).toBe(true);
-    expect(cmds.some((c) => c.includes('orchestrator/instructions.md'))).toBe(true);
-  });
-
-  test('fetches clan settings from config/<clan>/, no claude-code fallback', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    const settingsCmd = cmds.find((c) => c.includes('settings.json'));
-    expect(settingsCmd).toContain('config/retail/settings.json');
-    expect(settingsCmd).not.toContain('claude-code/settings.json');
-  });
-
-  test('global mode (clanName=null): derives $CLAN at runtime, falls back to config/settings.json', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, null));
-    const settingsCmd = cmds.find((c) => c.includes('settings.json'));
-    expect(settingsCmd).toContain('$CLAN');
-    expect(settingsCmd).toContain('discovered.md');
-    expect(settingsCmd).toContain('config/settings.json');
-    expect(settingsCmd).not.toContain('claude-code/settings.json');
-  });
-
   test('global mode: omits clan hook and command downloads', () => {
     const clan = {
       hooks: { SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] },
@@ -227,89 +187,6 @@ describe('buildSettingsJson', () => {
     const cmds = sessionCommands(buildSettingsJson(baseline, clan, null));
     expect(cmds.every((c) => !c.includes('ensure-pre-commit.sh'))).toBe(true);
     expect(cmds.every((c) => !c.includes('review-pr.md'))).toBe(true);
-  });
-
-  test('downloads global PreToolUse hook scripts', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    expect(cmds.some((c) => c.includes('hooks/tool-guardian.sh'))).toBe(true);
-    expect(cmds.some((c) => c.includes('hooks/secret-scanner.sh'))).toBe(true);
-  });
-
-  test('downloads global SessionStart hook scripts from hooks/', () => {
-    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(base, {}, 'retail'));
-    // Must download from global hooks/ path (no clan prefix)
-    expect(cmds.some((c) => c.includes('gcloud storage cp') && c.match(/hooks\/ensure-pre-commit\.sh/) && !c.includes('retail/'))).toBe(true);
-  });
-
-  test('runs global SessionStart scripts before clan SessionStart scripts', () => {
-    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const clan = { hooks: { SessionStart: [{ script: 'hooks/clan-setup.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(base, clan, 'retail'));
-    const globalRunIdx = cmds.findIndex((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
-    const clanRunIdx = cmds.findIndex((c) => c.includes('[ -f') && c.includes('clan-setup.sh'));
-    expect(globalRunIdx).toBeGreaterThan(-1);
-    expect(clanRunIdx).toBeGreaterThan(globalRunIdx);
-  });
-
-  test('runs global SessionStart scripts in global template mode (clanName=null)', () => {
-    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(base, {}, null));
-    expect(cmds.some((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'))).toBe(true);
-  });
-
-  test('downloads clan conventions to .agent/conventions.md', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    expect(cmds.some((c) => c.includes('config/retail/conventions.md') && c.includes('.agent/conventions.md'))).toBe(true);
-  });
-
-  test('downloads clan review policy to .agent/review.md', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    expect(cmds.some((c) => c.includes('config/retail/review.md') && c.includes('.agent/review.md'))).toBe(true);
-  });
-
-  test('does not download review policy in global template mode (clanName=null)', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, null));
-    expect(cmds.every((c) => !c.includes('review.md'))).toBe(true);
-  });
-
-  test('does not download conventions in global template mode (clanName=null)', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, null));
-    expect(cmds.every((c) => !c.includes('conventions.md'))).toBe(true);
-  });
-
-  test('downloads clan hook scripts under hooks/<clan>/', () => {
-    const clan = { hooks: { SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'platform'));
-    expect(cmds.some((c) => c.includes('hooks/platform/ensure-pre-commit.sh'))).toBe(true);
-  });
-
-  test('chmod uses wildcard, not explicit list', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    const chmodCmd = cmds.find((c) => c.startsWith('chmod'));
-    expect(chmodCmd).toContain('*.sh');
-  });
-
-  test('runs clan SessionStart scripts after download', () => {
-    const clan = { hooks: { SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'platform'));
-    const runCmd = cmds.find((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
-    expect(runCmd).toBeDefined();
-    // Run cmd should come after the download cmd
-    const downloadIdx = cmds.findIndex((c) => c.includes('hooks/platform/ensure-pre-commit.sh'));
-    const runIdx = cmds.indexOf(runCmd);
-    expect(runIdx).toBeGreaterThan(downloadIdx);
-  });
-
-  test('downloads global commands', () => {
-    const cmds = sessionCommands(buildSettingsJson(baseline, {}, 'retail'));
-    expect(cmds.some((c) => c.includes('commands/init.md'))).toBe(true);
-  });
-
-  test('downloads clan commands under commands/<clan>/', () => {
-    const clan = { commands: ['commands/review-pr.md'] };
-    const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'retail'));
-    expect(cmds.some((c) => c.includes('commands/retail/review-pr.md'))).toBe(true);
   });
 
   test('PreToolUse hooks use [ -f ] and bash, and the guard pattern that propagates the exit code', () => {
@@ -324,6 +201,7 @@ describe('buildSettingsJson', () => {
 
   test('.mjs hooks are started with node, with the same guard and args', () => {
     const nodeBaseline = {
+      bootstrap: 'hooks/session-start.mjs',
       hooks: {
         PreToolUse: [{ matcher: 'Bash', script: 'hooks/tool-guardian.mjs', args: ['--strict'] }],
         SessionStart: [{ script: 'hooks/warm-up.mjs' }],
@@ -334,9 +212,7 @@ describe('buildSettingsJson', () => {
       '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.mjs" ] || exit 0;' +
         ' node "${CLAUDE_PROJECT_DIR}/.claude/hooks/tool-guardian.mjs" --strict',
     );
-    expect(sessionCommands(result)).toContain(
-      '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/warm-up.mjs" ] && node "${CLAUDE_PROJECT_DIR}/.claude/hooks/warm-up.mjs" || true',
-    );
+    expect(sessionCommands(result).join('\n')).toContain('--run warm-up.mjs');
   });
 
   test('hooks without args or timeout emit neither field', () => {
@@ -382,16 +258,8 @@ describe('buildSettingsJson', () => {
       expect(result.hooks.PreToolUse[0].matcher).toBe('Write|Edit|MultiEdit|NotebookEdit|Bash');
     });
 
-    test('passes args to SessionStart scripts and downloads a shared script once', () => {
-      const cmds = sessionCommands(buildSettingsJson(withStop, {}, 'retail'));
-      expect(cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('hooks/verify-on-stop.sh'))).toHaveLength(1);
-      expect(cmds).toContain(
-        '[ -f "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" ] && bash "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-on-stop.sh" --baseline || true',
-      );
-    });
-
     test('shell-quotes arguments with unsafe characters', () => {
-      const cfg = { hooks: { Stop: [{ script: 'hooks/x.sh', args: ['a b', "it's", '$(rm -rf /)', 'plain-1.2'] }] } };
+      const cfg = { bootstrap: 'hooks/session-start.mjs', hooks: { Stop: [{ script: 'hooks/x.sh', args: ['a b', "it's", '$(rm -rf /)', 'plain-1.2'] }] } };
       const command = buildSettingsJson(cfg, {}, 'retail').hooks.Stop[0].hooks[0].command;
       expect(command).toContain(`x.sh" 'a b' 'it'\\''s' '$(rm -rf /)' plain-1.2`);
     });
@@ -401,34 +269,7 @@ describe('buildSettingsJson', () => {
       const result = buildSettingsJson(withStop, clan, 'retail');
       expect(result.hooks.Stop).toHaveLength(2);
       expect(result.hooks.Stop[1].hooks[0].command).toContain('clan-stop.sh');
-      expect(sessionCommands(result).some((c) => c.includes('hooks/retail/clan-stop.sh'))).toBe(true);
     });
-  });
-
-  test('clan hook with same filename as global SessionStart hook is not downloaded or run again', () => {
-    const base = { ...baseline, hooks: { ...baseline.hooks, SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }] } };
-    const clan = {
-      hooks: {
-        SessionStart: [{ script: 'hooks/ensure-pre-commit.sh' }], // same filename as global
-        PreToolUse: [{ matcher: 'Bash', script: 'hooks/clan-lint.sh' }],
-      },
-    };
-    const cmds = sessionCommands(buildSettingsJson(base, clan, 'retail'));
-    // ensure-pre-commit.sh must be downloaded exactly once (from global hooks/, not retail/)
-    const downloads = cmds.filter((c) => c.includes('gcloud storage cp') && c.includes('ensure-pre-commit.sh'));
-    expect(downloads).toHaveLength(1);
-    expect(downloads[0]).not.toContain('retail/');
-    // And run exactly once (global SessionStart, clan entry skipped)
-    const runs = cmds.filter((c) => c.includes('[ -f') && c.includes('ensure-pre-commit.sh'));
-    expect(runs).toHaveLength(1);
-  });
-
-  test('clan command with same filename as global command is not downloaded', () => {
-    const clan = { commands: ['commands/init.md'] }; // same filename as global
-    const cmds = sessionCommands(buildSettingsJson(baseline, clan, 'retail'));
-    const initDownloads = cmds.filter((c) => c.includes('init.md'));
-    expect(initDownloads).toHaveLength(1);
-    expect(initDownloads[0]).not.toContain('retail/');
   });
 
   test('PreToolUse entries include matcher field', () => {
@@ -449,17 +290,49 @@ describe('buildSettingsJson', () => {
     expect(result.permissions.allow).toEqual(baseline.permissions.allow);
   });
 
-  test('handles null baseline gracefully', () => {
+  test('a null baseline has no bootstrap and fails', () => {
     const clan = { permissions: { allow: ['Bash(./gradlew *)'] }, commands: [] };
-    const result = buildSettingsJson(null, clan, 'retail');
-    expect(result.permissions.allow).toEqual(['Bash(./gradlew *)']);
-    expect(result.hooks.SessionStart).toHaveLength(1);
+    expect(() => buildSettingsJson(null, clan, 'retail')).toThrow(/no bootstrap/);
+  });
+});
+
+// ── checkMainAgent in a clan repo ────────────────────────────────────────────
+
+describe('checkMainAgent in a repo without global/settings.yaml', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    existsSync.mockReturnValue(false);
+    readFileSync.mockReturnValue(`agent: orchestrator\n${'bootstrap: hooks/session-start.mjs'}\n`);
+    execGcloud.mockResolvedValue('');
+  });
+
+  test('fails when the repo defines the main-thread agent', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent', 'agents/orchestrator']);
+    await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(
+      /agents\/orchestrator\/ is the main-thread agent/,
+    );
+  });
+
+  test('passes for other agents, and skips the fetch without agents', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent']);
+    await expect(checkMainAgent('/root/agent-registry')).resolves.toBeUndefined();
+    fg.sync.mockReturnValue([]);
+    execGcloud.mockClear();
+    await checkMainAgent('/root/agent-registry');
+    expect(execGcloud).not.toHaveBeenCalled();
+  });
+
+  test('fails when the global baseline cannot be fetched', async () => {
+    fg.sync.mockReturnValue(['agents/cardpayment-agent']);
+    execGcloud.mockRejectedValue(new Error('denied'));
+    await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(/Could not fetch the global baseline/);
   });
 });
 
 // ── syncClanSettings ─────────────────────────────────────────────────────────
 
 const GLOBAL_YAML = `
+bootstrap: hooks/session-start.mjs
 permissions:
   allow:
     - "Bash(git status*)"
@@ -502,7 +375,7 @@ describe('syncClanSettings', () => {
 
   describe('platform repo — hasGlobal=true', () => {
     beforeEach(() => {
-      existsSync.mockImplementation((p) => p.includes('global/settings.yaml') || p.includes('config/settings.yaml'));
+      existsSync.mockImplementation((p) => p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('config/settings.yaml'));
       readFileSync.mockImplementation((p) => {
         if (p.includes('global/settings.yaml')) return GLOBAL_YAML;
         if (p.includes('config/settings.yaml')) return CLAN_YAML;
@@ -522,6 +395,36 @@ describe('syncClanSettings', () => {
         syncClanSettings('/root/agent-registry', [], false, 'platform'),
       ).rejects.toThrow(/bootstrap/);
       expect(upload).not.toHaveBeenCalled();
+    });
+
+    test('an agent needs its instructions and global/CLAUDE.md', async () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml') ? `agent: orchestrator\n${GLOBAL_YAML}` : '');
+      existsSync.mockImplementation((p) => p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.endsWith('session-start.mjs')
+        || p.includes('agents/orchestrator/instructions.md'));
+      await expect(syncClanSettings('/root/agent-registry', [], false, 'platform')).rejects.toThrow(/global\/CLAUDE\.md/);
+      expect(upload).not.toHaveBeenCalled();
+    });
+
+    test('checkMainAgent fails on a missing agent instructions file, whatever changed', async () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml') ? `agent: orchestrator\n${GLOBAL_YAML}` : '');
+      existsSync.mockImplementation((p) => p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('global/CLAUDE.md'));
+      await expect(checkMainAgent('/root/agent-registry')).rejects.toThrow(/agents\/orchestrator\/instructions\.md/);
+      existsSync.mockReturnValue(true);
+      await expect(checkMainAgent('/root/agent-registry')).resolves.toBeUndefined();
+    });
+
+    test('uploads global/CLAUDE.md as the shared rules, and sets agent in settings.json', async () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml')
+          ? `agent: orchestrator\n${GLOBAL_YAML}`
+          : '');
+      existsSync.mockImplementation((p) => !p.includes('config/settings.yaml'));
+      await syncClanSettings('/root/agent-registry', [], false, '');
+      expect(upload).toHaveBeenCalledWith('/root/agent-registry/global/CLAUDE.md', 'CLAUDE.md');
+      const json = JSON.parse(writeFileSync.mock.calls.find((c) => String(c[0]).includes('settings.json'))[1]);
+      expect(json.agent).toBe('orchestrator');
     });
 
     test('uploads global settings.yaml to config/settings.yaml', async () => {
@@ -544,7 +447,7 @@ describe('syncClanSettings', () => {
 
     test('uploads conventions.md to config/<clan>/conventions.md when it exists', async () => {
       existsSync.mockImplementation((p) =>
-        p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('conventions.md'),
+        p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('conventions.md'),
       );
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
@@ -559,7 +462,7 @@ describe('syncClanSettings', () => {
 
     test('uploads review.md to config/<clan>/review.md when it exists', async () => {
       existsSync.mockImplementation((p) =>
-        p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('review.md'),
+        p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('review.md'),
       );
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);
@@ -584,7 +487,7 @@ describe('syncClanSettings', () => {
 
     test('does not delete review.md when config/review.md exists', async () => {
       existsSync.mockImplementation((p) =>
-        p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('review.md'),
+        p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('config/settings.yaml') || p.includes('review.md'),
       );
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const rmCalls = execGcloud.mock.calls.filter((c) => c[0][1] === 'rm').map((c) => c[0][2]);
@@ -691,18 +594,18 @@ describe('syncClanSettings', () => {
       expect(calls.some((p) => p === 'config/retail/settings.json')).toBe(true);
     });
 
-    test('uses empty baseline when GCS fetch fails', async () => {
+    test('fails without uploading when the global baseline cannot be fetched', async () => {
       execGcloud.mockRejectedValue(new Error('not found'));
-      await syncClanSettings('/root/agent-registry', [], false, 'retail');
-      expect(core.warning).toHaveBeenCalledWith(expect.stringContaining('Could not fetch global baseline'));
-      const calls = upload.mock.calls.map((c) => c[1]);
-      expect(calls.some((p) => p === 'config/retail/settings.json')).toBe(true);
+      await expect(syncClanSettings('/root/agent-registry', [], false, 'retail')).rejects.toThrow(
+        /Could not fetch the global baseline/,
+      );
+      expect(upload).not.toHaveBeenCalled();
     });
   });
 
   describe('changed-path filtering', () => {
     beforeEach(() => {
-      existsSync.mockImplementation((p) => p.includes('global/settings.yaml') || p.includes('config/settings.yaml'));
+      existsSync.mockImplementation((p) => p.endsWith('session-start.mjs') || p.includes('global/settings.yaml') || p.includes('config/settings.yaml'));
       readFileSync.mockImplementation((p) => {
         if (p.includes('global/settings.yaml')) return GLOBAL_YAML;
         return CLAN_YAML;
@@ -809,7 +712,8 @@ describe('hook script paths', () => {
   // Scripts are uploaded to hooks/<name> and downloaded by file name only, so a
   // nested path such as hooks/sub/foo.sh would be uploaded to one location and
   // downloaded from another. The schemas therefore only accept flat paths.
-  const withHooks = (hooks) => ({ hooks });
+  const withHooks = (hooks, schema) =>
+    schema === globalSchema ? { bootstrap: 'hooks/session-start.mjs', hooks } : { hooks };
 
   test.each([
     ['global', globalSchema],
@@ -823,7 +727,7 @@ describe('hook script paths', () => {
         { PreToolUse: [{ matcher: 'Bash', script: nested }] },
         { Stop: [{ script: nested }] },
       ]) {
-        expect(validate(withHooks(hooks), schema).valid).toBe(false);
+        expect(validate(withHooks(hooks, schema), schema).valid).toBe(false);
       }
     },
   );
@@ -837,7 +741,7 @@ describe('hook script paths', () => {
       PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.sh' }],
       Stop: [{ script: 'hooks/c.sh', timeout: 10 }],
     };
-    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+    expect(validate(withHooks(hooks, schema), schema).valid).toBe(true);
   });
 
   test.each([
@@ -849,26 +753,10 @@ describe('hook script paths', () => {
       PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.mjs' }],
       Stop: [{ script: 'hooks/c.mjs', timeout: 10 }],
     };
-    expect(validate(withHooks(hooks), schema).valid).toBe(true);
+    expect(validate(withHooks(hooks, schema), schema).valid).toBe(true);
     for (const script of ['hooks/d.js', 'hooks/e.py', 'hooks/f.mjs.bak']) {
-      expect(validate(withHooks({ Stop: [{ script }] }), schema).valid).toBe(false);
+      expect(validate(withHooks({ Stop: [{ script }] }, schema), schema).valid).toBe(false);
     }
   });
 
-  test('a clan script with the same file name as a global one is not downloaded', () => {
-    const baseline = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
-    const clan = { hooks: { Stop: [{ script: 'hooks/same.sh' }] } };
-    const cmds = buildSettingsJson(
-      baseline,
-      clan,
-      'retail',
-    ).hooks.SessionStart[0].hooks.flatMap((h) => h.command.split('\n'));
-    expect(
-      cmds.filter(
-        (c) => c.includes('same.sh') && c.includes('gcloud storage cp'),
-      ),
-    ).toEqual([
-      'gcloud storage cp gs://extenda-agent-artifacts/hooks/same.sh "${CLAUDE_PROJECT_DIR}/.claude/hooks/same.sh" 2>/dev/null || true',
-    ]);
-  });
 });

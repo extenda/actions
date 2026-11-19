@@ -102930,13 +102930,20 @@ var global_settings_schema_default = {
   description: "Platform baseline applied to all clans. Managed by the platform team.",
   type: "object",
   additionalProperties: false,
+  required: ["bootstrap"],
   properties: {
     bootstrap: {
-      description: "Optional. Script under hooks/ that the SessionStart hook runs instead of the inline download steps. \
-It downloads and installs the agent config, then runs the SessionStart scripts. The hook downloads the script first when\
- a repository does not have it.",
+      description: "Required. Script under hooks/ that the SessionStart hook runs. It downloads and installs the agent c\
+onfig, then runs the SessionStart scripts. The hook downloads the script first when a repository does not have it.",
       type: "string",
       pattern: "^hooks/[A-Za-z0-9_.-]+\\.(sh|mjs)$"
+    },
+    agent: {
+      description: "Optional. The main-thread agent, set as `agent` in every settings.json. The bootstrap installs agent\
+s/<agent>/instructions.md as .claude/agents/<agent>.md, and global/CLAUDE.md, published as CLAUDE.md, becomes the shared\
+ rules in CLAUDE.md and AGENTS.md. Both files must exist in agent-registry/.",
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]*$"
     },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/GlobalHooks" },
@@ -103198,17 +103205,7 @@ var hookCmd = /* @__PURE__ */ __name((command, timeout) => ({
   ...timeout ? { timeout } : {}
 }), "hookCmd");
 var hookEntryCmd = /* @__PURE__ */ __name((entry) => hookCmd(gcpHook(entry), entry.timeout), "hookEntryCmd");
-var allHookEntries = /* @__PURE__ */ __name((config) => [
-  ...config?.hooks?.SessionStart ?? [],
-  ...config?.hooks?.PreToolUse ?? [],
-  ...config?.hooks?.Stop ?? []
-], "allHookEntries");
 var SETUP_TIMEOUT_ALLOWANCE = 60;
-var sequential = /* @__PURE__ */ __name((steps) => {
-  const scriptTimeouts = steps.reduce((sum, step) => sum + (step.timeout ?? 0), 0);
-  const timeout = scriptTimeouts > 0 ? scriptTimeouts + SETUP_TIMEOUT_ALLOWANCE : void 0;
-  return hookCmd(steps.map((step) => step.command).join("\n"), timeout);
-}, "sequential");
 var sessionStartScripts = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const global2 = baseline?.hooks?.SessionStart ?? [];
   if (!clanName) return global2;
@@ -103246,78 +103243,12 @@ session."}'; fi`;
   return [hookCmd(command, timeout)];
 }, "bootstrapHooks");
 var buildSessionStartHooks = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
-  if (baseline?.bootstrap) {
-    return bootstrapHooks(baseline, clanConfig, clanName);
+  if (!baseline?.bootstrap) {
+    throw new Error(
+      "The global baseline has no bootstrap: settings.json would not sync the agent config"
+    );
   }
-  const cmds = [];
-  cmds.push(hookCmd(`mkdir -p "${CD}/.claude/hooks" "${CD}/.claude/commands"`));
-  if (clanName) {
-    cmds.push(hookCmd(
-      `gcloud storage cp ${GCS2}/config/${clanName}/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
-    ));
-  } else {
-    cmds.push(hookCmd(
-      `CLAN=$(sed -n 's/.*\\*\\*Clan:\\*\\* \\([a-z0-9-]*\\).*/\\1/p' "${CD}/.agent/discovered.md" 2>/dev/null); [ -n "$\
-CLAN" ] && gcloud storage cp ${GCS2}/config/$CLAN/settings.json "${CD}/.claude/settings.json" 2>/dev/null || gcloud stor\
-age cp ${GCS2}/config/settings.json "${CD}/.claude/settings.json" 2>/dev/null || true`
-    ));
-  }
-  const downloadedGlobal = /* @__PURE__ */ new Set();
-  for (const entry of allHookEntries(baseline)) {
-    const s = filename(entry.script);
-    if (downloadedGlobal.has(s)) continue;
-    downloadedGlobal.add(s);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/hooks/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
-  }
-  if (clanName) {
-    const globalHookNames = new Set(allHookEntries(baseline).map((e) => filename(e.script)));
-    const downloadedClan = /* @__PURE__ */ new Set();
-    for (const entry of allHookEntries(clanConfig)) {
-      const s = filename(entry.script);
-      if (globalHookNames.has(s) || downloadedClan.has(s)) continue;
-      downloadedClan.add(s);
-      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/hooks/${clanName}/${s} "${CD}/.claude/hooks/${s}" 2>/dev/null || true`));
-    }
-  }
-  cmds.push(hookCmd(`chmod +x "${CD}/.claude/hooks/"*.sh 2>/dev/null || true`));
-  cmds.push(hookCmd(
-    `tmp=$(mktemp); gcloud storage cat ${GCS2}/agents/orchestrator/instructions.md 2>/dev/null | awk '/^---$/{c++;if(c==\
-2){p=1;next}}p' > "$tmp"; if [ -s "$tmp" ]; then mv "$tmp" "${CD}/CLAUDE.md"; cp "${CD}/CLAUDE.md" "${CD}/AGENTS.md"; el\
-se rm -f "$tmp"; fi`
-  ));
-  for (const c3 of baseline?.commands ?? []) {
-    const f3 = filename(c3);
-    cmds.push(hookCmd(`gcloud storage cp ${GCS2}/commands/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null || true`));
-  }
-  if (clanName) {
-    const globalCommandNames = new Set((baseline?.commands ?? []).map((c3) => filename(c3)));
-    for (const c3 of clanConfig?.commands ?? []) {
-      const f3 = filename(c3);
-      if (globalCommandNames.has(f3)) continue;
-      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/commands/${clanName}/${f3} "${CD}/.claude/commands/${f3}" 2>/dev/null\
- || true`));
-    }
-  }
-  if (clanName) {
-    for (const f3 of CLAN_AGENT_FILES) {
-      cmds.push(hookCmd(`gcloud storage cp ${GCS2}/config/${clanName}/${f3} "${CD}/.agent/${f3}" 2>/dev/null || true`));
-    }
-  }
-  for (const entry of baseline?.hooks?.SessionStart ?? []) {
-    const s = filename(entry.script);
-    cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)}\
- || true`, entry.timeout));
-  }
-  if (clanName) {
-    const globalSessionNames = new Set((baseline?.hooks?.SessionStart ?? []).map((e) => filename(e.script)));
-    for (const entry of clanConfig?.hooks?.SessionStart ?? []) {
-      const s = filename(entry.script);
-      if (globalSessionNames.has(s)) continue;
-      cmds.push(hookCmd(`[ -f "${CD}/.claude/hooks/${s}" ] && ${interpreter(s)} "${CD}/.claude/hooks/${s}"${argString(entry)}\
- || true`, entry.timeout));
-    }
-  }
-  return [sequential(cmds)];
+  return bootstrapHooks(baseline, clanConfig, clanName);
 }, "buildSessionStartHooks");
 var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) => {
   const basePerms = baseline?.permissions?.allow ?? [];
@@ -103338,6 +103269,7 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
     ...clanConfig?.hooks?.Stop ?? []
   ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
   return {
+    ...baseline?.agent ? { agent: baseline.agent } : {},
     permissions: { allow: allPerms },
     hooks: {
       // Run for events that begin a new session id: startup, clear and fork. Skip resume and
@@ -103415,6 +103347,45 @@ var writeTempFile = /* @__PURE__ */ __name((content, suffix) => {
   (0, import_node_fs9.writeFileSync)(tmpPath, content, "utf8");
   return tmpPath;
 }, "writeTempFile");
+var checkMainAgent = /* @__PURE__ */ __name(async (registryRoot) => {
+  const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
+  if (!(0, import_node_fs9.existsSync)(globalYamlPath)) {
+    await checkNotMainAgent(registryRoot);
+    return;
+  }
+  const { agent } = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8")) ?? {};
+  if (!agent) return;
+  for (const required of [
+    `agents/${agent}/instructions.md`,
+    "global/CLAUDE.md"
+  ]) {
+    if (!(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, required))) {
+      throw new Error(
+        `global/settings.yaml: agent ${agent} needs agent-registry/${required}`
+      );
+    }
+  }
+}, "checkMainAgent");
+var checkNotMainAgent = /* @__PURE__ */ __name(async (registryRoot) => {
+  const local = import_fast_glob3.default.sync("agents/*", { cwd: registryRoot, onlyDirectories: true }).map((dir) => import_node_path8.default.
+  basename(dir));
+  if (!local.length) return;
+  let baseline;
+  try {
+    baseline = await fetchGlobalBaseline();
+  } catch (e) {
+    throw new Error(
+      `Could not fetch the global baseline from GCS to check agents/: ${e.message}`,
+      { cause: e }
+    );
+  }
+  const agent = baseline?.agent;
+  if (agent && local.includes(agent)) {
+    throw new Error(
+      `agents/${agent}/ is the main-thread agent; only the platform repo (with global/settings.yaml) publishes it`
+    );
+  }
+}, "checkNotMainAgent");
 var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths, dryRun, clan) => {
   const globalYamlPath = import_node_path8.default.join(registryRoot, "global", "settings.yaml");
   const clanYamlPath = import_node_path8.default.join(registryRoot, "config", "settings.yaml");
@@ -103424,6 +103395,7 @@ var syncClanSettings = /* @__PURE__ */ __name(async (registryRoot, changedPaths,
   const affected = /* @__PURE__ */ __name((prefix2) => !changedPaths.length || changedPaths.some((p2) => p2.startsWith(`\
 agent-registry/${prefix2}`)), "affected");
   if (hasGlobal && affected("global/")) {
+    await checkMainAgent(registryRoot);
     startGroup("Global baseline");
     const globalConfig = load((0, import_node_fs9.readFileSync)(globalYamlPath, "utf8"));
     validateSettings("global/settings.yaml", globalConfig, global_settings_schema_default);
@@ -103435,6 +103407,15 @@ agent-registry/${prefix2}`)), "affected");
     }
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "commands"), "commands", dryRun);
+    const rulesPath = import_node_path8.default.join(registryRoot, "global", "CLAUDE.md");
+    if ((0, import_node_fs9.existsSync)(rulesPath)) {
+      if (dryRun) {
+        info(`[dry-run] Would upload global/CLAUDE.md \u2192 gs://${GCS_BUCKET2}/CLAUDE.md`);
+      } else {
+        await upload(rulesPath, "CLAUDE.md");
+        info(`Shared rules uploaded: gs://${GCS_BUCKET2}/CLAUDE.md`);
+      }
+    }
     if (dryRun) {
       info(`[dry-run] Would upload global/settings.yaml \u2192 gs://${GCS_BUCKET2}/config/settings.yaml`);
     } else {
@@ -103521,8 +103502,10 @@ agent-registry/${prefix2}`)), "affected");
       baseline = await fetchGlobalBaseline();
       info("Fetched global baseline from GCS");
     } catch (e) {
-      warning(`Could not fetch global baseline from GCS: ${e.message}. Using empty baseline.`);
-      baseline = { permissions: { allow: [] }, hooks: {} };
+      throw new Error(
+        `Could not fetch the global baseline from GCS: ${e.message}`,
+        { cause: e }
+      );
     }
   }
   const merged = buildSettingsJson(baseline, clanConfig, clanName);
@@ -103706,6 +103689,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     info("No changed paths detected \u2014 processing all items");
   }
   const registryRoot = import_node_path9.default.join(process.cwd(), AGENT_REGISTRY_PATH);
+  await checkMainAgent(registryRoot);
   await processAgents(registryRoot, changedPaths, gitSha, dryRun);
   await processMcps(registryRoot, changedPaths, dryRun);
   const skillFailures = await processSkills(

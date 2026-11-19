@@ -257,18 +257,18 @@ commands:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `permissions.allow` | no | Additional permission strings merged with the global set. |
-| `hooks.SessionStart` | no | Scripts that run once per session start, after all files are downloaded. |
+| `hooks.SessionStart` | no | Scripts the bootstrap runs once per session start, after it installs the config. |
 | `hooks.PreToolUse` | no | Additional PreToolUse hooks merged with the global set. |
 | `hooks.Stop` | no | Hooks that run when Claude finishes a turn. Exit code 2 blocks the stop. |
 | `commands` | no | Additional slash-command files added alongside global commands. |
 
 Hook scripts go in `agent-registry/config/hooks/` and slash-command files in `agent-registry/config/commands/`.
 
-Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args` (`node` instead of `bash` for a `.mjs` script; Node is a prerequisite of the orchestrator install), so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts are run as `[ -f script ] && bash script args || true` (again `node` for `.mjs`) and never block session start, whatever their exit code.
-The SessionStart hook has matcher `startup|clear|fork`: it does not run on resume or compaction.
-All SessionStart setup steps run sequentially in one hook, so its timeout is the sum of the scripts' `timeout` values plus a 60-second allowance for setup and downloads.
+Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args` (`node` instead of `bash` for a `.mjs` script; Node is a prerequisite of the orchestrator install), so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts never block session start, whatever their exit code.
 
-With `bootstrap: hooks/<script>.sh` (or `.mjs`) in the global `settings.yaml` (platform team only), the SessionStart hook runs that script instead of the steps above: `bash .claude/hooks/<script>.sh [--clan <clan>] --run '<script> [args]'...` (`node` for a `.mjs` bootstrap, checked with `node --check` instead of `bash -n`). It downloads the script first when the repository does not have it. The platform's `session-start.sh` checks that gcloud has credentials, downloads `hooks/`, `commands/`, `config/<clan>/` and the orchestrator instructions in one copy, validates and installs them, then runs the `--run` scripts in order. In this mode SessionStart script names and `args` must match `^[A-Za-z0-9_@%+=:,./-]+$`, and the hook timeout is always set: the sum of the scripts' `timeout` values plus 60 seconds. The publish fails when the bootstrap script is missing from `agent-registry/global/`.
+The global `settings.yaml` (platform team only) must set `bootstrap: hooks/<script>.sh` (or `.mjs`). The SessionStart hook has matcher `startup|clear|fork` (it does not run on resume or compaction) and runs that script: `bash .claude/hooks/<script>.sh [--clan <clan>] --run '<script> [args]'...` (`node` for a `.mjs` bootstrap, checked with `node --check` instead of `bash -n`). It downloads the script first when the repository does not have it. The platform's bootstrap checks that gcloud has credentials, downloads `hooks/`, `commands/`, `config/<clan>/`, the shared `CLAUDE.md` and the orchestrator instructions in one copy, validates and installs them, then runs the `--run` scripts in order. SessionStart script names and `args` must match `^[A-Za-z0-9_@%+=:,./-]+$`, and the hook timeout is the sum of the scripts' `timeout` values plus 60 seconds. The publish fails when the bootstrap script is missing from `agent-registry/global/`, and a clan publish fails when the global baseline cannot be fetched.
+
+With `agent: <agent-id>` in the global `settings.yaml`, every `settings.json` sets `"agent": "<agent-id>"`, so Claude Code runs that agent as the main thread. The bootstrap installs `agents/<agent-id>/instructions.md` as `.claude/agents/<agent-id>.md`, and `agent-registry/global/CLAUDE.md`, published as `CLAUDE.md`, as the shared rules for every role in `CLAUDE.md` and `AGENTS.md`. Every publish fails when either file is missing. Only the platform repo publishes that agent: a publish from any other repo that defines `agents/<agent-id>/` fails, and so does a clan `settings.yaml` with `agent` (the clan schema allows only `permissions`, `hooks` and `commands`).
 
 Hook `script` paths must be direct children of `hooks/` (for example `hooks/my-guard.sh`). Subdirectories are rejected, because scripts are stored and downloaded by file name. A clan script with the same file name as a global script is ignored; the global script wins.
 
@@ -287,6 +287,7 @@ Edit it in the clan common repo, not in `.agent/review.md`, which is replaced on
 All artifacts land in `gs://extenda-agent-artifacts/`. The clan's portion of the bucket looks like:
 
 ```
+CLAUDE.md                        # shared rules for every role (platform repo only)
 config/
   <clan>/
     settings.json                # merged settings.json downloaded by developers on session start
