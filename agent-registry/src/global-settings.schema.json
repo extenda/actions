@@ -10,6 +10,11 @@
       "type": "string",
       "pattern": "^hooks/[A-Za-z0-9_.-]+\\.(sh|mjs)$"
     },
+    "agent": {
+      "description": "Optional. The main-thread agent, set as `agent` in every settings.json. The bootstrap installs agents/<agent>/instructions.md as .claude/agents/<agent>.md, and global/CLAUDE.md, published as CLAUDE.md, becomes the shared rules in CLAUDE.md and AGENTS.md. Both files must exist in agent-registry/. Requires bootstrap.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
     "permissions": { "$ref": "#/definitions/Permissions" },
     "hooks": { "$ref": "#/definitions/GlobalHooks" },
     "commands": { "$ref": "#/definitions/Commands" }

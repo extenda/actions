@@ -271,6 +271,7 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
   ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
 
   return {
+    ...(baseline?.agent ? { agent: baseline.agent } : {}),
     permissions: { allow: allPerms },
     hooks: {
       // Run for events that begin a new session id: startup, clear and fork. Skip resume and
@@ -392,8 +393,32 @@ export const syncClanSettings = async (registryRoot, changedPaths, dryRun, clan)
       );
     }
 
+    // Never publish a settings.json that selects an agent the bootstrap cannot install, or without its shared rules.
+    const { agent } = globalConfig;
+    if (agent) {
+      if (!bootstrap) {
+        throw new Error('global/settings.yaml: agent needs bootstrap, which installs the agent file');
+      }
+      for (const required of [`agents/${agent}/instructions.md`, 'global/CLAUDE.md']) {
+        if (!existsSync(path.join(registryRoot, required))) {
+          throw new Error(`global/settings.yaml: agent ${agent} needs agent-registry/${required}`);
+        }
+      }
+    }
+
     await syncFiles(path.join(registryRoot, 'global', 'hooks'), 'hooks', dryRun);
     await syncFiles(path.join(registryRoot, 'global', 'commands'), 'commands', dryRun);
+
+    // The shared rules for every role, installed by the bootstrap as CLAUDE.md and AGENTS.md
+    const rulesPath = path.join(registryRoot, 'global', 'CLAUDE.md');
+    if (existsSync(rulesPath)) {
+      if (dryRun) {
+        core.info(`[dry-run] Would upload global/CLAUDE.md → gs://${GCS_BUCKET}/CLAUDE.md`);
+      } else {
+        await upload(rulesPath, 'CLAUDE.md');
+        core.info(`Shared rules uploaded: gs://${GCS_BUCKET}/CLAUDE.md`);
+      }
+    }
 
     // Upload raw global YAML for clan repos that need to fetch the baseline
     if (dryRun) {

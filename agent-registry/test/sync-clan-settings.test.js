@@ -524,6 +524,30 @@ describe('syncClanSettings', () => {
       expect(upload).not.toHaveBeenCalled();
     });
 
+    test('an agent needs bootstrap, its instructions and global/CLAUDE.md', async () => {
+      const withAgent = (prefix) => readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml') ? `${prefix}agent: orchestrator\n${GLOBAL_YAML}` : '');
+      withAgent('');
+      await expect(syncClanSettings('/root/agent-registry', [], false, 'platform')).rejects.toThrow(/needs bootstrap/);
+      withAgent('bootstrap: hooks/session-start.mjs\n');
+      existsSync.mockImplementation((p) => p.includes('global/settings.yaml') || p.endsWith('session-start.mjs')
+        || p.includes('agents/orchestrator/instructions.md'));
+      await expect(syncClanSettings('/root/agent-registry', [], false, 'platform')).rejects.toThrow(/global\/CLAUDE\.md/);
+      expect(upload).not.toHaveBeenCalled();
+    });
+
+    test('uploads global/CLAUDE.md as the shared rules, and sets agent in settings.json', async () => {
+      readFileSync.mockImplementation((p) =>
+        p.includes('global/settings.yaml')
+          ? `bootstrap: hooks/session-start.mjs\nagent: orchestrator\n${GLOBAL_YAML}`
+          : '');
+      existsSync.mockImplementation((p) => !p.includes('config/settings.yaml'));
+      await syncClanSettings('/root/agent-registry', [], false, '');
+      expect(upload).toHaveBeenCalledWith('/root/agent-registry/global/CLAUDE.md', 'CLAUDE.md');
+      const json = JSON.parse(writeFileSync.mock.calls.find((c) => String(c[0]).includes('settings.json'))[1]);
+      expect(json.agent).toBe('orchestrator');
+    });
+
     test('uploads global settings.yaml to config/settings.yaml', async () => {
       await syncClanSettings('/root/agent-registry', [], false, 'platform');
       const calls = upload.mock.calls.map((c) => c[1]);

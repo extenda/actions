@@ -102938,6 +102938,13 @@ It downloads and installs the agent config, then runs the SessionStart scripts. 
       type: "string",
       pattern: "^hooks/[A-Za-z0-9_.-]+\\.(sh|mjs)$"
     },
+    agent: {
+      description: "Optional. The main-thread agent, set as `agent` in every settings.json. The bootstrap installs agent\
+s/<agent>/instructions.md as .claude/agents/<agent>.md, and global/CLAUDE.md, published as CLAUDE.md, becomes the shared\
+ rules in CLAUDE.md and AGENTS.md. Both files must exist in agent-registry/. Requires bootstrap.",
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]*$"
+    },
     permissions: { $ref: "#/definitions/Permissions" },
     hooks: { $ref: "#/definitions/GlobalHooks" },
     commands: { $ref: "#/definitions/Commands" }
@@ -103338,6 +103345,7 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
     ...clanConfig?.hooks?.Stop ?? []
   ].map((e) => ({ hooks: [hookEntryCmd(e)] }));
   return {
+    ...baseline?.agent ? { agent: baseline.agent } : {},
     permissions: { allow: allPerms },
     hooks: {
       // Run for events that begin a new session id: startup, clear and fork. Skip resume and
@@ -103433,8 +103441,28 @@ agent-registry/${prefix2}`)), "affected");
         `global/settings.yaml: bootstrap ${bootstrap} does not exist in agent-registry/global/`
       );
     }
+    const { agent } = globalConfig;
+    if (agent) {
+      if (!bootstrap) {
+        throw new Error("global/settings.yaml: agent needs bootstrap, which installs the agent file");
+      }
+      for (const required of [`agents/${agent}/instructions.md`, "global/CLAUDE.md"]) {
+        if (!(0, import_node_fs9.existsSync)(import_node_path8.default.join(registryRoot, required))) {
+          throw new Error(`global/settings.yaml: agent ${agent} needs agent-registry/${required}`);
+        }
+      }
+    }
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "hooks"), "hooks", dryRun);
     await syncFiles(import_node_path8.default.join(registryRoot, "global", "commands"), "commands", dryRun);
+    const rulesPath = import_node_path8.default.join(registryRoot, "global", "CLAUDE.md");
+    if ((0, import_node_fs9.existsSync)(rulesPath)) {
+      if (dryRun) {
+        info(`[dry-run] Would upload global/CLAUDE.md \u2192 gs://${GCS_BUCKET2}/CLAUDE.md`);
+      } else {
+        await upload(rulesPath, "CLAUDE.md");
+        info(`Shared rules uploaded: gs://${GCS_BUCKET2}/CLAUDE.md`);
+      }
+    }
     if (dryRun) {
       info(`[dry-run] Would upload global/settings.yaml \u2192 gs://${GCS_BUCKET2}/config/settings.yaml`);
     } else {
