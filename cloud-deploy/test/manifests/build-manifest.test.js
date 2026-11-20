@@ -1111,6 +1111,69 @@ metadata:
     expect(manifest).toMatchSnapshot();
   });
 
+  test('It should give 100% traffic to the new revision on first deploy when serve traffic is false', async () => {
+    const image = 'example-image:latest';
+    const service = {
+      'cloud-run': {
+        service: 'example-service',
+        resources: {
+          cpu: 1,
+          memory: '512Mi',
+        },
+        protocol: 'http',
+        scaling: {
+          concurrency: 80,
+        },
+        traffic: {
+          'serve-traffic': false,
+        },
+      },
+      security: 'none',
+      labels: {
+        product: 'actions',
+        component: 'jest',
+      },
+      environments: {
+        production: {
+          'min-instances': 1,
+          env: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+          },
+        },
+        staging: 'none',
+      },
+    };
+
+    const revisionList = [];
+
+    const projectId = 'example-project';
+    const clanName = 'example-clan';
+    const env = 'dev';
+
+    getRevisions.mockResolvedValueOnce(revisionList);
+
+    await buildManifest(
+      image,
+      service,
+      projectId,
+      clanName,
+      env,
+      '',
+      '',
+      '',
+      '',
+      '',
+      false,
+    );
+
+    const manifest = yaml.load(readFileSync('cloudrun-service.yaml'));
+    mockFs.restore();
+    expect(manifest.spec.traffic).toEqual([
+      { percent: 100, latestRevision: true },
+    ]);
+  });
+
   test('It should fail deploy if more than 1 active revisions while serve traffic false', async () => {
     const image = 'example-image:latest';
     const service = {
