@@ -112762,7 +112762,7 @@ var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, regi
       { cause: err }
     );
   }
-  if (!output || !output.trim()) {
+  if (!output?.trim()) {
     throw new Error(
       `Unexpected empty output when looking up service ${service}`
     );

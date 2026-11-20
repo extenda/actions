@@ -37,7 +37,7 @@ const getPreviousRevision = async (
       { cause: err },
     );
   }
-  if (!output || !output.trim()) {
+  if (!output?.trim()) {
     throw new Error(
       `Unexpected empty output when looking up service ${service}`,
     );
