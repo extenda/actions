@@ -9,9 +9,12 @@ import deploy from './manifests/deploy.js';
 import getImageWithSha256 from './manifests/image-sha256.js';
 import { securityVersion } from './manifests/security-sidecar.js';
 import publishPolicies from './policies/publish-policies.js';
+import {
+  getNewRevision,
+  getPreviousRevision,
+} from './utils/canary-revisions.js';
 import checkPolicyExists from './utils/cloud-armor.js';
 import readSecret from './utils/load-credentials.js';
-import { getNewRevision, getPreviousRevision } from './utils/canary-revisions.js';
 import {
   refreshCanaryStatus,
   registerAutomaticCanary,
@@ -125,9 +128,10 @@ const action = async () => {
     isNewCanary && typeof trafficCanary === 'object' && trafficCanary.steps
       ? trafficCanary.steps
       : DEFAULT_CANARY_STEPS;
-  const canarySteps = configuredSteps[configuredSteps.length - 1] === 100
-    ? configuredSteps
-    : [...configuredSteps, 100];
+  const canarySteps =
+    configuredSteps[configuredSteps.length - 1] === 100
+      ? configuredSteps
+      : [...configuredSteps, 100];
 
   if (isNewCanary && typeof trafficCanary === 'object' && trafficCanary.steps) {
     for (let i = 1; i < configuredSteps.length; i++) {
@@ -165,9 +169,41 @@ const action = async () => {
   // Trivvy scanning
   if (process.platform !== 'win32') {
     if (env !== 'staging' || projectID === 'quotes-staging-ccdf') {
-      await runScan(serviceAccountKeyCICD, image, serviceName, labels, projectID);
+      await runScan(
+        serviceAccountKeyCICD,
+        image,
+        serviceName,
+        labels,
+        projectID,
+      );
     }
   }
+
+  // Automatic canary needs a previous revision to fall back to. On a first
+  // deploy there is none, so skip canary and serve 100% traffic right away.
+  let previousRevision = null;
+  let firstDeploy = false;
+  if (isNewCanary && env === 'prod' && !platformGKE) {
+    const previous = await getPreviousRevision(
+      serviceName,
+      projectID,
+      'europe-west1',
+    );
+    if (previous.firstDeploy) {
+      core.info(
+        `Canary skipped: no active revision found for ${serviceName} (first deploy). Deploying with 100% traffic.`,
+      );
+      firstDeploy = true;
+    } else {
+      previousRevision = previous.revision;
+      if (previousRevision) {
+        core.info(`Canary: previous revision is ${previousRevision}`);
+      } else {
+        core.warning('Deploy failed due to canary rollout in progress');
+      }
+    }
+  }
+  const effectiveServeTraffic = firstDeploy ? true : serveTraffic;
 
   // setup manifests (hpa, deploy, negs)
   const version = new Date().getTime();
@@ -184,7 +220,7 @@ const action = async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
-    serveTraffic,
+    effectiveServeTraffic,
   );
 
   await publishPolicies(
@@ -193,12 +229,6 @@ const action = async () => {
     userImage.split(':')[1] || version,
     deployYaml,
   );
-
-  let previousRevision = null;
-  if (isNewCanary && env === 'prod' && !platformGKE) {
-    previousRevision = await getPreviousRevision(serviceName, projectID, 'europe-west1');
-    core.info(`Canary: previous revision is ${previousRevision}`);
-  }
 
   core.info('Run cloud-deploy');
   const succesfulDeploy = await deploy(
@@ -255,7 +285,7 @@ const action = async () => {
         ),
       );
 
-      if (!serveTraffic) {
+      if (!effectiveServeTraffic) {
         const serviceInfo = {
           service: serviceName,
           project: projectID,
@@ -268,13 +298,20 @@ const action = async () => {
 
     // new traffic.canary config — register automatic canary for prod only
     if (isNewCanary && env === 'prod' && !platformGKE && previousRevision) {
-      const newRevision = await getNewRevision(serviceName, projectID, 'europe-west1');
+      const newRevision = await getNewRevision(
+        serviceName,
+        projectID,
+        'europe-west1',
+      );
       if (newRevision) {
         const resolvedSlackChannel =
           canarySlackChannel ||
-          (await readSecret(serviceAccountKeyCICD, env, 'clan_slack_channel', 'CLAN_SLACK_CHANNEL').catch(
-            () => '#platform-notifications',
-          ));
+          (await readSecret(
+            serviceAccountKeyCICD,
+            env,
+            'clan_slack_channel',
+            'CLAN_SLACK_CHANNEL',
+          ).catch(() => '#platform-notifications'));
         await registerAutomaticCanary({
           project: projectID,
           service: serviceName,

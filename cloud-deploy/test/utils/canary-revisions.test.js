@@ -16,60 +16,137 @@ describe('canary-revisions', () => {
   describe('getPreviousRevision', () => {
     it('returns the revision name that has 100% traffic', async () => {
       gcloudOutput.mockResolvedValue(
-        JSON.stringify({
-          status: {
-            traffic: [
-              { revisionName: 'my-service-00001-abc', percent: 100 },
-              { revisionName: 'my-service-00002-xyz', percent: 0 },
-            ],
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service' },
+            status: {
+              traffic: [
+                { revisionName: 'my-service-00001-abc', percent: 100 },
+                { revisionName: 'my-service-00002-xyz', percent: 0 },
+              ],
+            },
           },
-        }),
+        ]),
       );
 
       const result = await getPreviousRevision('my-service', 'my-project');
 
-      expect(result).toBe('my-service-00001-abc');
-      expect(gcloudOutput).toHaveBeenCalledWith([
-        'run',
-        'services',
-        'describe',
-        'my-service',
-        '--project=my-project',
-        '--region=europe-west1',
-        '--format=json(status.traffic)',
-      ]);
+      expect(result).toEqual({
+        firstDeploy: false,
+        revision: 'my-service-00001-abc',
+      });
+      expect(gcloudOutput).toHaveBeenCalledWith(
+        [
+          'run',
+          'services',
+          'list',
+          '--project=my-project',
+          '--region=europe-west1',
+          '--filter=metadata.name~^my-service$',
+          '--format=json(metadata.name,status.traffic)',
+        ],
+        'gcloud',
+        true,
+        true,
+      );
     });
 
-    it('returns null when no revision has 100% traffic', async () => {
+    it('is not a first deploy when traffic is split', async () => {
       gcloudOutput.mockResolvedValue(
-        JSON.stringify({
-          status: {
-            traffic: [
-              { revisionName: 'my-service-00001-abc', percent: 90 },
-              { revisionName: 'my-service-00002-xyz', percent: 10 },
-            ],
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service' },
+            status: {
+              traffic: [
+                { revisionName: 'my-service-00001-abc', percent: 90 },
+                { revisionName: 'my-service-00002-xyz', percent: 10 },
+              ],
+            },
           },
-        }),
+        ]),
       );
 
-      const result = await getPreviousRevision('my-service', 'my-project');
+      expect(await getPreviousRevision('my-service', 'my-project')).toEqual({
+        firstDeploy: false,
+        revision: null,
+      });
+    });
 
-      expect(result).toBeNull();
+    it('is a first deploy when the service does not exist', async () => {
+      gcloudOutput.mockResolvedValue('[]');
+
+      expect(await getPreviousRevision('my-service', 'my-project')).toEqual({
+        firstDeploy: true,
+        revision: null,
+      });
+    });
+
+    it('does not match a service with a longer name', async () => {
+      gcloudOutput.mockResolvedValue(
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service-worker' },
+            status: {
+              traffic: [{ revisionName: 'worker-00001', percent: 100 }],
+            },
+          },
+        ]),
+      );
+
+      expect(await getPreviousRevision('my-service', 'my-project')).toEqual({
+        firstDeploy: true,
+        revision: null,
+      });
+    });
+
+    it('is a first deploy when the service has no traffic status', async () => {
+      gcloudOutput.mockResolvedValue(
+        JSON.stringify([{ metadata: { name: 'my-service' }, status: {} }]),
+      );
+
+      expect(await getPreviousRevision('my-service', 'my-project')).toEqual({
+        firstDeploy: true,
+        revision: null,
+      });
+    });
+
+    it('throws when the output is empty', async () => {
+      gcloudOutput.mockResolvedValue('');
+
+      await expect(
+        getPreviousRevision('my-service', 'my-project'),
+      ).rejects.toThrow('empty output');
+    });
+
+    it('throws when gcloud fails', async () => {
+      gcloudOutput.mockRejectedValue(new Error('gcloud failed'));
+
+      await expect(
+        getPreviousRevision('my-service', 'my-project'),
+      ).rejects.toThrow(
+        'Failed to look up service my-service in project my-project, region europe-west1: gcloud failed',
+      );
     });
 
     it('accepts a custom region', async () => {
       gcloudOutput.mockResolvedValue(
-        JSON.stringify({
-          status: {
-            traffic: [{ revisionName: 'my-service-00001-abc', percent: 100 }],
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service' },
+            status: {
+              traffic: [{ revisionName: 'my-service-00001-abc', percent: 100 }],
+            },
           },
-        }),
+        ]),
       );
 
       await getPreviousRevision('my-service', 'my-project', 'us-central1');
 
       expect(gcloudOutput).toHaveBeenCalledWith(
         expect.arrayContaining(['--region=us-central1']),
+        'gcloud',
+        true,
+        true,
       );
     });
   });

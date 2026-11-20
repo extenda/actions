@@ -111626,7 +111626,7 @@ var cloudrunManifestTemplate = /* @__PURE__ */ __name(async (name, image, opa, l
       latestRevision: true
     }
   ];
-  if (activeRevisionName !== "") {
+  if (activeRevisionName) {
     traffic[0].percent = 0;
     traffic.push({
       percent: 100,
@@ -112738,6 +112738,57 @@ var publishPolicies = /* @__PURE__ */ __name(async (serviceName, env2, version3,
 }, "publishPolicies");
 var publish_policies_default = publishPolicies;
 
+// cloud-deploy/src/utils/canary-revisions.js
+var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  let output;
+  try {
+    output = await gcloud_output_default(
+      [
+        "run",
+        "services",
+        "list",
+        `--project=${projectID}`,
+        `--region=${region}`,
+        `--filter=metadata.name~^${service}$`,
+        "--format=json(metadata.name,status.traffic)"
+      ],
+      "gcloud",
+      true,
+      true
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to look up service ${service} in project ${projectID}, region ${region}: ${err.message}`,
+      { cause: err }
+    );
+  }
+  if (!output?.trim()) {
+    throw new Error(
+      `Unexpected empty output when looking up service ${service}`
+    );
+  }
+  const found = JSON.parse(output).find((s) => s.metadata?.name === service);
+  const traffic = found?.status?.traffic ?? [];
+  if (traffic.length === 0) {
+    return { firstDeploy: true, revision: null };
+  }
+  const serving = traffic.find((t2) => t2.percent === 100);
+  return { firstDeploy: false, revision: serving?.revisionName ?? null };
+}, "getPreviousRevision");
+var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  return gcloud_output_default([
+    "run",
+    "revisions",
+    "list",
+    `--service=${service}`,
+    `--project=${projectID}`,
+    `--region=${region}`,
+    "--sort-by=~creationTimestamp",
+    "--limit=1",
+    "--format=value(metadata.name)"
+  ]);
+}, "getNewRevision");
+
 // cloud-deploy/src/utils/cloud-armor.js
 var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
   const args = [
@@ -112753,35 +112804,6 @@ var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
   });
 }, "checkPolicyExists");
 var cloud_armor_default = checkPolicyExists;
-
-// cloud-deploy/src/utils/canary-revisions.js
-var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
-  const output = await gcloud_output_default([
-    "run",
-    "services",
-    "describe",
-    service,
-    `--project=${projectID}`,
-    `--region=${region}`,
-    "--format=json(status.traffic)"
-  ]);
-  const { status } = JSON.parse(output);
-  const serving = status.traffic.find((t2) => t2.percent === 100);
-  return serving?.revisionName ?? null;
-}, "getPreviousRevision");
-var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
-  return gcloud_output_default([
-    "run",
-    "revisions",
-    "list",
-    `--service=${service}`,
-    `--project=${projectID}`,
-    `--region=${region}`,
-    "--sort-by=~creationTimestamp",
-    "--limit=1",
-    "--format=value(metadata.name)"
-  ]);
-}, "getNewRevision");
 
 // cloud-deploy/src/utils/identity-token.js
 var getToken = /* @__PURE__ */ __name(async (audience = "platform") => getIdToken(audience), "getToken");
@@ -114018,9 +114040,38 @@ var action5 = /* @__PURE__ */ __name(async () => {
   const platformGKE = !cloudrun;
   if (process.platform !== "win32") {
     if (env2 !== "staging" || projectID === "quotes-staging-ccdf") {
-      await vulnerability_scanning_default(serviceAccountKeyCICD, image, serviceName, labels, projectID);
+      await vulnerability_scanning_default(
+        serviceAccountKeyCICD,
+        image,
+        serviceName,
+        labels,
+        projectID
+      );
     }
   }
+  let previousRevision = null;
+  let firstDeploy = false;
+  if (isNewCanary && env2 === "prod" && !platformGKE) {
+    const previous = await getPreviousRevision(
+      serviceName,
+      projectID,
+      "europe-west1"
+    );
+    if (previous.firstDeploy) {
+      info(
+        `Canary skipped: no active revision found for ${serviceName} (first deploy). Deploying with 100% traffic.`
+      );
+      firstDeploy = true;
+    } else {
+      previousRevision = previous.revision;
+      if (previousRevision) {
+        info(`Canary: previous revision is ${previousRevision}`);
+      } else {
+        warning("Deploy failed due to canary rollout in progress");
+      }
+    }
+  }
+  const effectiveServeTraffic = firstDeploy ? true : serveTraffic;
   const version3 = (/* @__PURE__ */ new Date()).getTime();
   info("Build manifests");
   await build_manifest_default(
@@ -114034,7 +114085,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
     internalHttpsCertificateCrt,
     internalHttpsCertificateKey,
     serviceAccountKeyCICD,
-    serveTraffic
+    effectiveServeTraffic
   );
   await publish_policies_default(
     serviceName,
@@ -114042,11 +114093,6 @@ var action5 = /* @__PURE__ */ __name(async () => {
     userImage.split(":")[1] || version3,
     deployYaml
   );
-  let previousRevision = null;
-  if (isNewCanary && env2 === "prod" && !platformGKE) {
-    previousRevision = await getPreviousRevision(serviceName, projectID, "europe-west1");
-    info(`Canary: previous revision is ${previousRevision}`);
-  }
   info("Run cloud-deploy");
   const succesfulDeploy = await deploy_default(
     projectID,
@@ -114096,7 +114142,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
           slackChannel
         )
       );
-      if (!serveTraffic) {
+      if (!effectiveServeTraffic) {
         const serviceInfo = {
           service: serviceName,
           project: projectID
@@ -114106,12 +114152,18 @@ var action5 = /* @__PURE__ */ __name(async () => {
       await Promise.all(requests);
     }
     if (isNewCanary && env2 === "prod" && !platformGKE && previousRevision) {
-      const newRevision = await getNewRevision(serviceName, projectID, "europe-west1");
+      const newRevision = await getNewRevision(
+        serviceName,
+        projectID,
+        "europe-west1"
+      );
       if (newRevision) {
-        const resolvedSlackChannel = canarySlackChannel || await load_credentials_default(serviceAccountKeyCICD, env2, "\
-clan_slack_channel", "CLAN_SLACK_CHANNEL").catch(
-          () => "#platform-notifications"
-        );
+        const resolvedSlackChannel = canarySlackChannel || await load_credentials_default(
+          serviceAccountKeyCICD,
+          env2,
+          "clan_slack_channel",
+          "CLAN_SLACK_CHANNEL"
+        ).catch(() => "#platform-notifications");
         await registerAutomaticCanary({
           project: projectID,
           service: serviceName,
