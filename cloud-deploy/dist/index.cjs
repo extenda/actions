@@ -114067,10 +114067,7 @@ var action5 = /* @__PURE__ */ __name(async () => {
       if (previousRevision) {
         info(`Canary: previous revision is ${previousRevision}`);
       } else {
-        warning(
-          "Automatic canary skipped: no revision serves 100% of the traffic, likely because a canary is already in progr\
-ess. The new revision gets no traffic until it is shifted manually."
-        );
+        warning("Deploy failed due to canary rollout in progress");
       }
     }
   }

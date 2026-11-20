@@ -199,11 +199,7 @@ const action = async () => {
       if (previousRevision) {
         core.info(`Canary: previous revision is ${previousRevision}`);
       } else {
-        core.warning(
-          'Automatic canary skipped: no revision serves 100% of the traffic, ' +
-            'likely because a canary is already in progress. ' +
-            'The new revision gets no traffic until it is shifted manually.',
-        );
+        core.warning('Deploy failed due to canary rollout in progress');
       }
     }
   }

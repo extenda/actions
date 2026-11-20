@@ -531,7 +531,7 @@ describe('Action', () => {
       expect.stringContaining('Canary skipped'),
     );
     expect(core.warning).toHaveBeenCalledWith(
-      expect.stringContaining('no revision serves 100% of the traffic'),
+      'Deploy failed due to canary rollout in progress',
     );
   });
 
