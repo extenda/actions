@@ -62164,7 +62164,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.21.0";
+var VERSION = "1.21.1";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url3) {
@@ -65762,8 +65762,13 @@ function throwIfCancellationRequested(config) {
   }
 }
 __name(throwIfCancellationRequested, "throwIfCancellationRequested");
-function elapsedSince(start) {
-  return Math.max(0, Date.now() - start);
+function resolveClock() {
+  return typeof performance !== "undefined" && utils_default.isFunction(performance.now) ? () => performance.now() : Date.
+  now;
+}
+__name(resolveClock, "resolveClock");
+function elapsedSince(now, start) {
+  return Math.max(0, Math.round(now() - start));
 }
 __name(elapsedSince, "elapsedSince");
 function dispatchRequest(_config) {
@@ -65775,11 +65780,12 @@ function dispatchRequest(_config) {
     config.headers.setContentType("application/x-www-form-urlencoded", false);
   }
   const adapter2 = adapters_default.getAdapter(config.adapter || defaults_default.adapter, config);
-  const start = Date.now();
+  const now = resolveClock();
+  const start = now();
   return adapter2(config).then(
     /* @__PURE__ */ __name(function onAdapterResolution(response) {
       throwIfCancellationRequested(config);
-      response.duration = elapsedSince(start);
+      response.duration = elapsedSince(now, start);
       config.response = response;
       try {
         response.data = transformData.call(config, config.transformResponse, response);
@@ -65793,7 +65799,7 @@ function dispatchRequest(_config) {
       if (!isCancel(reason)) {
         throwIfCancellationRequested(config);
         if (reason && reason.response) {
-          reason.response.duration = elapsedSince(start);
+          reason.response.duration = elapsedSince(now, start);
           config.response = reason.response;
           try {
             reason.response.data = transformData.call(

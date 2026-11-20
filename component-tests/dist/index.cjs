@@ -39572,13 +39572,14 @@ var require_utils4 = __commonJS({
   "node_modules/superagent/lib/utils.js"(exports2) {
     "use strict";
     exports2.type = (string_) => string_.split(/ *; */).shift();
+    var UNSAFE_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "prototype"]);
+    exports2.isSafeKey = (key) => !UNSAFE_KEYS.has(key);
     exports2.params = (value) => {
       const object = {};
       for (const string_ of value.split(/ *; */)) {
-        const parts = string_.split(/ *= */);
-        const key = parts.shift();
-        const value2 = parts.shift();
-        if (key && value2) object[key] = value2;
+        const [key, ...rest] = string_.split(/ *= */);
+        const value2 = rest.join("=");
+        if (key && value2 && exports2.isSafeKey(key)) object[key] = value2;
       }
       return object;
     };
@@ -39587,8 +39588,15 @@ var require_utils4 = __commonJS({
       for (const string_ of value.split(/ *, */)) {
         const parts = string_.split(/ *; */);
         const url = parts[0].slice(1, -1);
-        const rel = parts[1].split(/ *= */)[1].slice(1, -1);
-        object[rel] = url;
+        for (const part of parts.slice(1)) {
+          const [key, keyValue] = part.split(/ *= */, 2);
+          if (key && key.toLowerCase() === "rel" && keyValue) {
+            for (const relationship of keyValue.replace(/^"|"$/g, "").split(/ +/)) {
+              if (relationship && exports2.isSafeKey(relationship)) object[relationship] = url;
+            }
+            break;
+          }
+        }
       }
       return object;
     };
@@ -39604,17 +39612,17 @@ var require_utils4 = __commonJS({
       return header;
     };
     exports2.normalizeHostname = (hostname) => {
-      const [, normalized] = hostname.match(/^\[([^\]]+)\]$/) || [];
+      const [, normalized] = hostname.match(/^\[([^\]]+)]$/) || [];
       return normalized || hostname;
     };
     exports2.isObject = (object) => {
       return object !== null && typeof object === "object";
     };
     exports2.hasOwn = Object.hasOwn || function(object, property) {
-      if (object == null) {
+      if (object === null || object === void 0) {
         throw new TypeError("Cannot convert undefined or null to object");
       }
-      return Object.prototype.hasOwnProperty.call(new Object(object), property);
+      return Object.prototype.hasOwnProperty.call(Object(object), property);
     };
     exports2.mixin = (target, source) => {
       for (const key in source) {
@@ -39624,10 +39632,10 @@ var require_utils4 = __commonJS({
       }
     };
     exports2.isGzipOrDeflateEncoding = (res) => {
-      return new RegExp(/^\s*(?:deflate|gzip)\s*$/).test(res.headers["content-encoding"]);
+      return /^\s*(?:deflate|gzip)\s*$/i.test(res.headers["content-encoding"]);
     };
     exports2.isBrotliEncoding = (res) => {
-      return new RegExp(/^\s*(?:br)\s*$/).test(res.headers["content-encoding"]);
+      return /^\s*br\s*$/i.test(res.headers["content-encoding"]);
     };
   }
 });
@@ -39638,7 +39646,8 @@ var require_request_base = __commonJS({
     "use strict";
     var {
       isObject,
-      hasOwn
+      hasOwn,
+      isSafeKey
     } = require_utils4();
     module2.exports = RequestBase;
     function RequestBase() {
@@ -39743,7 +39752,7 @@ all .end() if you use promises");
         }
         this._fullfilledPromise = new Promise((resolve2, reject2) => {
           self.on("abort", () => {
-            if (this._maxRetries && this._maxRetries > this._retries) {
+            if (this.timedout && this._maxRetries && this._maxRetries > this._retries) {
               return;
             }
             if (this.timedout && this.timedoutError) {
@@ -39797,15 +39806,27 @@ all .end() if you use promises");
         }
         return this;
       }
-      this._header[field.toLowerCase()] = value;
+      const name = field.toLowerCase();
+      deleteHeader(this.header, name);
+      this._header[name] = value;
       this.header[field] = value;
+      if (this._unset) this._unset.delete(name);
       return this;
     };
     RequestBase.prototype.unset = function(field) {
-      delete this._header[field.toLowerCase()];
-      delete this.header[field];
+      const name = field.toLowerCase();
+      delete this._header[name];
+      deleteHeader(this.header, name);
+      this._unset = this._unset || /* @__PURE__ */ new Set();
+      this._unset.add(name);
       return this;
     };
+    function deleteHeader(header, name) {
+      for (const key of Object.keys(header)) {
+        if (key.toLowerCase() === name) delete header[key];
+      }
+    }
+    __name(deleteHeader, "deleteHeader");
     RequestBase.prototype.field = function(name, value, options) {
       if (name === null || void 0 === name) {
         throw new Error(".field(name, val) name can not be empty");
@@ -39908,7 +39929,17 @@ all .end() if you use promises");
       if (isObject_ && isObject(this._data)) {
         for (const key in data) {
           if (typeof data[key] == "bigint" && !data[key].toJSON) throw new Error("Cannot serialize BigInt value to json");
-          if (hasOwn(data, key)) this._data[key] = data[key];
+          if (!hasOwn(data, key)) continue;
+          if (isSafeKey(key)) {
+            this._data[key] = data[key];
+          } else {
+            Object.defineProperty(this._data, key, {
+              value: data[key],
+              enumerable: true,
+              writable: true,
+              configurable: true
+            });
+          }
         }
       } else if (typeof data === "bigint") throw new Error("Cannot send value of type BigInt");
       else if (typeof data === "string") {
@@ -39935,22 +39966,28 @@ all .end() if you use promises");
     };
     RequestBase.prototype._finalizeQueryString = function() {
       const query = this._query.join("&");
-      if (query) {
-        this.url += (this.url.includes("?") ? "&" : "?") + query;
-      }
       this._query.length = 0;
+      if (!query && !this._sort) return;
+      let url = String(this.url);
+      const hashIndex = url.indexOf("#");
+      const fragment = hashIndex === -1 ? "" : url.slice(hashIndex);
+      if (fragment) url = url.slice(0, hashIndex);
+      if (query) {
+        url += (url.includes("?") ? "&" : "?") + query;
+      }
       if (this._sort) {
-        const index = this.url.indexOf("?");
+        const index = url.indexOf("?");
         if (index >= 0) {
-          const queryArray = this.url.slice(index + 1).split("&");
+          const queryArray = url.slice(index + 1).split("&");
           if (typeof this._sort === "function") {
             queryArray.sort(this._sort);
           } else {
             queryArray.sort();
           }
-          this.url = this.url.slice(0, index) + "?" + queryArray.join("&");
+          url = url.slice(0, index) + "?" + queryArray.join("&");
         }
       }
+      this.url = url + fragment;
     };
     RequestBase.prototype._appendQueryString = () => {
       console.warn("Unsupported");
@@ -39992,6 +40029,9 @@ var require_http2wrapper = __commonJS({
     var Stream = require("stream");
     var net = require("net");
     var tls = require("tls");
+    var {
+      isSafeKey
+    } = require_utils4();
     var {
       HTTP2_HEADER_PATH,
       HTTP2_HEADER_STATUS,
@@ -40079,7 +40119,7 @@ var require_http2wrapper = __commonJS({
           this.emit("response", frame);
         });
         this._headerSent = true;
-        frame.once("drain", () => this.emit("drain"));
+        frame.on("drain", () => this.emit("drain"));
         frame.on("error", (error2) => this.emit("error", error2));
         frame.on("close", () => this.session.close());
         this.frame = frame;
@@ -40091,6 +40131,7 @@ var require_http2wrapper = __commonJS({
         for (let key of keys) {
           let value = headers[key];
           key = key.toLowerCase();
+          if (!isSafeKey(key)) continue;
           switch (key) {
             case HTTP2_HEADER_SET_COOKIE:
               value = Array.isArray(value) ? value : [value];
@@ -40143,6 +40184,21 @@ var require_http2wrapper = __commonJS({
         frame.close(NGHTTP2_CANCEL);
         this.session.destroy();
       }
+      _destroy(error2, callback) {
+        try {
+          if (this.frame) {
+            this.frame.close(NGHTTP2_CANCEL);
+          }
+        } catch (err) {
+        }
+        try {
+          if (this.session && !this.session.destroyed) {
+            this.session.destroy();
+          }
+        } catch (err) {
+        }
+        callback(error2);
+      }
     };
     exports2.setProtocol = setProtocol;
   }
@@ -40184,7 +40240,7 @@ var require_unzip = __commonJS({
       chooseDecompresser
     } = require_decompress();
     exports2.decompress = (request, res) => {
-      let decompresser = chooseDecompresser(res);
+      const decompresser = chooseDecompresser(res);
       const stream = new Stream();
       let decoder;
       stream.req = request;
@@ -40200,6 +40256,7 @@ var require_unzip = __commonJS({
         decoder = new StringDecoder(type);
       };
       decompresser.on("data", (buf) => {
+        if (decompresser.destroyed) return;
         if (decoder) {
           const string_ = decoder.write(buf);
           if (string_.length > 0) stream.emit("data", string_);
@@ -40222,6 +40279,7 @@ var require_unzip = __commonJS({
         }
         return this;
       };
+      return decompresser;
     };
   }
 });
@@ -40243,7 +40301,7 @@ var require_response_base = __commonJS({
       this.type = utils.type(ct2);
       const parameters = utils.params(ct2);
       for (const key in parameters) {
-        if (Object.prototype.hasOwnProperty.call(parameters, key)) this[key] = parameters[key];
+        if (Object.prototype.hasOwnProperty.call(parameters, key) && !(key in this)) this[key] = parameters[key];
       }
       this.links = {};
       try {
@@ -40398,6 +40456,7 @@ y", "ok", "redirects", "timeout", "buffer", "serialize", "parse", "ca", "key", "
 var require_agent2 = __commonJS({
   "node_modules/superagent/lib/node/agent.js"(exports2, module2) {
     "use strict";
+    var net = require("node:net");
     var {
       CookieJar
     } = require_cookiejar();
@@ -40407,6 +40466,33 @@ var require_agent2 = __commonJS({
     var methods = require_methods();
     var request = require_node2();
     var AgentBase = require_agent_base();
+    function defaultCookiePath(pathname) {
+      const lastSlash = pathname.lastIndexOf("/");
+      return lastSlash > 0 ? pathname.slice(0, lastSlash) : "/";
+    }
+    __name(defaultCookiePath, "defaultCookiePath");
+    function domainMatches(requestHost, domain) {
+      if (requestHost === domain) return true;
+      return requestHost.endsWith(`.${domain}`) && net.isIP(requestHost) === 0 && !/^\[/.test(requestHost);
+    }
+    __name(domainMatches, "domainMatches");
+    function filterCookiesForHost(cookies, requestHost) {
+      return cookies.filter((cookie) => {
+        if (typeof cookie !== "string") return false;
+        const parts = cookie.split(";");
+        for (const part of parts.slice(1)) {
+          const index = part.indexOf("=");
+          const name = (index === -1 ? part : part.slice(0, index)).trim().toLowerCase();
+          if (name !== "domain") continue;
+          const domain = (index === -1 ? "" : part.slice(index + 1)).trim().replace(/^\./, "").toLowerCase();
+          if (!domain) return true;
+          if (domain !== requestHost && !domain.includes(".")) return false;
+          return domainMatches(requestHost, domain);
+        }
+        return true;
+      });
+    }
+    __name(filterCookiesForHost, "filterCookiesForHost");
     var Agent = class extends AgentBase {
       static {
         __name(this, "Agent");
@@ -40440,12 +40526,13 @@ var require_agent2 = __commonJS({
        * @api private
        */
       _saveCookies(res) {
-        const cookies = res.headers["set-cookie"];
+        let cookies = res.headers["set-cookie"];
         if (cookies) {
-          var _res$request;
-          const url = new URL(((_res$request = res.request) === null || _res$request === void 0 ? void 0 : _res$request.
-          url) || "");
-          this.jar.setCookies(cookies, url.hostname, url.pathname);
+          const url = new URL(res.request && res.request.url || "");
+          if (!Array.isArray(cookies)) cookies = [cookies];
+          cookies = filterCookiesForHost(cookies, url.hostname.toLowerCase());
+          if (cookies.length === 0) return;
+          this.jar.setCookies(cookies, url.hostname, defaultCookiePath(url.pathname));
         }
       }
       /**
@@ -40467,7 +40554,7 @@ var require_agent2 = __commonJS({
       Agent.prototype[name] = function(url, fn2) {
         const request_ = new request.Request(method, url);
         request_.on("response", this._saveCookies.bind(this));
-        request_.on("redirect", this._saveCookies.bind(this));
+        request_.on("pre-redirect", this._saveCookies.bind(this));
         request_.on("redirect", this._attachCookies.bind(this, request_));
         this._setDefaults(request_);
         this._attachCookies(request_);
@@ -40479,7 +40566,7 @@ var require_agent2 = __commonJS({
     }
     Agent.prototype.del = Agent.prototype.delete;
     var proxyAgent = new Proxy(Agent, {
-      apply(target, thisArg, argumentsList) {
+      apply(target, thisArgument, argumentsList) {
         return new target(...argumentsList);
       }
     });
@@ -40523,11 +40610,14 @@ var require_json = __commonJS({
         let body;
         let error2;
         try {
-          body = res.text && JSON.parse(res.text);
+          const text = res.text && res.text.replace(/^\uFEFF/, "");
+          body = text && JSON.parse(text);
         } catch (err) {
           error2 = err;
           error2.rawResponse = res.text || null;
           error2.statusCode = res.statusCode;
+          error2.status = res.statusCode;
+          error2.headers = res.headers;
         } finally {
           fn2(error2, body);
         }
@@ -40588,13 +40678,13 @@ var require_node2 = __commonJS({
     "use strict";
     var {
       format
-    } = require("url");
-    var Stream = require("stream");
-    var https = require("https");
-    var http = require("http");
-    var fs3 = require("fs");
-    var zlib = require("zlib");
-    var util = require("util");
+    } = require("node:url");
+    var Stream = require("node:stream");
+    var https = require("node:https");
+    var http = require("node:http");
+    var fs3 = require("node:fs");
+    var zlib = require("node:zlib");
+    var util = require("node:util");
     var qs = require_lib();
     var mime = require_mime();
     var methods = require_methods();
@@ -40636,6 +40726,90 @@ var require_node2 = __commonJS({
     function noop() {
     }
     __name(noop, "noop");
+    function disposeNodeRequest(request_) {
+      const {
+        req
+      } = request_;
+      if (!req || request_._requestDisposed) {
+        return;
+      }
+      request_._requestDisposed = true;
+      if (request_._streamResponseListener) {
+        req.removeListener("response", request_._streamResponseListener);
+        request_._streamResponseListener = void 0;
+        request_._streamResponse = void 0;
+      }
+      try {
+        if (req.session && typeof req.session.destroy === "function") {
+          req.session.destroy();
+        }
+        if (req.socket && typeof req.socket.destroy === "function") {
+          req.socket.destroy();
+        }
+        if (typeof req.destroy === "function") {
+          req.destroy();
+          return;
+        }
+        if (typeof req.abort === "function") {
+          req.abort();
+          return;
+        }
+        if (typeof req.end === "function") {
+          req.end();
+        }
+      } catch (err) {
+        debug2("error disposing request after setup failure", err);
+      }
+    }
+    __name(disposeNodeRequest, "disposeNodeRequest");
+    function preserveDotSegments(urlString) {
+      const parts = urlString.match(/^([a-z][a-z\d+.-]*:\/\/[^/?#]*)([^?#]*)(.*)$/i);
+      if (!parts) {
+        return {
+          urlString,
+          restorePath(path2) {
+            return path2;
+          }
+        };
+      }
+      const segments = [];
+      const prefix = "__superagent_dot_segment_";
+      const path = parts[2].replace(/\/((?:\.|%2e){1,2})(?=\/|$)/gi, (_3, segment) => {
+        const marker = `${prefix}${segments.length}__`;
+        segments.push(segment);
+        return `/${marker}`;
+      });
+      return {
+        urlString: `${parts[1]}${path}${parts[3]}`,
+        restorePath(requestPath) {
+          let restoredPath = requestPath;
+          for (const [index, segment] of segments.entries()) {
+            restoredPath = restoredPath.replace(`${prefix}${index}__`, segment);
+          }
+          return restoredPath;
+        }
+      };
+    }
+    __name(preserveDotSegments, "preserveDotSegments");
+    function withDefaultProtocol(urlString) {
+      return urlString.indexOf("http") === 0 ? urlString : `http://${urlString}`;
+    }
+    __name(withDefaultProtocol, "withDefaultProtocol");
+    var REDIRECT_PROTOCOLS = /* @__PURE__ */ new Set(["http:", "https:"]);
+    var UNIX_SOCKET_PROTOCOLS = /* @__PURE__ */ new Set(["http+unix:", "https+unix:"]);
+    function isAllowedRedirectTarget(current, target) {
+      if (REDIRECT_PROTOCOLS.has(target.protocol)) return true;
+      return UNIX_SOCKET_PROTOCOLS.has(target.protocol) && target.protocol === current.protocol && target.hostname !== "" &&
+      target.hostname === current.hostname;
+    }
+    __name(isAllowedRedirectTarget, "isAllowedRedirectTarget");
+    function isSameOrigin(current, target) {
+      if (current.origin !== "null" && target.origin !== "null") {
+        return current.origin === target.origin;
+      }
+      return current.protocol === target.protocol && current.hostname === target.hostname && current.port === target.port;
+    }
+    __name(isSameOrigin, "isSameOrigin");
     exports2.Response = Response;
     mime.define({
       "application/x-www-form-urlencoded": ["form", "urlencoded", "form-data"]
@@ -40646,15 +40820,24 @@ var require_node2 = __commonJS({
       "http2:": http2
     };
     exports2.serialize = {
-      "application/x-www-form-urlencoded": /* @__PURE__ */ __name((obj) => {
-        return qs.stringify(obj, {
+      "application/x-www-form-urlencoded"(object) {
+        return qs.stringify(object, {
           indices: false,
           strictNullHandling: true
         });
-      }, "application/x-www-form-urlencoded"),
-      "application/json": safeStringify
+      },
+      "application/json": safeStringify,
+      // CSP reports carry JSON bodies but use a distinct registered media type.
+      "application/csp-report": safeStringify
     };
     exports2.parse = require_parsers();
+    var BUILT_IN_PARSERS = {
+      "application/x-www-form-urlencoded": exports2.parse["application/x-www-form-urlencoded"],
+      "application/json": exports2.parse["application/json"],
+      text: exports2.parse.text,
+      image: exports2.parse.image
+    };
+    var BUFFERING_PARSERS = new Set(Object.keys(BUILT_IN_PARSERS).map((key) => BUILT_IN_PARSERS[key]));
     exports2.buffer = {};
     function _initHeaders(request_) {
       request_._header = {
@@ -40737,6 +40920,10 @@ var require_node2 = __commonJS({
       return this._formData;
     };
     Request.prototype.agent = function(agent2) {
+      if (arguments.length > 0 && agent2 && typeof agent2 === "object" && typeof agent2.addRequest !== "function") {
+        throw new TypeError(".agent() expects an http(s).Agent-compatible object. Did you mean to use .cert() and .key()\
+?");
+      }
       if (arguments.length === 0) return this._agent;
       this._agent = agent2;
       return this;
@@ -40764,6 +40951,10 @@ var require_node2 = __commonJS({
       const request_ = this.request();
       if (!this._streamRequest) {
         this._streamRequest = true;
+        this._streamResponseListener = (res) => {
+          this._streamResponse = res;
+        };
+        request_.once("response", this._streamResponseListener);
       }
       return request_.write(data, encoding);
     };
@@ -40782,7 +40973,7 @@ var require_node2 = __commonJS({
         this._emitResponse();
         if (this._aborted) return;
         if (this._shouldDecompress(res)) {
-          let decompresser = chooseDecompresser(res);
+          const decompresser = chooseDecompresser(res);
           decompresser.on("error", (error2) => {
             if (error2 && error2.code === "Z_BUF_ERROR") {
               stream.emit("end");
@@ -40809,10 +41000,30 @@ var require_node2 = __commonJS({
         return this.callback(new Error("No location header for redirect"), res);
       }
       debug2("redirect %s -> %s", this.url, url);
-      url = new URL(url, this.url).href;
       res.resume();
+      let target;
+      let current;
+      try {
+        current = new URL(withDefaultProtocol(this.url));
+        target = new URL(url, current);
+      } catch (err) {
+        const error2 = new Error(`Invalid redirect location: ${url}`);
+        error2.code = "EINVALIDREDIRECT";
+        error2.status = res.statusCode;
+        error2.location = url;
+        return this.callback(error2, res);
+      }
+      if (!isAllowedRedirectTarget(current, target)) {
+        const error2 = new Error(`Unsupported protocol in redirect location: ${target.href}`);
+        error2.code = "EUNSUPPORTEDREDIRECT";
+        error2.status = res.statusCode;
+        error2.location = url;
+        return this.callback(error2, res);
+      }
+      url = target.href;
+      this._emitPreRedirect(res);
       let headers = this.req.getHeaders ? this.req.getHeaders() : this.req._headers;
-      const changesOrigin = new URL(url).host !== new URL(this.url).host;
+      const changesOrigin = !isSameOrigin(current, target);
       if (res.statusCode === 301 || res.statusCode === 302) {
         headers = utils.cleanHeader(headers, changesOrigin);
         this.method = this.method === "HEAD" ? "HEAD" : "GET";
@@ -40822,6 +41033,14 @@ var require_node2 = __commonJS({
         headers = utils.cleanHeader(headers, changesOrigin);
         this.method = "GET";
         this._data = null;
+      }
+      if ((res.statusCode === 307 || res.statusCode === 308) && changesOrigin) {
+        delete headers.authorization;
+        delete headers.cookie;
+      }
+      if (changesOrigin) {
+        this.username = void 0;
+        this.password = void 0;
       }
       delete headers.host;
       delete this.req;
@@ -40893,18 +41112,19 @@ var require_node2 = __commonJS({
       } catch (err) {
         return this.emit("error", err);
       }
-      let {
-        url: urlString
-      } = this;
+      const urlString = withDefaultProtocol(this.url);
       const retries = this._retries;
-      if (urlString.indexOf("http") !== 0) urlString = `http://${urlString}`;
-      const url = new URL(urlString);
+      const protectedUrl = preserveDotSegments(urlString);
+      const url = new URL(protectedUrl.urlString);
       let {
         protocol
       } = url;
-      let path = `${url.pathname}${url.search}`;
+      const path = protectedUrl.restorePath(`${url.pathname}${url.search}`);
       if (/^https?\+unix:/.test(protocol) === true) {
         protocol = `${protocol.split("+")[0]}:`;
+        if (!url.hostname) {
+          throw new Error('Invalid unix socket URL: percent-encode the socket path by replacing "/" with "%2F".');
+        }
         options.socketPath = url.hostname.replace(/%2F/g, "/");
         url.host = "";
         url.hostname = "";
@@ -40913,7 +41133,8 @@ var require_node2 = __commonJS({
         const {
           hostname
         } = url;
-        const match = hostname in this._connectOverride ? this._connectOverride[hostname] : this._connectOverride["*"];
+        const match = hasOwn(this._connectOverride, hostname) ? this._connectOverride[hostname] : this._connectOverride["\
+*"];
         if (match) {
           if (!this._header.host) {
             this.set("host", url.host);
@@ -40939,6 +41160,11 @@ var require_node2 = __commonJS({
       options.port = url.port;
       options.path = path;
       options.host = utils.normalizeHostname(url.hostname);
+      if (!this._enableHttp2) {
+        options.headers = {
+          ...this.header
+        };
+      }
       options.ca = this._ca;
       options.key = this._key;
       options.pfx = this._pfx;
@@ -40959,41 +41185,61 @@ var require_node2 = __commonJS({
       const {
         req
       } = this;
-      req.setNoDelay(true);
-      if (options.method !== "HEAD") {
-        req.setHeader("Accept-Encoding", "gzip, deflate");
-      }
-      this.protocol = protocol;
-      this.host = url.host;
-      req.once("drain", () => {
-        this.emit("drain");
-      });
       req.on("error", (error2) => {
-        if (this._aborted) return;
+        if (this._aborted || this._requestDisposed) return;
         if (this._retries !== retries) return;
         if (this.response) return;
         this.callback(error2);
       });
-      if (url.username || url.password) {
-        this.auth(url.username, url.password);
-      }
-      if (this.username && this.password) {
-        this.auth(this.username, this.password);
-      }
-      for (const key in this.header) {
-        if (hasOwn(this.header, key)) req.setHeader(key, this.header[key]);
-      }
-      if (this.cookies) {
-        if (hasOwn(this._header, "cookie")) {
-          const temporaryJar = new CookieJar.CookieJar();
-          temporaryJar.setCookies(this._header.cookie.split("; "));
-          temporaryJar.setCookies(this.cookies.split("; "));
-          req.setHeader("Cookie", temporaryJar.getCookies(CookieJar.CookieAccessInfo.All).toValueString());
-        } else {
-          req.setHeader("Cookie", this.cookies);
+      try {
+        req.setNoDelay(true);
+        if (options.method !== "HEAD" && !(this._unset && this._unset.has("accept-encoding"))) {
+          req.setHeader("Accept-Encoding", "gzip, deflate");
         }
+        this.protocol = protocol;
+        this.host = url.host;
+        const emitDrain = /* @__PURE__ */ __name(() => {
+          this.emit("drain");
+        }, "emitDrain");
+        req.on("drain", emitDrain);
+        req.once("close", () => {
+          req.removeListener("drain", emitDrain);
+        });
+        if (url.username || url.password) {
+          this.auth(url.username, url.password);
+        }
+        if (this.username && this.password) {
+          this.auth(this.username, this.password);
+        }
+        for (const key in this.header) {
+          if (hasOwn(this.header, key)) req.setHeader(key, this.header[key]);
+        }
+        if (this.cookies) {
+          if (hasOwn(this._header, "cookie")) {
+            const temporaryJar = new CookieJar.CookieJar();
+            temporaryJar.setCookies(this._header.cookie.split("; "));
+            temporaryJar.setCookies(this.cookies.split("; "));
+            req.setHeader("Cookie", temporaryJar.getCookies(CookieJar.CookieAccessInfo.All).toValueString());
+          } else {
+            req.setHeader("Cookie", this.cookies);
+          }
+        }
+        return req;
+      } catch (err) {
+        disposeNodeRequest(this);
+        throw err;
       }
-      return req;
+    };
+    Request.prototype._disposeRequest = function() {
+      disposeNodeRequest(this);
+    };
+    Request.prototype._failRequest = function(error2) {
+      this._disposeRequest();
+      if (typeof this._callback === "function" && this._callback !== noop) {
+        this.callback(error2);
+        return;
+      }
+      throw error2;
     };
     Request.prototype.callback = function(error2, res) {
       if (this._shouldRetry(error2, res)) {
@@ -41001,7 +41247,10 @@ var require_node2 = __commonJS({
       }
       const fn2 = this._callback || noop;
       this.clearTimeout();
-      if (this.called) return console.warn("superagent: double callback bug");
+      if (this.called) {
+        if (this.timedout) return;
+        return console.warn("superagent: double callback bug");
+      }
       this.called = true;
       if (!error2) {
         try {
@@ -41052,8 +41301,24 @@ var require_node2 = __commonJS({
       response.redirects = this._redirectList;
       this.emit("redirect", response);
     };
+    Request.prototype._emitPreRedirect = function(res) {
+      this.res = res;
+      const response = new Response(this);
+      response.redirects = this._redirectList;
+      this.emit("pre-redirect", response);
+    };
     Request.prototype.end = function(fn2) {
-      this.request();
+      try {
+        this.request();
+      } catch (err) {
+        this._endCalled = true;
+        if (typeof fn2 === "function") {
+          this._callback = fn2;
+          this.callback(err);
+          return;
+        }
+        throw err;
+      }
       debug2("%s %s", this.method, this.url);
       if (this._endCalled) {
         throw new Error(".end() was called twice. This is not supported in superagent");
@@ -41073,20 +41338,32 @@ var require_node2 = __commonJS({
       } = this;
       this._setTimeouts();
       if (method !== "HEAD" && !req._headerSent) {
-        if (typeof data !== "string") {
-          let contentType = req.getHeader("Content-Type");
-          if (contentType) contentType = contentType.split(";")[0];
-          let serialize = this._serializer || exports2.serialize[contentType];
-          if (!serialize && isJSON(contentType)) {
-            serialize = exports2.serialize["application/json"];
+        try {
+          if (typeof data !== "string") {
+            let contentType = req.getHeader("Content-Type");
+            if (contentType) contentType = contentType.split(";")[0];
+            let serialize = this._serializer || (hasOwn(exports2.serialize, contentType) ? exports2.serialize[contentType] :
+            void 0);
+            if (!serialize && isJSON(contentType)) {
+              serialize = exports2.serialize["application/json"];
+            }
+            if (serialize) data = serialize(data);
           }
-          if (serialize) data = serialize(data);
-        }
-        if (data && !req.getHeader("Content-Length")) {
-          req.setHeader("Content-Length", Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data));
+          if (data && !req.getHeader("Content-Length")) {
+            req.setHeader("Content-Length", Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data));
+          }
+        } catch (err) {
+          return this._failRequest(err);
         }
       }
-      req.once("response", (res) => {
+      let streamResponse;
+      if (this._streamResponseListener) {
+        req.removeListener("response", this._streamResponseListener);
+        this._streamResponseListener = void 0;
+        streamResponse = this._streamResponse;
+        this._streamResponse = void 0;
+      }
+      const handleResponse = /* @__PURE__ */ __name((res) => {
         debug2("%s %s -> %s", this.method, this.url, res.statusCode);
         if (this._responseTimeoutTimer) {
           clearTimeout(this._responseTimeoutTimer);
@@ -41110,11 +41387,12 @@ var require_node2 = __commonJS({
           this.callback(null, this._emitResponse());
           return;
         }
+        let decompresser = null;
         if (this._shouldDecompress(res)) {
-          decompress(req, res);
+          decompresser = decompress(req, res);
         }
         let buffer = this._buffer;
-        if (buffer === void 0 && mime2 in exports2.buffer) {
+        if (buffer === void 0 && hasOwn(exports2.buffer, mime2)) {
           buffer = Boolean(exports2.buffer[mime2]);
         }
         let parser = this._parser;
@@ -41144,6 +41422,7 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
                 const flattenedFields = {};
                 if (fields) {
                   for (const key in fields) {
+                    if (!Object.prototype.hasOwnProperty.call(fields, key)) continue;
                     const value = fields[key];
                     flattenedFields[key] = Array.isArray(value) && value.length === 1 ? value[0] : value;
                   }
@@ -41151,6 +41430,7 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
                 const flattenedFiles = {};
                 if (files) {
                   for (const key in files) {
+                    if (!Object.prototype.hasOwnProperty.call(files, key)) continue;
                     const value = files[key];
                     flattenedFiles[key] = Array.isArray(value) && value.length === 1 ? value[0] : value;
                   }
@@ -41161,8 +41441,8 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
             buffer = true;
           } else if (isBinary(mime2)) {
             parser = exports2.parse.image;
-            buffer = true;
-          } else if (exports2.parse[mime2]) {
+            buffer = buffer !== false;
+          } else if (hasOwn(exports2.parse, mime2)) {
             parser = exports2.parse[mime2];
           } else if (type === "text") {
             parser = exports2.parse.text;
@@ -41184,22 +41464,34 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
         let parserHandlesEnd = false;
         if (buffer) {
           let responseBytesLeft = this._maxResponseSize || 2e8;
+          let exceeded = false;
           res.on("data", (buf) => {
-            responseBytesLeft -= buf.byteLength || buf.length > 0 ? buf.length : 0;
+            if (exceeded) return;
+            responseBytesLeft -= Buffer.isBuffer(buf) ? buf.length : Buffer.byteLength(String(buf));
             if (responseBytesLeft < 0) {
+              exceeded = true;
               const error2 = new Error("Maximum response size reached");
               error2.code = "ETOOLARGE";
               parserHandlesEnd = false;
-              res.destroy(error2);
+              if (decompresser) decompresser.destroy();
+              res.destroy();
               this.callback(error2, null);
             }
           });
+        }
+        if (parser && !buffer && BUFFERING_PARSERS.has(parser)) {
+          if (parser === BUILT_IN_PARSERS["application/x-www-form-urlencoded"]) {
+            res.setEncoding("ascii");
+          } else if (parser !== BUILT_IN_PARSERS.image) {
+            res.setEncoding("utf8");
+          }
+          parser = null;
         }
         if (parser) {
           try {
             parserHandlesEnd = buffer;
             parser(res, (error2, object, files) => {
-              if (this.timedout) {
+              if (this.timedout || this.called) {
                 return;
               }
               if (error2 && !this._aborted) {
@@ -41226,16 +41518,37 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
           });
           return;
         }
+        const completeAbortedResponse = /* @__PURE__ */ __name(() => {
+          if (!this._aborted) {
+            return false;
+          }
+          parserHandlesEnd = false;
+          if (!this.called) {
+            this.emit("end");
+            const response = this._emitResponse();
+            response.on("error", noop);
+            this.callback(null, response);
+          }
+          return true;
+        }, "completeAbortedResponse");
         res.once("error", (error2) => {
+          if (completeAbortedResponse()) return;
           parserHandlesEnd = false;
           this.callback(error2, null);
         });
+        res.once("aborted", completeAbortedResponse);
+        res.once("close", completeAbortedResponse);
         if (!parserHandlesEnd) res.once("end", () => {
           debug2("end %s %s", this.method, this.url);
           this.emit("end");
           this.callback(null, this._emitResponse());
         });
-      });
+      }, "handleResponse");
+      if (streamResponse) {
+        process.nextTick(handleResponse, streamResponse);
+      } else {
+        req.once("response", handleResponse);
+      }
       this.emit("request", this);
       const getProgressMonitor = /* @__PURE__ */ __name(() => {
         const lengthComputable = true;
@@ -41271,27 +41584,34 @@ gured. Call `req.buffer(true or false)` or set `superagent.buffer[mime] = true o
         chunking.push(null);
         return chunking;
       }, "bufferToChunks");
-      const formData = this._formData;
-      if (formData) {
-        const headers = formData.getHeaders();
-        for (const i in headers) {
-          if (hasOwn(headers, i)) {
-            debug2('setting FormData header: "%s: %s"', i, headers[i]);
-            req.setHeader(i, headers[i]);
+      try {
+        const formData = this._formData;
+        if (formData) {
+          const headers = formData.getHeaders();
+          for (const i in headers) {
+            if (hasOwn(headers, i)) {
+              debug2('setting FormData header: "%s: %s"', i, headers[i]);
+              req.setHeader(i, headers[i]);
+            }
           }
+          formData.getLength((error2, length) => {
+            if (error2 && error2 !== "Unknown stream") {
+              this._failRequest(error2);
+              return;
+            }
+            debug2("got FormData Content-Length: %s", length);
+            if (typeof length === "number") {
+              req.setHeader("Content-Length", length);
+            }
+            formData.pipe(getProgressMonitor()).pipe(req);
+          });
+        } else if (Buffer.isBuffer(data)) {
+          bufferToChunks(data).pipe(getProgressMonitor()).pipe(req);
+        } else {
+          req.end(data);
         }
-        formData.getLength((error2, length) => {
-          if (error2) debug2("formData.getLength had error", error2, length);
-          debug2("got FormData Content-Length: %s", length);
-          if (typeof length === "number") {
-            req.setHeader("Content-Length", length);
-          }
-          formData.pipe(getProgressMonitor()).pipe(req);
-        });
-      } else if (Buffer.isBuffer(data)) {
-        bufferToChunks(data).pipe(getProgressMonitor()).pipe(req);
-      } else {
-        req.end(data);
+      } catch (err) {
+        this._failRequest(err);
       }
     };
     Request.prototype._shouldDecompress = (res) => {
@@ -41391,6 +41711,87 @@ var require_test = __commonJS({
     } catch (_3) {
     }
     var serverStates = /* @__PURE__ */ new WeakMap();
+    function startServer(server) {
+      const state = {
+        pending: 0,
+        listening: false,
+        closing: false,
+        error: null,
+        waiting: [],
+        reopen: []
+      };
+      function settle(err) {
+        server.removeListener("listening", onListening);
+        server.removeListener("error", onError);
+        server.removeListener("close", onClose);
+        state.listening = !err;
+        state.error = err;
+        const waiting = state.waiting;
+        state.waiting = [];
+        waiting.forEach(function(callback) {
+          callback(err);
+        });
+      }
+      __name(settle, "settle");
+      function onListening() {
+        settle(null);
+      }
+      __name(onListening, "onListening");
+      function onError(err) {
+        settle(err);
+      }
+      __name(onError, "onError");
+      function onClose() {
+        settle(new Error("SuperTest server closed before listening"));
+      }
+      __name(onClose, "onClose");
+      serverStates.set(server, state);
+      server.once("listening", onListening);
+      server.once("error", onError);
+      server.once("close", onClose);
+      server.listen(0, "127.0.0.1");
+      return state;
+    }
+    __name(startServer, "startServer");
+    function holdServer(server, fn2) {
+      let state = serverStates.get(server);
+      if (state && state.listening && !state.closing && !server.address()) {
+        serverStates.delete(server);
+        state = void 0;
+      }
+      if (state && state.closing) {
+        state.reopen.push(function() {
+          holdServer(server, fn2);
+        });
+        return;
+      }
+      if (!state) {
+        if (server.address()) return fn2(null, null);
+        state = startServer(server);
+      }
+      state.pending += 1;
+      const release = /* @__PURE__ */ __name(function(done) {
+        state.pending -= 1;
+        if (state.pending > 0 || serverStates.get(server) !== state) return done();
+        if (!state.listening || !server.address()) {
+          serverStates.delete(server);
+          return done();
+        }
+        state.closing = true;
+        server.close(function() {
+          serverStates.delete(server);
+          state.reopen.forEach(function(reopen) {
+            reopen();
+          });
+          done();
+        });
+      }, "release");
+      if (state.listening || state.error) return fn2(state.error, release);
+      state.waiting.push(function(err) {
+        fn2(err, release);
+      });
+    }
+    __name(holdServer, "holdServer");
     var Test = class extends Request {
       static {
         __name(this, "Test");
@@ -41428,41 +41829,102 @@ var require_test = __commonJS({
        * @api private
        */
       serverAddress(app, path) {
-        let addr = app.address();
-        let state = serverStates.get(app);
-        if (!addr) {
-          if (!state) {
-            state = {
-              pending: 0,
-              starting: true,
-              closing: false,
-              startError: null
-            };
-            serverStates.set(app, state);
-            const onListening = /* @__PURE__ */ __name(function() {
-              state.starting = false;
-              app.removeListener("error", onError);
-            }, "onListening");
-            const onError = /* @__PURE__ */ __name(function(err) {
-              state.starting = false;
-              state.startError = err;
-              app.removeListener("listening", onListening);
-            }, "onError");
-            app.once("listening", onListening);
-            app.once("error", onError);
-            app.listen(0, "127.0.0.1");
-          }
-          addr = app.address();
+        const addr = app.address();
+        if (addr && !serverStates.has(app)) return this.formatServerUrl(app, addr, path);
+        this._server = app;
+        this._serverPath = path;
+        if (addr) return this.formatServerUrl(app, addr, path);
+        const protocol = app instanceof Server ? "https" : "http";
+        return protocol + "://127.0.0.1" + path;
+      }
+      /**
+       * Calls `fn(err)` once the server can take this request, holding a server
+       * started by SuperTest open until `_releaseServer()`.
+       *
+       * @param {Function} fn
+       * @api private
+       */
+      _whenServerReady(fn2) {
+        const server = this._server;
+        if (!server || this._serverReady === true) return fn2(this._serverError);
+        if (this._serverReady) return this._serverReady.push(fn2);
+        this._serverReady = [fn2];
+        holdServer(server, (err, release) => {
+          const callbacks = this._serverReady;
+          this._serverReady = true;
+          this._serverError = err;
+          this._serverRelease = release;
+          if (!err) this.url = this.formatServerUrl(server, server.address(), this._serverPath);
+          callbacks.forEach(function(callback) {
+            callback(err);
+          });
+        });
+      }
+      /**
+       * Releases the hold `_whenServerReady()` took, at most once, then calls `fn`.
+       *
+       * @param {Function} fn
+       * @api private
+       */
+      _releaseServer(fn2) {
+        const release = this._serverRelease;
+        if (!release) return fn2();
+        this._serverRelease = void 0;
+        release(fn2);
+      }
+      /**
+       * Write data to the request body, holding it until the server SuperTest
+       * starts is listening.
+       *
+       * @param {Buffer|String} data
+       * @param {String} [encoding]
+       * @return {Boolean}
+       * @api public
+       */
+      write(data, encoding) {
+        if (!this._server || this._serverReady === true) {
+          return this._serverError ? false : super.write(data, encoding);
         }
-        if (state) {
-          this._server = app;
+        if (!this._serverWrites) {
+          this._serverWrites = [];
+          this._whenServerReady((err) => {
+            const writes = this._serverWrites;
+            this._serverWrites = void 0;
+            if (err) return;
+            try {
+              writes.forEach((args) => {
+                super.write(args[0], args[1]);
+              });
+            } catch (e) {
+              this._serverError = e;
+              this.abort();
+            }
+          });
         }
-        if (!addr) {
-          this._serverPath = path;
-          const protocol = app instanceof Server ? "https" : "http";
-          return protocol + "://127.0.0.1" + path;
-        }
-        return this.formatServerUrl(app, addr, path);
+        this._serverWrites.push([data, encoding]);
+        return true;
+      }
+      /**
+       * Pipe the response to `stream` once the server SuperTest starts is
+       * listening.
+       *
+       * @param {Stream} stream
+       * @param {Object} [options]
+       * @return {Stream}
+       * @api public
+       */
+      pipe(stream, options) {
+        this.once("end", () => {
+          this._releaseServer(function() {
+          });
+        });
+        this._whenServerReady((err) => {
+          if (!err) return super.pipe(stream, options);
+          this._releaseServer(function() {
+            stream.emit("error", err);
+          });
+        });
+        return stream;
       }
       /**
        * Builds a request URL from a listening server address.
@@ -41473,6 +41935,7 @@ var require_test = __commonJS({
        * @returns {String} URL address
        * @api private
        */
+      // eslint-disable-next-line class-methods-use-this
       formatServerUrl(app, addr, path) {
         let host = addr.address;
         if (host === "::") host = "127.0.0.1";
@@ -41532,64 +41995,24 @@ var require_test = __commonJS({
        * @api public
        */
       end(fn2) {
-        const server = this._server;
-        const state = server && serverStates.get(server);
         let complete = false;
-        let dispatch;
-        let onListening;
-        let onStartError;
-        let onClose;
-        const removeStartListeners = /* @__PURE__ */ __name(() => {
-          if (!server) return;
-          if (onListening) server.removeListener("listening", onListening);
-          if (onStartError) server.removeListener("error", onStartError);
-          if (onClose) server.removeListener("close", onClose);
-        }, "removeStartListeners");
+        const releases = !this._ended;
+        this._ended = true;
         const finish = /* @__PURE__ */ __name((err, res) => {
           if (complete) return;
           complete = true;
-          removeStartListeners();
           const localAssert = /* @__PURE__ */ __name(() => this.assert(err, res, fn2), "localAssert");
-          if (state) {
-            state.pending -= 1;
-            if (state.pending === 0 && !state.closing && server._handle) {
-              state.closing = true;
-              return server.close(function() {
-                serverStates.delete(server);
-                localAssert();
-              });
-            }
-            if (state.pending === 0 && !server._handle) serverStates.delete(server);
-          }
-          localAssert();
+          if (!releases) return localAssert();
+          this._releaseServer(localAssert);
         }, "finish");
-        dispatch = /* @__PURE__ */ __name(() => {
-          removeStartListeners();
+        this._whenServerReady(() => {
+          if (this._serverError) return finish(this._serverError);
           try {
-            if (this._serverPath !== void 0) {
-              this.url = this.formatServerUrl(server, server.address(), this._serverPath);
-              this._serverPath = void 0;
-            }
             super.end(finish);
-          } catch (err) {
-            finish(err);
+          } catch (e) {
+            finish(e);
           }
-        }, "dispatch");
-        if (state) state.pending += 1;
-        if (state && state.startError) {
-          finish(state.startError);
-        } else if (state && state.starting) {
-          onListening = dispatch;
-          onStartError = finish;
-          onClose = /* @__PURE__ */ __name(function() {
-            finish(new Error("SuperTest server closed before listening"));
-          }, "onClose");
-          server.once("listening", onListening);
-          server.once("error", onStartError);
-          server.once("close", onClose);
-        } else {
-          dispatch();
-        }
+        });
         return this;
       }
       /**
@@ -41679,7 +42102,7 @@ var require_test = __commonJS({
       _assertHeader(header, res) {
         const field = header.name;
         const actual = res.headers[field.toLowerCase()];
-        const fieldExpected = header.value;
+        const fieldExpected = typeof header.value === "number" ? String(header.value) : header.value;
         if (typeof actual === "undefined") return new Error('expected "' + field + '" header field');
         if (Array.isArray(actual) && actual.toString() === fieldExpected || fieldExpected === actual) {
           return;
@@ -41994,7 +42417,7 @@ var require_assertion = __commonJS({
             return;
           }
           cookie.name = key;
-          cookie.value = decode(val);
+          cookie.value = value;
         });
         if (typeof cookie.options === "undefined") cookie.options = {};
         return cookie;
