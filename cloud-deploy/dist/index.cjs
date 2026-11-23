@@ -112739,6 +112739,7 @@ var publishPolicies = /* @__PURE__ */ __name(async (serviceName, env2, version3,
 var publish_policies_default = publishPolicies;
 
 // cloud-deploy/src/utils/canary-revisions.js
+var TRAFFIC_TIMEOUT_MILLIS = 5 * 60 * 1e3;
 var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
   let output;
   try {
@@ -112772,8 +112773,8 @@ var getPreviousRevision = /* @__PURE__ */ __name(async (service, projectID, regi
   if (traffic.length === 0) {
     return { firstDeploy: true, revision: null };
   }
-  const serving = traffic.find((t2) => t2.percent === 100);
-  return { firstDeploy: false, revision: serving?.revisionName ?? null };
+  const serving2 = traffic.find((t2) => t2.percent === 100);
+  return { firstDeploy: false, revision: serving2?.revisionName ?? null };
 }, "getPreviousRevision");
 var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
   return gcloud_output_default([
@@ -112788,6 +112789,114 @@ var getNewRevision = /* @__PURE__ */ __name(async (service, projectID, region = 
     "--format=value(metadata.name)"
   ]);
 }, "getNewRevision");
+var getTrafficSplit = /* @__PURE__ */ __name(async (service, projectID, region = "europe-west1") => {
+  let output;
+  try {
+    output = await gcloud_output_default(
+      [
+        "run",
+        "services",
+        "list",
+        `--project=${projectID}`,
+        `--region=${region}`,
+        `--filter=metadata.name~^${service}$`,
+        "--format=json(metadata.name,status.traffic)"
+      ],
+      "gcloud",
+      true,
+      true
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to read traffic for service ${service} in project ${projectID}, region ${region}: ${err.message}`,
+      { cause: err }
+    );
+  }
+  if (!output?.trim()) {
+    return [];
+  }
+  const found = JSON.parse(output).find((s) => s.metadata?.name === service);
+  return (found?.status?.traffic ?? []).filter((t2) => t2.revisionName).map((t2) => ({ revisionName: t2.revisionName, percent: t2.
+  percent ?? 0 }));
+}, "getTrafficSplit");
+var shiftTrafficToRevision = /* @__PURE__ */ __name(async (service, projectID, region, revision) => {
+  try {
+    await gcloud_output_default(
+      [
+        "run",
+        "services",
+        "update-traffic",
+        service,
+        `--project=${projectID}`,
+        `--region=${region}`,
+        `--to-revisions=${revision}=100`
+      ],
+      "gcloud",
+      true,
+      true
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to route 100% traffic to ${revision} for service ${service}: ${err.message}`,
+      { cause: err }
+    );
+  }
+}, "shiftTrafficToRevision");
+var waitForFullTraffic = /* @__PURE__ */ __name(async (service, projectID, region, revision, timeoutMillis = TRAFFIC_TIMEOUT_MILLIS) => {
+  try {
+    await retryUntil(
+      () => getTrafficSplit(service, projectID, region),
+      (traffic) => traffic.some((t2) => t2.revisionName === revision && t2.percent === 100),
+      timeoutMillis
+    );
+  } catch (err) {
+    throw new Error(
+      `Revision ${revision} did not reach 100% traffic for service ${service}: ${err.message}`,
+      { cause: err }
+    );
+  }
+}, "waitForFullTraffic");
+var deleteRevision2 = /* @__PURE__ */ __name(async (service, projectID, region, revision, timeoutMillis = TRAFFIC_TIMEOUT_MILLIS) => {
+  const isListed = /* @__PURE__ */ __name(async () => (await get_revisions_default(service, projectID, region)).some(
+    (r2) => r2.name === revision
+  ), "isListed");
+  try {
+    if (!await isListed()) {
+      return;
+    }
+    try {
+      await gcloud_output_default(
+        [
+          "run",
+          "revisions",
+          "delete",
+          revision,
+          `--project=${projectID}`,
+          `--region=${region}`,
+          "--quiet"
+        ],
+        "gcloud",
+        true,
+        true
+      );
+    } catch (err) {
+      if (await isListed()) {
+        throw err;
+      }
+      return;
+    }
+    await retryUntil(
+      () => get_revisions_default(service, projectID, region),
+      (revisions) => !revisions.some((r2) => r2.name === revision),
+      timeoutMillis
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to delete canary revision ${revision} of service ${service}: ${err.message}`,
+      { cause: err }
+    );
+  }
+}, "deleteRevision");
 
 // cloud-deploy/src/utils/cloud-armor.js
 var checkPolicyExists = /* @__PURE__ */ __name(async (policy, projectID) => {
@@ -112850,6 +112959,37 @@ var registerAutomaticCanary = /* @__PURE__ */ __name(async (data) => {
   }
   return result;
 }, "registerAutomaticCanary");
+var authHeaders = /* @__PURE__ */ __name(async () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${await identity_token_default()}`
+}), "authHeaders");
+var canaryUrl = /* @__PURE__ */ __name((service) => `/canary/automatic/${encodeURIComponent(service)}`, "canaryUrl");
+var cancelAutomaticCanary = /* @__PURE__ */ __name(async (service, project, region, supersededBy) => {
+  const url3 = `${canaryUrl(service)}/cancel`;
+  try {
+    const response = await axios_default.post(
+      url3,
+      { project, region, reason: "superseded", supersededBy },
+      { headers: await authHeaders() }
+    );
+    info(`response from ${url3} with response code ${response.status}`);
+    return response.data ?? {};
+  } catch (error2) {
+    if (error2.response?.status === 404) {
+      if (error2.response.data?.code === "NO_CANARY_IN_PROGRESS") {
+        return null;
+      }
+      throw new Error(
+        `Failed to cancel automatic canary for ${service}: cancel endpoint not available (404)`,
+        { cause: error2 }
+      );
+    }
+    throw new Error(
+      `Failed to cancel automatic canary for ${service}: ${error2.message ?? error2}`,
+      { cause: error2 }
+    );
+  }
+}, "cancelAutomaticCanary");
 var sendScaleSetup = /* @__PURE__ */ __name(async (service, projectid, region, platform2, mininstances, scaleup, scaledown) => {
   const url3 = "/scaling/setup";
   const data = {
@@ -113894,6 +114034,120 @@ var loadServiceDefinition = /* @__PURE__ */ __name((serviceFile) => {
 }, "loadServiceDefinition");
 var service_definition_default = loadServiceDefinition;
 
+// cloud-deploy/src/utils/supersede-canary.js
+var serving = /* @__PURE__ */ __name((traffic) => traffic.filter((t2) => t2.percent > 0), "serving");
+var percentOf = /* @__PURE__ */ __name((traffic, revision) => traffic.find((t2) => t2.revisionName === revision)?.percent ??
+0, "percentOf");
+var assertAtMostTwoServing = /* @__PURE__ */ __name((service, traffic) => {
+  const live = serving(traffic);
+  if (live.length > 2) {
+    throw new Error(
+      `Cannot determine the stable revision for ${service}: ${live.length} revisions serve traffic (${live.map((t2) => `${t2.
+      revisionName}=${t2.percent}%`).join(", ")}). Resolve the traffic split manually`
+    );
+  }
+}, "assertAtMostTwoServing");
+var recordMatchesTraffic = /* @__PURE__ */ __name((record, traffic) => {
+  if (!record.previous_revision || percentOf(traffic, record.previous_revision) <= 0) {
+    return false;
+  }
+  return serving(traffic).every(
+    (t2) => t2.revisionName === record.previous_revision || t2.revisionName === record.revision
+  );
+}, "recordMatchesTraffic");
+var oldestServingFallback = /* @__PURE__ */ __name(async (service, project, region, traffic) => {
+  const live = serving(traffic);
+  if (live.length === 0) {
+    throw new Error(
+      `Cannot determine the stable revision for ${service}: no revision serves traffic`
+    );
+  }
+  assertAtMostTwoServing(service, traffic);
+  if (live.length === 1) {
+    return { stable: live[0].revisionName, canaries: [] };
+  }
+  const revisions = await get_revisions_default(service, project, region);
+  const dated = live.map((t2) => {
+    const rev = revisions.find((r2) => r2.name === t2.revisionName);
+    const time = Date.parse(rev?.creationTimestamp);
+    if (Number.isNaN(time)) {
+      throw new Error(
+        `Cannot determine the stable revision for ${service}: no creation time for ${t2.revisionName}`
+      );
+    }
+    return { name: t2.revisionName, time };
+  });
+  dated.sort((a, b2) => a.time - b2.time);
+  return {
+    stable: dated[0].name,
+    canaries: dated.slice(1).map((d2) => d2.name)
+  };
+}, "oldestServingFallback");
+var supersedeCanary = /* @__PURE__ */ __name(async ({
+  service,
+  project,
+  region = "europe-west1",
+  supersededBy
+}) => {
+  const cancelled = await cancelAutomaticCanary(
+    service,
+    project,
+    region,
+    supersededBy
+  );
+  const traffic = await getTrafficSplit(service, project, region);
+  assertAtMostTwoServing(service, traffic);
+  let plan;
+  if (cancelled === null) {
+    info("No automatic canary in progress to cancel");
+    const full = traffic.find((t2) => t2.percent === 100);
+    if (full) {
+      info(
+        `Revision ${full.revisionName} already serves 100% traffic, nothing to supersede`
+      );
+      return full.revisionName;
+    }
+    plan = await oldestServingFallback(service, project, region, traffic);
+  } else if (recordMatchesTraffic(cancelled, traffic)) {
+    plan = {
+      stable: cancelled.previous_revision,
+      canaries: cancelled.revision ? [cancelled.revision] : []
+    };
+  } else {
+    warning(
+      `Canary record does not match the live traffic (stable revision ${cancelled.previous_revision ?? "(none)"}, canary\
+ revision ${cancelled.revision ?? "(none)"}), using the oldest serving revision`
+    );
+    plan = await oldestServingFallback(service, project, region, traffic);
+  }
+  const { stable, canaries } = plan;
+  warning(
+    `New deploy supersedes the canary in progress: cancelling ${canaries.join(", ") || "no canary revision"}, keeping st\
+able revision ${stable}`
+  );
+  await shiftTrafficToRevision(service, project, region, stable);
+  await waitForFullTraffic(service, project, region, stable);
+  for (const canary of canaries) {
+    const current = await getTrafficSplit(service, project, region);
+    if (percentOf(current, canary) > 0) {
+      throw new Error(
+        `Refusing to delete canary revision ${canary} of service ${service}: it still serves ${percentOf(current, canary)}\
+% traffic`
+      );
+    }
+    try {
+      await deleteRevision2(service, project, region, canary);
+    } catch (err) {
+      throw new Error(
+        `${err.message}. Traffic is safe on stable revision ${stable}.`,
+        { cause: err }
+      );
+    }
+  }
+  return stable;
+}, "supersedeCanary");
+var supersede_canary_default = supersedeCanary;
+
 // cloud-deploy/src/utils/vulnerability-scanning.js
 var import_node_fs15 = __toESM(require("node:fs"), 1);
 var runScan = /* @__PURE__ */ __name(async (serviceAccount, image, serviceName, labels, projectID) => {
@@ -114067,7 +114321,13 @@ var action5 = /* @__PURE__ */ __name(async () => {
       if (previousRevision) {
         info(`Canary: previous revision is ${previousRevision}`);
       } else {
-        warning("Deploy failed due to canary rollout in progress");
+        previousRevision = await supersede_canary_default({
+          service: serviceName,
+          project: projectID,
+          region: "europe-west1",
+          supersededBy: /^[0-9a-f]{7,40}$/.test(process.env.GITHUB_SHA ?? "") ? process.env.GITHUB_SHA : void 0
+        });
+        info(`Canary: previous revision is ${previousRevision}`);
       }
     }
   }

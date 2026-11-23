@@ -20,6 +20,7 @@ import {
   sendScaleSetup,
 } from '../src/utils/send-request.js';
 import loadServiceDefinition from '../src/utils/service-definition.js';
+import supersedeCanary from '../src/utils/supersede-canary.js';
 import runScan from '../src/utils/vulnerability-scanning.js';
 
 vi.mock('../src/utils/load-credentials.js');
@@ -36,6 +37,7 @@ vi.mock('../src/utils/send-request.js');
 vi.mock('../src/utils/vulnerability-scanning.js');
 vi.mock('../src/utils/cloud-armor.js');
 vi.mock('../src/utils/canary-revisions.js');
+vi.mock('../src/utils/supersede-canary.js');
 
 const serviceDef = {
   kubernetes: {
@@ -461,7 +463,7 @@ describe('Action', () => {
     );
   });
 
-  test('It keeps serve-traffic false and skips registration when canary traffic is split', async () => {
+  test('It supersedes an in-progress canary and registers the new canary against the stable revision', async () => {
     core.getInput
       .mockReturnValueOnce('service-account')
       .mockReturnValueOnce('clan-service-account')
@@ -517,8 +519,13 @@ describe('Action', () => {
       firstDeploy: false,
       revision: null,
     });
+    supersedeCanary.mockResolvedValueOnce('service-name-00041-xyz');
+    getNewRevision.mockResolvedValueOnce('service-name-00043-def');
+    registerAutomaticCanary.mockResolvedValueOnce(true);
 
+    vi.stubEnv('GITHUB_SHA', 'abcdef1234');
     await action();
+    vi.unstubAllEnvs();
 
     expect(getPreviousRevision).toHaveBeenCalledWith(
       'service-name',
@@ -526,12 +533,21 @@ describe('Action', () => {
       'europe-west1',
     );
     expect(buildManifest.mock.calls[0][10]).toBe(false);
-    expect(registerAutomaticCanary).not.toHaveBeenCalled();
     expect(core.info).not.toHaveBeenCalledWith(
       expect.stringContaining('Canary skipped'),
     );
-    expect(core.warning).toHaveBeenCalledWith(
-      'Deploy failed due to canary rollout in progress',
+    expect(supersedeCanary).toHaveBeenCalledWith({
+      service: 'service-name',
+      project: 'project-id',
+      region: 'europe-west1',
+      supersededBy: 'abcdef1234',
+    });
+    expect(buildManifest).toHaveBeenCalled();
+    expect(supersedeCanary.mock.invocationCallOrder[0]).toBeLessThan(
+      buildManifest.mock.invocationCallOrder[0],
+    );
+    expect(registerAutomaticCanary).toHaveBeenCalledWith(
+      expect.objectContaining({ previousRevision: 'service-name-00041-xyz' }),
     );
   });
 
