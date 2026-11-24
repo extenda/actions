@@ -212,6 +212,44 @@ describe('canary-revisions', () => {
       ]);
     });
 
+    it('fails closed on traffic without a revision name (latestRevision)', async () => {
+      gcloudOutput.mockResolvedValue(
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service' },
+            status: {
+              traffic: [
+                { revisionName: 'r1', percent: 50 },
+                { latestRevision: true, percent: 50 },
+              ],
+            },
+          },
+        ]),
+      );
+      await expect(getTrafficSplit('my-service', 'p')).rejects.toThrow(
+        'target without a revision name',
+      );
+    });
+
+    it('ignores nameless entries without traffic', async () => {
+      gcloudOutput.mockResolvedValue(
+        JSON.stringify([
+          {
+            metadata: { name: 'my-service' },
+            status: {
+              traffic: [
+                { revisionName: 'r1', percent: 100 },
+                { latestRevision: true, percent: 0 },
+              ],
+            },
+          },
+        ]),
+      );
+      expect(await getTrafficSplit('my-service', 'p')).toEqual([
+        { revisionName: 'r1', percent: 100 },
+      ]);
+    });
+
     it('returns an empty list for empty output and wraps gcloud errors', async () => {
       gcloudOutput.mockResolvedValueOnce('');
       expect(await getTrafficSplit('my-service', 'p')).toEqual([]);

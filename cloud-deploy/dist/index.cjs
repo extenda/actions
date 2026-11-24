@@ -112816,8 +112816,15 @@ var getTrafficSplit = /* @__PURE__ */ __name(async (service, projectID, region =
     return [];
   }
   const found = JSON.parse(output).find((s) => s.metadata?.name === service);
-  return (found?.status?.traffic ?? []).filter((t2) => t2.revisionName).map((t2) => ({ revisionName: t2.revisionName, percent: t2.
-  percent ?? 0 }));
+  const entries = found?.status?.traffic ?? [];
+  const unresolved = entries.find((t2) => !t2.revisionName && t2.percent > 0);
+  if (unresolved) {
+    throw new Error(
+      `Service ${service} has ${unresolved.percent}% traffic on a target without a revision name (for example latestRevi\
+sion), cannot safely change traffic`
+    );
+  }
+  return entries.filter((t2) => t2.revisionName).map((t2) => ({ revisionName: t2.revisionName, percent: t2.percent ?? 0 }));
 }, "getTrafficSplit");
 var shiftTrafficToRevision = /* @__PURE__ */ __name(async (service, projectID, region, revision) => {
   try {
@@ -114127,7 +114134,8 @@ able revision ${stable}`
   );
   await shiftTrafficToRevision(service, project, region, stable);
   await waitForFullTraffic(service, project, region, stable);
-  for (const canary of canaries) {
+  const [canary] = canaries;
+  if (canary) {
     const current = await getTrafficSplit(service, project, region);
     if (percentOf(current, canary) > 0) {
       throw new Error(

@@ -131,7 +131,9 @@ const supersedeCanary = async ({
   await shiftTrafficToRevision(service, project, region, stable);
   await waitForFullTraffic(service, project, region, stable);
 
-  for (const canary of canaries) {
+  // assertAtMostTwoServing leaves at most one canary.
+  const [canary] = canaries;
+  if (canary) {
     // Never delete a revision that still serves traffic.
     const current = await getTrafficSplit(service, project, region);
     if (percentOf(current, canary) > 0) {

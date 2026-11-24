@@ -100,7 +100,16 @@ const getTrafficSplit = async (service, projectID, region = 'europe-west1') => {
     return [];
   }
   const found = JSON.parse(output).find((s) => s.metadata?.name === service);
-  return (found?.status?.traffic ?? [])
+  const entries = found?.status?.traffic ?? [];
+  const unresolved = entries.find((t) => !t.revisionName && t.percent > 0);
+  if (unresolved) {
+    // Fail closed: a target such as latestRevision that is not resolved to a
+    // concrete revision would hide real traffic from the safety checks.
+    throw new Error(
+      `Service ${service} has ${unresolved.percent}% traffic on a target without a revision name (for example latestRevision), cannot safely change traffic`,
+    );
+  }
+  return entries
     .filter((t) => t.revisionName)
     .map((t) => ({ revisionName: t.revisionName, percent: t.percent ?? 0 }));
 };
