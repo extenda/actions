@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import getToken from '../../src/utils/identity-token.js';
 import {
+  cancelAutomaticCanary,
   isProjectWhitelisted,
   refreshCanaryStatus,
   registerAutomaticCanary,
@@ -356,6 +357,54 @@ describe('Send request to platform api', () => {
       await expect(isProjectWhitelisted('some-project')).rejects.toThrow(
         'network error',
       );
+    });
+  });
+
+  describe('automatic canary supersede', () => {
+    it('posts the cancel request with reason superseded', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockResolvedValue({ status: 200, data: { revision: 'r2' } });
+      expect(await cancelAutomaticCanary('svc', 'p', 'r', 'sha')).toEqual({
+        revision: 'r2',
+      });
+      expect(axios.post).toHaveBeenCalledWith(
+        '/canary/automatic/svc/cancel',
+        {
+          project: 'p',
+          region: 'r',
+          reason: 'superseded',
+          supersededBy: 'sha',
+        },
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: 'Bearer token' }),
+        }),
+      );
+    });
+
+    it('returns null on 404 with code NO_CANARY_IN_PROGRESS', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockRejectedValue({
+        response: { status: 404, data: { code: 'NO_CANARY_IN_PROGRESS' } },
+      });
+      expect(await cancelAutomaticCanary('svc', 'p', 'r', 'sha')).toBeNull();
+    });
+
+    it('fails on any other 404 (endpoint not available)', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockRejectedValue({
+        response: { status: 404, data: { message: 'Not Found' } },
+      });
+      await expect(
+        cancelAutomaticCanary('svc', 'p', 'r', 'sha'),
+      ).rejects.toThrow('cancel endpoint not available');
+    });
+
+    it('throws when cancel fails', async () => {
+      getToken.mockResolvedValue('token');
+      axios.post.mockRejectedValue(new Error('500'));
+      await expect(
+        cancelAutomaticCanary('svc', 'p', 'r', 'sha'),
+      ).rejects.toThrow('Failed to cancel automatic canary for svc: 500');
     });
   });
 });

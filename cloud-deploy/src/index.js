@@ -23,6 +23,7 @@ import {
   sendScaleSetup,
 } from './utils/send-request.js';
 import loadServiceDefinition from './utils/service-definition.js';
+import supersedeCanary from './utils/supersede-canary.js';
 import runScan from './utils/vulnerability-scanning.js';
 
 const action = async () => {
@@ -199,7 +200,15 @@ const action = async () => {
       if (previousRevision) {
         core.info(`Canary: previous revision is ${previousRevision}`);
       } else {
-        core.warning('Deploy failed due to canary rollout in progress');
+        previousRevision = await supersedeCanary({
+          service: serviceName,
+          project: projectID,
+          region: 'europe-west1',
+          supersededBy: /^[0-9a-f]{7,40}$/.test(process.env.GITHUB_SHA ?? '')
+            ? process.env.GITHUB_SHA
+            : undefined,
+        });
+        core.info(`Canary: previous revision is ${previousRevision}`);
       }
     }
   }

@@ -51,6 +51,52 @@ const registerAutomaticCanary = async (data) => {
   return result;
 };
 
+const authHeaders = async () => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${await getToken()}`,
+});
+
+const canaryUrl = (service) =>
+  `/canary/automatic/${encodeURIComponent(service)}`;
+
+/**
+ * Cancel the automatic canary of a service because a new deploy supersedes it.
+ * @returns {Promise<object|null>} the cancelled record (revision,
+ *   previous_revision, status), or null when the API answers 404 with code
+ *   NO_CANARY_IN_PROGRESS. Any other failure, including any other 404, throws.
+ */
+const cancelAutomaticCanary = async (
+  service,
+  project,
+  region,
+  supersededBy,
+) => {
+  const url = `${canaryUrl(service)}/cancel`;
+  try {
+    const response = await axios.post(
+      url,
+      { project, region, reason: 'superseded', supersededBy },
+      { headers: await authHeaders() },
+    );
+    core.info(`response from ${url} with response code ${response.status}`);
+    return response.data ?? {};
+  } catch (error) {
+    if (error.response?.status === 404) {
+      if (error.response.data?.code === 'NO_CANARY_IN_PROGRESS') {
+        return null;
+      }
+      throw new Error(
+        `Failed to cancel automatic canary for ${service}: cancel endpoint not available (404)`,
+        { cause: error },
+      );
+    }
+    throw new Error(
+      `Failed to cancel automatic canary for ${service}: ${error.message ?? error}`,
+      { cause: error },
+    );
+  }
+};
+
 const sendScaleSetup = async (
   service,
   projectid,
@@ -123,6 +169,7 @@ const isProjectWhitelisted = async (projectId) => {
 };
 
 export {
+  cancelAutomaticCanary,
   isProjectWhitelisted,
   refreshCanaryStatus,
   registerAutomaticCanary,

@@ -388,6 +388,30 @@ between each step. If errors are detected the rollout is rolled back automatical
 
 **Important:** Automatic canary only activates in production (`env: prod`). Staging deployments are unaffected.
 
+**New deploy while a canary is in progress:**
+When a new production Cloud Run deploy with automatic canary starts and the service has no revision at 100% traffic, a canary is still rolling out and the action supersedes it.
+
+1. The canary is cancelled in the platform API (`POST /canary/automatic/{service}/cancel`, reason `superseded`) before any traffic change.
+   The response carries the stable revision (`previous_revision`) and the canary (`revision`) from the database.
+2. If three or more revisions serve traffic, or no stable revision can be determined, the deploy fails and traffic is not touched.
+   The record is used only when its stable revision serves traffic and no revision other than its canary serves traffic.
+   Otherwise the record is stale, and the oldest serving revision (by creation time) is stable and the other serving revision is the canary.
+3. A 404 with code `NO_CANARY_IN_PROGRESS` means there is nothing to cancel.
+   If a revision already serves 100% traffic, the canary finished and the deploy continues with that revision as the previous revision.
+   If traffic is still split (a re-run), the oldest serving revision is used as in step 2.
+   Any other 404 or error fails the deploy.
+4. 100% of the traffic is routed to the stable revision, and the action waits (5 minute timeout) until `status.traffic` shows it.
+5. Right before the delete, traffic is read again.
+   The canary revision is only deleted when it serves 0%, and a revision that is already gone counts as deleted.
+   If the delete fails, the deploy fails and traffic is already safe on the stable revision.
+6. The deploy then continues and the new canary is registered against the stable revision.
+
+Warnings in the log name the cancelled and the stable revisions.
+Staging, GKE, first deploys and deploys without canary are unchanged.
+The deploying service account needs `run.services.list`, `run.services.update`, `run.revisions.list` and `run.revisions.delete`.
+The action calls the platform API with a Google ID token (audience `platform`), which the API policy admits without a permission check.
+The `pla.canary.cancel` permission only matters for other callers, such as users or workload identity.
+
 **Simple form** — uses default steps `[10, 25, 50, 75, 100]`:
 
 ```yaml
