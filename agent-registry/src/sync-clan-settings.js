@@ -158,6 +158,11 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
     })),
   ];
 
+  const postToolUse = [
+    ...(baseline?.hooks?.PostToolUse ?? []),
+    ...(clanConfig?.hooks?.PostToolUse ?? []),
+  ].map((e) => ({ matcher: e.matcher, hooks: [hookEntryCmd(e)] }));
+
   const stop = [
     ...(baseline?.hooks?.Stop ?? []),
     ...(clanConfig?.hooks?.Stop ?? []),
@@ -177,6 +182,7 @@ export const buildSettingsJson = (baseline, clanConfig, clanName) => {
         },
       ],
       ...(preToolUse.length ? { PreToolUse: preToolUse } : {}),
+      ...(postToolUse.length ? { PostToolUse: postToolUse } : {}),
       ...(stop.length ? { Stop: stop } : {}),
     },
   };
