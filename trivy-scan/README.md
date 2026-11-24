@@ -130,11 +130,37 @@ The action provides outputs for all generated files, which can be used in subseq
       ${{ steps.scan.outputs.text-report }}
 ```
 
+### Scanning a ZIP Archive
+
+Set `archive` instead of `image` to scan a packaged artifact, such as a managed service bundle that ships with a
+jlink Java runtime. Trivy does not detect jlink-built runtimes, so archive mode runs three tools:
+
+1. [Syft](https://github.com/anchore/syft) creates the SPDX and CycloneDX SBOMs from the extracted archive.
+2. [Grype](https://github.com/anchore/grype) scans the CycloneDX SBOM. It finds the Java runtime and its CVEs.
+3. Trivy scans the extracted files, which adds JAR findings that Grype's database may miss.
+
+The Grype findings are converted and merged into the Trivy JSON report, so the job summary, text report, Slack
+notification and `cvss-score-threshold` work as for images. Findings reported by both tools are listed once.
+
+```yaml
+- uses: extenda/actions/trivy-scan@v0
+  with:
+    archive: my-service-linux-x64.zip
+    service-account-key: ${{ secrets.SECRET_AUTH }}
+    fail-on-vulnerabilities: true
+```
+
+Limitations:
+- One archive per call.
+- Linux runners only.
+- `upload-sbom` is not supported yet. The action fails if it is `true` together with `archive`.
+
 ## Inputs
 
 | Input                             | Description                                                                                                                                | Required | Default         |
 |:----------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------|:---------|:----------------|
-| `image`                           | The Docker image to scan. Can be a tag or digest (e.g., `eu.gcr.io/extenda/my-image:latest` or `eu.gcr.io/extenda/my-image@sha256:...`). | Yes      |                 |
+| `image`                           | The Docker image to scan. Can be a tag or digest (e.g., `eu.gcr.io/extenda/my-image:latest` or `eu.gcr.io/extenda/my-image@sha256:...`). Set either `image` or `archive`. | No | |
+| `archive`                         | Path to a ZIP archive to scan instead of an image. See [Scanning a ZIP Archive](#scanning-a-zip-archive). Set either `image` or `archive`. | No | |
 | `service-account-key`             | The GCP service account key for accessing the image repository, uploading SBOMs to Artifact Registry, and sending Slack notifications.     | Yes      |                 |
 | `upload-sbom`                     | Whether to upload the generated SBOM files to Google Artifact Registry. Recommended for production images to maintain CRA compliance.      | No       | `false`         |
 | `fail-on-vulnerabilities`         | Set to `true` to fail the action if vulnerabilities are found. If `false`, vulnerabilities are reported but the action succeeds.           | No       | `false`         |

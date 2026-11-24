@@ -110310,22 +110310,6 @@ var notifySlack = /* @__PURE__ */ __name(async (serviceAccount, message, channel
 }, "notifySlack");
 var slack_notify_default = notifySlack;
 
-// trivy-scan/src/docker-auth.js
-var isGoogleRegistry = /* @__PURE__ */ __name((registry) => registry.endsWith(".gcr.io") || registry.endsWith("-docker.p\
-kg.dev"), "isGoogleRegistry");
-async function authenticateDocker(image) {
-  const [registry] = image.split("/");
-  if (!isGoogleRegistry(registry)) {
-    return null;
-  }
-  return execGcloud(
-    ["auth", "configure-docker", registry, "--quiet"],
-    "gcloud",
-    true
-  );
-}
-__name(authenticateDocker, "authenticateDocker");
-
 // trivy-scan/src/setup-trivy.js
 var import_node_os4 = __toESM(require("node:os"), 1);
 var determineVersion = /* @__PURE__ */ __name(async (providedVersion) => {
@@ -110585,6 +110569,22 @@ async function writeTrivyJobSummary(scanResult) {
 }
 __name(writeTrivyJobSummary, "writeTrivyJobSummary");
 
+// trivy-scan/src/docker-auth.js
+var isGoogleRegistry = /* @__PURE__ */ __name((registry) => registry.endsWith(".gcr.io") || registry.endsWith("-docker.p\
+kg.dev"), "isGoogleRegistry");
+async function authenticateDocker(image) {
+  const [registry] = image.split("/");
+  if (!isGoogleRegistry(registry)) {
+    return null;
+  }
+  return execGcloud(
+    ["auth", "configure-docker", registry, "--quiet"],
+    "gcloud",
+    true
+  );
+}
+__name(authenticateDocker, "authenticateDocker");
+
 // trivy-scan/src/trivy-scan.js
 var import_node_fs10 = __toESM(require("node:fs"), 1);
 var outputs = {
@@ -110807,26 +110807,36 @@ var trivy = /* @__PURE__ */ __name(async (serviceAccountKey, image, {
       typeof attestationKeyUri == "string" ? attestationKeyUri : void 0
     );
   }
-  if (!scanResult.success) {
-    if (notifySlackOnVulnerabilities) {
-      info("Sending slack notification...");
-      await slack_notify_default(
-        serviceAccountKey,
-        scanResult.summary.message,
-        "",
-        scanResult.report.text
-      );
-    }
-    const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Chec\
-k the report for details: ${summaryUrl}`;
-    if (failOnVulnerabilities) {
-      throw new Error(vulnerableMessage);
-    } else {
-      warning(vulnerableMessage);
-    }
-  }
+  await handleVulnerabilities(serviceAccountKey, scanResult, summaryUrl, {
+    failOnVulnerabilities,
+    notifySlackOnVulnerabilities,
+    scoreThreshold,
+    kind: "image"
+  });
   return scanResult;
 }), "trivy");
+var handleVulnerabilities = /* @__PURE__ */ __name(async (serviceAccountKey, scanResult, summaryUrl, { failOnVulnerabilities,
+notifySlackOnVulnerabilities, scoreThreshold, kind }) => {
+  if (scanResult.success) {
+    return;
+  }
+  if (notifySlackOnVulnerabilities) {
+    info("Sending slack notification...");
+    await slack_notify_default(
+      serviceAccountKey,
+      scanResult.summary.message,
+      "",
+      scanResult.report.text
+    );
+  }
+  const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in ${kind} scan. Chec\
+k the report for details: ${summaryUrl}`;
+  if (failOnVulnerabilities) {
+    throw new Error(vulnerableMessage);
+  } else {
+    warning(vulnerableMessage);
+  }
+}, "handleVulnerabilities");
 
 // cloud-deploy/src/manifests/image-sha256.js
 var getImageWithSha256 = /* @__PURE__ */ __name(async (semanticImage) => {

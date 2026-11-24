@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 
 import { withGcloud } from '../../setup-gcloud/src/index.js';
 import notifySlack from '../../slack-notify/src/slack-notify.js';
+import archiveScan from './archive-scan.js';
 import authenticateDocker from './docker-auth.js';
 import setupTrivy from './setup-trivy.js';
 import { writeTrivyJobSummary } from './trivy-report.js';
@@ -72,30 +73,89 @@ const trivy = async (
       );
     }
 
-    if (!scanResult.success) {
-      if (notifySlackOnVulnerabilities) {
-        core.info('Sending slack notification...');
-        await notifySlack(
-          serviceAccountKey,
-          scanResult.summary.message,
-          '',
-          scanResult.report.text,
-        );
-      }
+    await handleVulnerabilities(serviceAccountKey, scanResult, summaryUrl, {
+      failOnVulnerabilities,
+      notifySlackOnVulnerabilities,
+      scoreThreshold,
+      kind: 'image',
+    });
 
-      const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in image scan. Check the report for details: ${summaryUrl}`;
-      if (failOnVulnerabilities) {
-        throw new Error(vulnerableMessage);
-      } else {
-        core.warning(vulnerableMessage);
-      }
+    return scanResult;
+  });
+
+const handleVulnerabilities = async (
+  serviceAccountKey,
+  scanResult,
+  summaryUrl,
+  { failOnVulnerabilities, notifySlackOnVulnerabilities, scoreThreshold, kind },
+) => {
+  if (scanResult.success) {
+    return;
+  }
+
+  if (notifySlackOnVulnerabilities) {
+    core.info('Sending slack notification...');
+    await notifySlack(
+      serviceAccountKey,
+      scanResult.summary.message,
+      '',
+      scanResult.report.text,
+    );
+  }
+
+  const vulnerableMessage = `Vulnerabilities with CVSS score >= ${scoreThreshold.toFixed(1)} found in ${kind} scan. Check the report for details: ${summaryUrl}`;
+  if (failOnVulnerabilities) {
+    throw new Error(vulnerableMessage);
+  } else {
+    core.warning(vulnerableMessage);
+  }
+};
+
+/**
+ * Scan a ZIP archive with Syft, Grype and Trivy and handle the results like an image scan.
+ * SBOM upload is not supported for archives.
+ */
+const trivyArchive = async (
+  serviceAccountKey,
+  archive,
+  {
+    version = 'v0.69.3',
+    severity,
+    ignoreUnfixed,
+    timeout,
+    failOnVulnerabilities = false,
+    notifySlackOnVulnerabilities = false,
+    scoreThreshold = 9.5,
+  } = {},
+) =>
+  withGcloud(serviceAccountKey, async () => {
+    core.startGroup(`Scanning archive ${archive}...`);
+    const scanResult = await archiveScan(archive, {
+      version,
+      severity,
+      ignoreUnfixed,
+      timeout,
+      scoreThreshold,
+    });
+    core.endGroup();
+
+    const summaryUrl = await writeTrivyJobSummary(scanResult);
+    if (summaryUrl) {
+      core.notice(`Trivy summary is available on the run page: ${summaryUrl}`);
     }
+
+    await handleVulnerabilities(serviceAccountKey, scanResult, summaryUrl, {
+      failOnVulnerabilities,
+      notifySlackOnVulnerabilities,
+      scoreThreshold,
+      kind: 'archive',
+    });
 
     return scanResult;
   });
 
 const action = async () => {
-  const image = core.getInput('image', { required: true });
+  const image = core.getInput('image');
   const serviceAccountKey = core.getInput('service-account-key', {
     required: true,
   });
@@ -112,8 +172,13 @@ const action = async () => {
   const resolvedAttestationKeyUri =
     attestationKeyUri === 'none' ? null : attestationKeyUri || undefined;
   const scoreThreshold = core.getInput('cvss-score-threshold');
+  const archive = core.getInput('archive');
 
-  await trivy(serviceAccountKey, image, {
+  if (Boolean(image) === Boolean(archive)) {
+    throw new Error('Set exactly one of the inputs `image` or `archive`.');
+  }
+
+  const options = {
     version,
     severity,
     ignoreUnfixed,
@@ -126,6 +191,20 @@ const action = async () => {
         ? Number(scoreThreshold)
         : undefined,
     notifySlackOnVulnerabilities,
+  };
+
+  if (archive) {
+    if (uploadSbomArtifacts) {
+      throw new Error(
+        'SBOM upload is not supported for archives yet. Set `upload-sbom: false` when scanning an archive.',
+      );
+    }
+    await trivyArchive(serviceAccountKey, archive, options);
+    return;
+  }
+
+  await trivy(serviceAccountKey, image, {
+    ...options,
     uploadSbomArtifacts,
     attestationKeyUri: resolvedAttestationKeyUri,
   });
