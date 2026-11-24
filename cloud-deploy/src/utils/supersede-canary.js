@@ -63,12 +63,12 @@ const oldestServingFallback = async (service, project, region, traffic) => {
     const rev = revisions.find((r) => r.name === t.revisionName);
     // A missing or unparsable timestamp gives NaN, which is not > 0.
     const time = Date.parse(rev?.creationTimestamp ?? '');
-    if (!(time > 0)) {
-      throw new Error(
-        `Cannot determine the stable revision for ${service}: no creation time for ${t.revisionName}`,
-      );
+    if (time > 0) {
+      return { name: t.revisionName, time };
     }
-    return { name: t.revisionName, time };
+    throw new Error(
+      `Cannot determine the stable revision for ${service}: no creation time for ${t.revisionName}`,
+    );
   });
   dated.sort((a, b) => a.time - b.time);
   return {
