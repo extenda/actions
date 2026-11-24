@@ -102977,6 +102977,11 @@ s/<agent>/instructions.md as .claude/agents/<agent>.md, and global/CLAUDE.md, pu
           type: "array",
           items: { $ref: "#/definitions/MatchedHookEntry" }
         },
+        PostToolUse: {
+          description: "Global post-tool-use hook scripts, run after a matching tool call succeeds.",
+          type: "array",
+          items: { $ref: "#/definitions/MatchedHookEntry" }
+        },
         Stop: {
           description: "Global stop scripts, run when Claude finishes a turn. Exit code 2 blocks the stop.",
           type: "array",
@@ -103083,6 +103088,12 @@ var clan_settings_schema_default = {
         },
         PreToolUse: {
           description: "Clan pre-tool-use scripts. Must exist under agent-registry/config/hooks/",
+          type: "array",
+          items: { $ref: "#/definitions/MatchedHookEntry" }
+        },
+        PostToolUse: {
+          description: "Clan post-tool-use scripts, run after a matching tool call succeeds. Must exist under agent-regi\
+stry/config/hooks/",
           type: "array",
           items: { $ref: "#/definitions/MatchedHookEntry" }
         },
@@ -103264,6 +103275,10 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
       hooks: [hookEntryCmd(e)]
     }))
   ];
+  const postToolUse = [
+    ...baseline?.hooks?.PostToolUse ?? [],
+    ...clanConfig?.hooks?.PostToolUse ?? []
+  ].map((e) => ({ matcher: e.matcher, hooks: [hookEntryCmd(e)] }));
   const stop = [
     ...baseline?.hooks?.Stop ?? [],
     ...clanConfig?.hooks?.Stop ?? []
@@ -103282,6 +103297,7 @@ var buildSettingsJson = /* @__PURE__ */ __name((baseline, clanConfig, clanName) 
         }
       ],
       ...preToolUse.length ? { PreToolUse: preToolUse } : {},
+      ...postToolUse.length ? { PostToolUse: postToolUse } : {},
       ...stop.length ? { Stop: stop } : {}
     }
   };
