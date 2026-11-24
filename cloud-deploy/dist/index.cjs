@@ -114076,8 +114076,8 @@ var oldestServingFallback = /* @__PURE__ */ __name(async (service, project, regi
   const revisions = await get_revisions_default(service, project, region);
   const dated = live.map((t2) => {
     const rev = revisions.find((r2) => r2.name === t2.revisionName);
-    const time = Date.parse(rev?.creationTimestamp);
-    if (Number.isNaN(time)) {
+    const time = Date.parse(rev?.creationTimestamp ?? "");
+    if (!(time > 0)) {
       throw new Error(
         `Cannot determine the stable revision for ${service}: no creation time for ${t2.revisionName}`
       );

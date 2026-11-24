@@ -242,6 +242,32 @@ describe('supersedeCanary (end to end with fake gcloud and API)', () => {
     expect(state.revisions.map(([n]) => n)).toEqual(['svc-1']);
   });
 
+  it.each([
+    ['missing', undefined],
+    ['empty', ''],
+    ['unparsable', 'not-a-date'],
+  ])(
+    'fails without touching traffic when a creation time is %s',
+    async (_n, bad) => {
+      const state = world({
+        traffic: { 'svc-1': 50, 'svc-2': 50 },
+        revisions: [
+          ['svc-1', T1],
+          ['svc-2', bad],
+        ],
+      });
+      apiCancels({
+        reject: {
+          response: { status: 404, data: { code: 'NO_CANARY_IN_PROGRESS' } },
+        },
+      });
+
+      await expect(run()).rejects.toThrow('no creation time for svc-2');
+      expect(state.traffic).toEqual({ 'svc-1': 50, 'svc-2': 50 });
+      expect(calls).not.toContain('run services update-traffic');
+    },
+  );
+
   it('fails without touching traffic when 3 revisions serve traffic', async () => {
     const state = world({
       traffic: { 'svc-1': 40, 'svc-2': 30, 'svc-3': 30 },
