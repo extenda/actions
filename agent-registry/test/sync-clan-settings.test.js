@@ -285,6 +285,26 @@ describe('buildSettingsJson', () => {
     expect(result.hooks.PreToolUse[2].hooks[0].command).toContain('clan-lint.sh');
   });
 
+  test('PostToolUse hooks carry the matcher and the script command', () => {
+    const clan = {
+      hooks: { PostToolUse: [{ matcher: 'Write|Edit', script: 'hooks/check.sh', args: ['--fast'] }] },
+    };
+    const result = buildSettingsJson(baseline, clan, 'retail');
+    expect(result.hooks.PostToolUse).toHaveLength(1);
+    expect(result.hooks.PostToolUse[0].matcher).toBe('Write|Edit');
+    expect(result.hooks.PostToolUse[0].hooks[0].command).toContain('check.sh');
+    expect(result.hooks.PostToolUse[0].hooks[0].command).toContain('--fast');
+  });
+
+  test('omits PostToolUse when none is configured', () => {
+    expect(buildSettingsJson(baseline, {}, 'retail').hooks.PostToolUse).toBeUndefined();
+  });
+
+  test('clan schema requires a matcher on PostToolUse entries', () => {
+    const clan = { hooks: { PostToolUse: [{ script: 'hooks/a.sh' }] } };
+    expect(validate(clan, clanSchema).valid).toBe(false);
+  });
+
   test('handles empty clan config gracefully', () => {
     const result = buildSettingsJson(baseline, {}, 'retail');
     expect(result.permissions.allow).toEqual(baseline.permissions.allow);
@@ -725,6 +745,7 @@ describe('hook script paths', () => {
       for (const hooks of [
         { SessionStart: [{ script: nested }] },
         { PreToolUse: [{ matcher: 'Bash', script: nested }] },
+        { PostToolUse: [{ matcher: 'Bash', script: nested }] },
         { Stop: [{ script: nested }] },
       ]) {
         expect(validate(withHooks(hooks, schema), schema).valid).toBe(false);
@@ -739,6 +760,7 @@ describe('hook script paths', () => {
     const hooks = {
       SessionStart: [{ script: 'hooks/a.sh', args: ['--x'] }],
       PreToolUse: [{ matcher: 'Bash', script: 'hooks/b.sh' }],
+      PostToolUse: [{ matcher: 'Write|Edit', script: 'hooks/d.sh', timeout: 30 }],
       Stop: [{ script: 'hooks/c.sh', timeout: 10 }],
     };
     expect(validate(withHooks(hooks, schema), schema).valid).toBe(true);

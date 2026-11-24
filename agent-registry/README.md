@@ -59,7 +59,7 @@ agent-registry/
   config/                 # clan-specific Claude Code settings
     settings.yaml         # clan name, additional permissions, hooks, and commands
     hooks/
-      *.sh, *.mjs         # clan SessionStart and PreToolUse hook scripts (.mjs runs with node)
+      *.sh, *.mjs         # clan SessionStart, PreToolUse, PostToolUse and Stop hook scripts (.mjs runs with node)
     commands/
       *.md                # slash commands available to clan developers
     conventions.md        # clan coding conventions — downloaded to .agent/conventions.md
@@ -245,6 +245,9 @@ hooks:
   PreToolUse:
     - matcher: "Bash"
       script: hooks/my-guard.sh           # additional PreToolUse hooks
+  PostToolUse:
+    - matcher: "Write|Edit"
+      script: hooks/my-check.sh           # runs after a matching tool call succeeds
   Stop:
     - script: hooks/my-verify.sh          # runs when Claude finishes a turn; exit 2 blocks the stop
       args: ["--strict"]                  # optional, shell-quoted into the command
@@ -259,12 +262,13 @@ commands:
 | `permissions.allow` | no | Additional permission strings merged with the global set. |
 | `hooks.SessionStart` | no | Scripts the bootstrap runs once per session start, after it installs the config. |
 | `hooks.PreToolUse` | no | Additional PreToolUse hooks merged with the global set. |
+| `hooks.PostToolUse` | no | Additional PostToolUse hooks merged with the global set. Each entry takes `matcher` and `script`; the hook runs after a matching tool call. |
 | `hooks.Stop` | no | Hooks that run when Claude finishes a turn. Exit code 2 blocks the stop. |
 | `commands` | no | Additional slash-command files added alongside global commands. |
 
 Hook scripts go in `agent-registry/config/hooks/` and slash-command files in `agent-registry/config/commands/`.
 
-Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args` (`node` instead of `bash` for a `.mjs` script; Node is a prerequisite of the orchestrator install), so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop). SessionStart scripts never block session start, whatever their exit code.
+Every hook entry (in any event, global or clan) accepts two optional fields: `args` (list of strings, shell-quoted into the generated command) and `timeout` (seconds). A hook runs as `[ -f script ] || exit 0; bash script args` (`node` instead of `bash` for a `.mjs` script; Node is a prerequisite of the orchestrator install), so a missing script is a no-op (the executable bit is not required) and the script's own exit code is propagated: exit 2 blocks the tool call (PreToolUse) or the stop (Stop); on PostToolUse the tool has already run, so exit 2 only feeds the hook's stderr back to Claude. SessionStart scripts never block session start, whatever their exit code.
 
 The global `settings.yaml` (platform team only) must set `bootstrap: hooks/<script>.sh` (or `.mjs`). The SessionStart hook has matcher `startup|clear|fork` (it does not run on resume or compaction) and runs that script: `bash .claude/hooks/<script>.sh [--clan <clan>] --run '<script> [args]'...` (`node` for a `.mjs` bootstrap, checked with `node --check` instead of `bash -n`). It downloads the script first when the repository does not have it. The platform's bootstrap checks that gcloud has credentials, downloads `hooks/`, `commands/`, `config/<clan>/`, the shared `CLAUDE.md` and the orchestrator instructions in one copy, validates and installs them, then runs the `--run` scripts in order. SessionStart script names and `args` must match `^[A-Za-z0-9_@%+=:,./-]+$`, and the hook timeout is the sum of the scripts' `timeout` values plus 60 seconds. The publish fails when the bootstrap script is missing from `agent-registry/global/`, and a clan publish fails when the global baseline cannot be fetched.
 
