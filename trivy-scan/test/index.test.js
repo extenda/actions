@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import { withGcloud } from '../../setup-gcloud/src/index.js';
 import notifySlack from '../../slack-notify/src/slack-notify.js';
+import archiveScan from '../src/archive-scan.js';
 import authenticateDocker from '../src/docker-auth.js';
 import action from '../src/index.js';
 import { writeTrivyJobSummary as trivyJobSummary } from '../src/trivy-report.js';
@@ -14,6 +15,7 @@ vi.mock('../src/docker-auth.js');
 vi.mock('../src/upload-sbom.js');
 vi.mock('../src/trivy-report.js');
 vi.mock('../src/trivy-scan.js');
+vi.mock('../src/archive-scan.js');
 vi.mock('../../slack-notify/src/slack-notify.js');
 vi.mock('../../setup-gcloud/src/index.js');
 
@@ -207,4 +209,87 @@ test('Action maps sbom attestation key input before uploading SBOMs', async () =
     scanResult.sbom,
     attestationKeyUri,
   );
+});
+
+const setArchiveInputs = (inputs, booleans = {}) => {
+  core.getInput.mockImplementation((name) => inputs[name] ?? '');
+  core.getBooleanInput.mockImplementation((name) => booleans[name] ?? false);
+};
+
+test('Action scans an archive instead of an image', async () => {
+  setArchiveInputs(
+    {
+      archive: 'app.zip',
+      'service-account-key': 'sa',
+      severity: 'CRITICAL,HIGH',
+      timeout: '5m0s',
+    },
+    { 'ignore-unfixed': true },
+  );
+  archiveScan.mockResolvedValueOnce({
+    success: true,
+    summary: { message: 'Summary' },
+  });
+
+  await action();
+
+  expect(archiveScan).toHaveBeenCalledWith('app.zip', {
+    version: 'v0.69.3',
+    severity: 'CRITICAL,HIGH',
+    ignoreUnfixed: true,
+    timeout: '5m0s',
+    scoreThreshold: 9.5,
+  });
+  expect(trivyScan).not.toHaveBeenCalled();
+  expect(authenticateDocker).not.toHaveBeenCalled();
+  expect(uploadSbom).not.toHaveBeenCalled();
+});
+
+test('Action fails an archive scan above the threshold', async () => {
+  setArchiveInputs(
+    {
+      archive: 'app.zip',
+      'service-account-key': 'sa',
+      'cvss-score-threshold': '8.0',
+    },
+    {
+      'fail-on-vulnerabilities': true,
+      'notify-slack-on-vulnerabilities': true,
+    },
+  );
+  archiveScan.mockResolvedValueOnce({
+    success: false,
+    summary: { message: 'Summary' },
+    report: { text: 'Report' },
+  });
+
+  await expect(action()).rejects.toThrow(
+    'Vulnerabilities with CVSS score >= 8.0 found in archive scan.',
+  );
+  expect(notifySlack).toHaveBeenCalledWith('sa', 'Summary', '', 'Report');
+});
+
+test('Action rejects SBOM upload for archives', async () => {
+  setArchiveInputs(
+    { archive: 'app.zip', 'service-account-key': 'sa' },
+    { 'upload-sbom': true },
+  );
+
+  await expect(action()).rejects.toThrow(
+    'SBOM upload is not supported for archives yet.',
+  );
+  expect(archiveScan).not.toHaveBeenCalled();
+});
+
+test.each([
+  ['both', { image: 'ubuntu', archive: 'app.zip' }],
+  ['neither', {}],
+])('Action rejects %s of image and archive', async (_, inputs) => {
+  setArchiveInputs({ ...inputs, 'service-account-key': 'sa' });
+
+  await expect(action()).rejects.toThrow(
+    'Set exactly one of the inputs `image` or `archive`.',
+  );
+  expect(trivyScan).not.toHaveBeenCalled();
+  expect(archiveScan).not.toHaveBeenCalled();
 });

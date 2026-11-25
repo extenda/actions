@@ -1,6 +1,6 @@
 name: Trivy Scan
 description: >
-  Scan an image with Trivy and generate SBOM files and reports.
+  Scan an image or a ZIP archive with Trivy and generate SBOM files and reports.
   The action can optionally upload SBOM files to Google Artifact Registry.
 author: Extenda Retail
 inputs:
@@ -9,8 +9,14 @@ inputs:
       The service account key which will be used to access the image repository.
     required: true
   image:
-    description: The Docker image to scan.
-    required: true
+    description: The Docker image to scan. Set either `image` or `archive`.
+    required: false
+  archive:
+    description: >
+      Path to a ZIP archive to scan instead of an image, for example a managed service bundle with a jlink Java
+      runtime. Syft creates the SBOMs, Grype scans the SBOM and Trivy scans the extracted files. The findings are
+      merged into one Trivy report. Linux x64 runners only. `upload-sbom` is not supported for archives.
+    required: false
   severity:
     description: >
       The severity levels to include in the scan report. Comma-separated values of
