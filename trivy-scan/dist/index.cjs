@@ -105661,6 +105661,11 @@ artifact }) => {
     CVSS: cvss
   };
 }).filter((v2) => severities.includes(v2.Severity)), "grypeToTrivy");
+var hasJavaRuntime = /* @__PURE__ */ __name((cdxJson) => (cdxJson?.components || []).some(
+  (c3) => (c3.properties || []).some(
+    (p2) => p2.name === "syft:package:metadataType" && p2.value === "java-jvm-installation"
+  )
+), "hasJavaRuntime");
 var mergeReports = /* @__PURE__ */ __name((trivyJson, grypeVulnerabilities) => {
   const results = trivyJson?.Results || [];
   const seen = new Set(
@@ -105712,6 +105717,12 @@ vy-archive-"));
       "--output",
       `spdx-json=${outputs.sbom.spdx}`
     ]);
+    if (!hasJavaRuntime(JSON.parse(import_node_fs10.default.readFileSync(outputs.sbom.cdx, "utf8")))) {
+      warning(
+        `No Java runtime found in ${import_node_path6.default.basename(archive)}. If the archive bundles one, it was not\
+ scanned. Check that it has a 'release' file.`
+      );
+    }
     const grypeArgs = [
       `sbom:${outputs.sbom.cdx}`,
       "--quiet",

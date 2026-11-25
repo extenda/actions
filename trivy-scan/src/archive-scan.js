@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 
@@ -74,6 +75,19 @@ export const grypeToTrivy = (grypeJson, severities) =>
       };
     })
     .filter((v) => severities.includes(v.Severity));
+
+/**
+ * Check if Syft found a Java runtime. Its JVM cataloger reads the runtime's `release` file, so a jlink build without
+ * that file would otherwise drop the runtime from the scan without any error.
+ */
+export const hasJavaRuntime = (cdxJson) =>
+  (cdxJson?.components || []).some((c) =>
+    (c.properties || []).some(
+      (p) =>
+        p.name === 'syft:package:metadataType' &&
+        p.value === 'java-jvm-installation',
+    ),
+  );
 
 /**
  * Merge Grype findings into the Trivy report. Findings Trivy already reported are not repeated.
@@ -149,6 +163,14 @@ export default async function archiveScan(
       '--output',
       `spdx-json=${outputs.sbom.spdx}`,
     ]);
+
+    if (
+      !hasJavaRuntime(JSON.parse(fs.readFileSync(outputs.sbom.cdx, 'utf8')))
+    ) {
+      core.warning(
+        `No Java runtime found in ${path.basename(archive)}. If the archive bundles one, it was not scanned. Check that it has a 'release' file.`,
+      );
+    }
 
     const grypeArgs = [
       `sbom:${outputs.sbom.cdx}`,

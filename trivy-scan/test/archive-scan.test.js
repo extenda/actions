@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest';
@@ -9,10 +10,12 @@ import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { loadTool } from '../../utils/src/index.js';
 import archiveScan, {
   grypeToTrivy,
+  hasJavaRuntime,
   mergeReports,
 } from '../src/archive-scan.js';
 import setupTrivy from '../src/setup-trivy.js';
 
+vi.mock('@actions/core');
 vi.mock('@actions/exec');
 vi.mock('@actions/tool-cache');
 vi.mock('../../utils/src/index.js');
@@ -82,11 +85,35 @@ const trivyJson = {
   ],
 };
 
+// The JVM component as Syft 1.18.1 reports it for the Checkout Light v0.12.1 bundle.
+const jvmComponent = {
+  type: 'application',
+  name: 'openjdk',
+  version: '25.0.5',
+  properties: [
+    { name: 'syft:package:foundBy', value: 'java-jvm-cataloger' },
+    { name: 'syft:package:metadataType', value: 'java-jvm-installation' },
+  ],
+};
+const jarComponent = {
+  type: 'library',
+  name: 'guava',
+  version: '33.6.0-jre',
+  properties: [{ name: 'syft:package:metadataType', value: 'java-archive' }],
+};
+let cdxJson;
+
 beforeEach(() => {
+  cdxJson = { components: [jarComponent, jvmComponent] };
+  // Archive scans are Linux only. Pin the platform so the tests also run on macOS.
+  vi.spyOn(os, 'platform').mockReturnValue('linux');
   setupTrivy.mockResolvedValue('/tmp/trivy');
   loadTool.mockImplementation(async ({ tool }) => `/tmp/${tool}`);
   tc.extractZip.mockResolvedValue('/tmp/extracted');
   exec.mockImplementation(async (tool) => {
+    if (tool === '/tmp/syft') {
+      fs.writeFileSync('.trivy/sbom.cdx.json', JSON.stringify(cdxJson));
+    }
     if (tool === '/tmp/grype') {
       fs.writeFileSync('.trivy/grype.json', JSON.stringify(grypeJson));
     }
@@ -189,6 +216,28 @@ test('It scans an archive and reports the Java runtime', async () => {
     report: { json: '.trivy/report.json', text: '.trivy/report.txt' },
   });
   expect(fs.readFileSync('.trivy/report.txt', 'utf8')).toContain('openjdk');
+});
+
+test('hasJavaRuntime detects the JVM installation in the SBOM', () => {
+  expect(hasJavaRuntime({ components: [jarComponent, jvmComponent] })).toBe(
+    true,
+  );
+  expect(hasJavaRuntime({ components: [jarComponent] })).toBe(false);
+  expect(hasJavaRuntime({})).toBe(false);
+});
+
+test('It does not warn when the Java runtime is found', async () => {
+  await archiveScan(ARCHIVE);
+  expect(core.warning).not.toHaveBeenCalled();
+});
+
+test('It warns when no Java runtime is found', async () => {
+  cdxJson = { components: [jarComponent] };
+  const result = await archiveScan(ARCHIVE);
+  expect(core.warning).toHaveBeenCalledWith(
+    expect.stringContaining('No Java runtime found in test-archive.zip'),
+  );
+  expect(result.success).toBe(true);
 });
 
 test('It fails the threshold on the Java runtime score', async () => {
