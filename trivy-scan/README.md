@@ -152,7 +152,7 @@ notification and `cvss-score-threshold` work as for images. Findings reported by
 
 Limitations:
 - One archive per call.
-- Linux runners only.
+- Linux x64 runners only.
 - `upload-sbom` is not supported yet. The action fails if it is `true` together with `archive`.
 
 ## Inputs

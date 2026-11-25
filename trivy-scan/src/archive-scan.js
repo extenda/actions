@@ -90,20 +90,28 @@ export const hasJavaRuntime = (cdxJson) =>
   );
 
 /**
+ * Identify a finding by vulnerability, package and version. Trivy names Maven packages `group:artifact` while Grype
+ * uses only the artifact, so only the artifact is compared.
+ */
+const findingKey = (v) =>
+  [
+    v.VulnerabilityID,
+    String(v.PkgName ?? '')
+      .split(':')
+      .pop()
+      .toLowerCase(),
+    v.InstalledVersion,
+  ].join('@');
+
+/**
  * Merge Grype findings into the Trivy report. Findings Trivy already reported are not repeated.
  */
 export const mergeReports = (trivyJson, grypeVulnerabilities) => {
   const results = trivyJson?.Results || [];
   const seen = new Set(
-    results.flatMap((r) =>
-      (r.Vulnerabilities || []).map(
-        (v) => `${v.VulnerabilityID}@${v.InstalledVersion}`,
-      ),
-    ),
+    results.flatMap((r) => (r.Vulnerabilities || []).map(findingKey)),
   );
-  const extra = grypeVulnerabilities.filter(
-    (v) => !seen.has(`${v.VulnerabilityID}@${v.InstalledVersion}`),
-  );
+  const extra = grypeVulnerabilities.filter((v) => !seen.has(findingKey(v)));
   return {
     ...trivyJson,
     Results: [

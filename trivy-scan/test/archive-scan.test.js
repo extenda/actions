@@ -173,6 +173,34 @@ test('mergeReports adds only findings Trivy did not report', () => {
   ]);
 });
 
+test('mergeReports keeps packages that share a CVE and version', () => {
+  // Real case from the itab and scanner bundles: one logback CVE matches two artifacts.
+  const trivy = {
+    Results: [
+      {
+        Target: 'lib',
+        Vulnerabilities: [
+          {
+            VulnerabilityID: 'CVE-2023-6378',
+            PkgName: 'ch.qos.logback:logback-classic',
+            InstalledVersion: '1.2.11',
+          },
+        ],
+      },
+    ],
+  };
+  const grype = ['logback-classic', 'logback-core'].map((PkgName) => ({
+    VulnerabilityID: 'CVE-2023-6378',
+    PkgName,
+    InstalledVersion: '1.2.11',
+  }));
+
+  const merged = mergeReports(trivy, grype);
+  expect(merged.Results[1].Vulnerabilities.map((v) => v.PkgName)).toEqual([
+    'logback-core',
+  ]);
+});
+
 test('It scans an archive and reports the Java runtime', async () => {
   const result = await archiveScan(ARCHIVE);
 

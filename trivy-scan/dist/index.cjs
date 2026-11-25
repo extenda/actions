@@ -105666,18 +105666,17 @@ var hasJavaRuntime = /* @__PURE__ */ __name((cdxJson) => (cdxJson?.components ||
     (p2) => p2.name === "syft:package:metadataType" && p2.value === "java-jvm-installation"
   )
 ), "hasJavaRuntime");
+var findingKey = /* @__PURE__ */ __name((v2) => [
+  v2.VulnerabilityID,
+  String(v2.PkgName ?? "").split(":").pop().toLowerCase(),
+  v2.InstalledVersion
+].join("@"), "findingKey");
 var mergeReports = /* @__PURE__ */ __name((trivyJson, grypeVulnerabilities) => {
   const results = trivyJson?.Results || [];
   const seen = new Set(
-    results.flatMap(
-      (r2) => (r2.Vulnerabilities || []).map(
-        (v2) => `${v2.VulnerabilityID}@${v2.InstalledVersion}`
-      )
-    )
+    results.flatMap((r2) => (r2.Vulnerabilities || []).map(findingKey))
   );
-  const extra = grypeVulnerabilities.filter(
-    (v2) => !seen.has(`${v2.VulnerabilityID}@${v2.InstalledVersion}`)
-  );
+  const extra = grypeVulnerabilities.filter((v2) => !seen.has(findingKey(v2)));
   return {
     ...trivyJson,
     Results: [

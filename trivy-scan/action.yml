@@ -15,7 +15,7 @@ inputs:
     description: >
       Path to a ZIP archive to scan instead of an image, for example a managed service bundle with a jlink Java
       runtime. Syft creates the SBOMs, Grype scans the SBOM and Trivy scans the extracted files. The findings are
-      merged into one Trivy report. Linux runners only. `upload-sbom` is not supported for archives.
+      merged into one Trivy report. Linux x64 runners only. `upload-sbom` is not supported for archives.
     required: false
   severity:
     description: >
